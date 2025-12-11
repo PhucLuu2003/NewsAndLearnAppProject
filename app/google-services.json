@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "449064985682",
+    "project_id": "newsandlearnapp",
+    "storage_bucket": "newsandlearnapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:449064985682:android:de2394130da88ce4bdeb8b",
+        "android_client_info": {
+          "package_name": "com.example.newsandlearn"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTN1KlmtyKZT7j4p_-PApkc6rhegJm-x4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
