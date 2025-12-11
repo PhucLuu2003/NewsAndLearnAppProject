@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1C1C1E"
+    tools:context=".TopicSelectionActivity">
+
+    <TextView
+        android:id="@+id/title_topic_selection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:text="Chọn chủ đề báo bạn mong muốn"
+        android:textColor="@android:color/white"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/topic_chip_group"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        app:chipSpacing="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_topic_selection">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_khoa_hoc"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Khoa học và công nghệ"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_phong_cach_song"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phong cách sống"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_co_the_ban_chua_biet"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Có thể bạn chưa biết"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_truyen_ngan"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Truyện ngắn"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_truyen_cuoi"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Truyện cười"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_suc_khoe"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Sức khoẻ"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_van_hoa_nghe_thuat"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Văn hoá nghệ thuật"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_giao_duc"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giáo dục"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_hoc_tap"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Học tập"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_kinh_te"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kinh tế"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_du_lich"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Du lịch"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_giai_tri"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Giải trí"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_the_thao"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thể thao"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_chinh_tri_xa_hoi"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Chính trị xã hội"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_the_gioi_do_day"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thế giới đó đây"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_the_gioi_tu_nhien"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thế giới tự nhiên"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_thuc_pham"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thực phẩm"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_dong_vat"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Động vật"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_tong_hop"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tổng hợp"
+            android:textColor="@color/topic_chip_text_selector"
+            app:chipBackgroundColor="@color/topic_chip_background_selector"
+            app:chipStrokeColor="@color/topic_chip_stroke_selector"
+            app:chipStrokeWidth="1dp" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <Button
+        android:id="@+id/continue_button_topic"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="#4A80F0"
+        android:text="Tiếp tục"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
