@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:scaleType="centerCrop"
+        android:src="@android:color/darker_gray" 
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/article_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:ellipsize="end"
+        android:maxLines="2"
+        android:text="Drinking carrot juice could boost immune system"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toStartOf="@+id/article_time"
+        app:layout_constraintStart_toEndOf="@+id/thumbnail"
+        app:layout_constraintTop_toTopOf="@+id/thumbnail" />
+
+    <TextView
+        android:id="@+id/article_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:drawablePadding="4dp"
+        android:text="1 min"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:drawableStartCompat="@android:drawable/ic_menu_recent_history" 
+        app:drawableTint="@android:color/darker_gray"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/article_title" />
+
+    <TextView
+        android:id="@+id/article_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="2023-12-15 19:32:36"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/article_time" />
+
+    <TextView
+        android:id="@+id/article_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="「FOX」"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/thumbnail"
+        app:layout_constraintStart_toStartOf="@+id/article_title" />
+
+    <TextView
+        android:id="@+id/article_views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:drawablePadding="4dp"
+        android:text="7205"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:drawableStartCompat="@android:drawable/ic_menu_view" 
+        app:drawableTint="@android:color/darker_gray"
+        app:layout_constraintBottom_toBottomOf="@+id/article_source"
+        app:layout_constraintStart_toEndOf="@+id/article_source" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
