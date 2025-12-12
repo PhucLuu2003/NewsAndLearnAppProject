@@ -49,4 +49,18 @@ dependencies {
     implementation ("com.google.firebase:firebase-auth")
     implementation ("com.google.firebase:firebase-firestore")
     implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+    
+    // ExoPlayer for video playback
+    implementation("androidx.media3:media3-exoplayer:1.2.1")
+    implementation("androidx.media3:media3-ui:1.2.1")
+    implementation("androidx.media3:media3-exoplayer-dash:1.2.1")
+    
+    // Lottie for animations (optional but recommended)
+    implementation("com.airbnb.android:lottie:6.1.0")
+    
+    // Glide for image loading
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }

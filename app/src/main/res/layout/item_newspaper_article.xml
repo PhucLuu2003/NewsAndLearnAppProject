@@ -5,18 +5,57 @@
     android:orientation="horizontal"
     android:padding="8dp">
 
-    <View
+    <ImageView
+        android:id="@+id/article_image"
         android:layout_width="100dp"
         android:layout_height="60dp"
         android:background="@drawable/white_card_background" />
 
-    <TextView
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp">
+
+        <TextView
+            android:id="@+id/article_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Newspaper"
+            android:textColor="@android:color/white"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/article_source"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/article_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp" />
+
+        <TextView
+            android:id="@+id/article_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/favorite_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="16dp"
-        android:text="Newspaper"
-        android:textColor="@android:color/white"
-        android:textSize="16sp" />
+        android:src="@android:drawable/btn_star_big_off"/>
 
 </LinearLayout>

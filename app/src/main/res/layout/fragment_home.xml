@@ -1,9 +1,522 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/tv_home"
+<!-- Modern Homepage Layout with Material Design 3 & Firebase Integration -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:text="Home Fragment"
-    android:textSize="18sp"
-    android:padding="16dp"/>
+    android:background="#0D0D0F"
+    tools:context=".Fragment.HomeFragment">
+
+    <!-- Main Content with Pull to Refresh -->
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="100dp">
+
+                <!-- Modern Header -->
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/header_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingStart="20dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="16dp">
+
+                    <!-- User Avatar with Online Status -->
+                    <androidx.cardview.widget.CardView
+                        android:id="@+id/avatar_card"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        app:cardCornerRadius="24dp"
+                        app:cardElevation="2dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <ImageView
+                            android:id="@+id/profile_avatar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_profile" />
+                    </androidx.cardview.widget.CardView>
+
+                    <!-- Welcome Text -->
+                    <LinearLayout
+                        android:id="@+id/welcome_container"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:orientation="vertical"
+                        app:layout_constraintBottom_toBottomOf="@+id/avatar_card"
+                        app:layout_constraintEnd_toStartOf="@+id/notification_btn"
+                        app:layout_constraintStart_toEndOf="@+id/avatar_card"
+                        app:layout_constraintTop_toTopOf="@+id/avatar_card">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:alpha="0.6"
+                            android:text="Xin chào,"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/username"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="User"
+                            android:textColor="#FFFFFF"
+                            android:textSize="17sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Notification Button -->
+                    <ImageView
+                        android:id="@+id/notification_btn"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="8dp"
+                        android:padding="8dp"
+                        android:src="@android:drawable/ic_popup_reminder"
+                        app:tint="#FFFFFF"
+                        app:layout_constraintBottom_toBottomOf="@+id/avatar_card"
+                        app:layout_constraintEnd_toStartOf="@+id/settings_btn"
+                        app:layout_constraintTop_toTopOf="@+id/avatar_card" />
+
+                    <!-- Settings Button -->
+                    <ImageView
+                        android:id="@+id/settings_btn"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:padding="8dp"
+                        android:src="@android:drawable/ic_menu_preferences"
+                        app:tint="#FFFFFF"
+                        app:layout_constraintBottom_toBottomOf="@+id/avatar_card"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/avatar_card" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Premium Search Bar -->
+                <LinearLayout
+                    android:id="@+id/search_bar_home"
+                    android:layout_width="match_parent"
+                    android:layout_height="56dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="@drawable/pill_shaped_search_background"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp">
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_menu_search"
+                        app:tint="#666666" />
+
+                    <TextView
+                        android:id="@+id/search_hint"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="Tìm kiếm bài viết, từ vựng..."
+                        android:textColor="#666666"
+                        android:textSize="15sp" />
+
+                    <ImageView
+                        android:id="@+id/voice_search_btn"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:src="@android:drawable/ic_btn_speak_now"
+                        app:tint="#666666" />
+                </LinearLayout>
+
+                <!-- Level Chips (Material 3 Style) -->
+                <HorizontalScrollView
+                    android:id="@+id/level_chips_scroll"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/level_chip_group"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:chipSpacing="8dp"
+                        app:selectionRequired="true"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_all"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:checkable="true"
+                            android:checked="true"
+                            android:text="📚 Tất cả"
+                            android:textColor="@color/chip_text_color"
+                            app:chipBackgroundColor="@color/chip_background_color"
+                            app:chipCornerRadius="20dp"
+                            app:chipStrokeWidth="0dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_easy"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:checkable="true"
+                            android:text="🟢 Dễ"
+                            android:textColor="@color/chip_text_color"
+                            app:chipBackgroundColor="@color/chip_background_color"
+                            app:chipCornerRadius="20dp"
+                            app:chipStrokeWidth="0dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_medium"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:checkable="true"
+                            android:text="🟡 Trung bình"
+                            android:textColor="@color/chip_text_color"
+                            app:chipBackgroundColor="@color/chip_background_color"
+                            app:chipCornerRadius="20dp"
+                            app:chipStrokeWidth="0dp" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_hard"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:checkable="true"
+                            android:text="🔴 Khó"
+                            android:textColor="@color/chip_text_color"
+                            app:chipBackgroundColor="@color/chip_background_color"
+                            app:chipCornerRadius="20dp"
+                            app:chipStrokeWidth="0dp" />
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+
+                <!-- Hero Section / Featured Article -->
+                <androidx.cardview.widget.CardView
+                    android:id="@+id/hero_card"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:layout_marginEnd="20dp"
+                    app:cardBackgroundColor="#1A1A1D"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="4dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_overlay_background">
+
+                        <!-- Featured Badge -->
+                        <TextView
+                            android:id="@+id/featured_badge"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="16dp"
+                            android:background="@drawable/badge_rounded_background"
+                            android:paddingStart="12dp"
+                            android:paddingTop="6dp"
+                            android:paddingEnd="12dp"
+                            android:paddingBottom="6dp"
+                            android:text="⭐ NỔI BẬT"
+                            android:textColor="#FFD700"
+                            android:textSize="11sp"
+                            android:textStyle="bold"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <!-- Featured Content -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="16dp"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+
+                            <TextView
+                                android:id="@+id/featured_title"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:maxLines="2"
+                                android:text="Khám phá phương pháp học tiếng Anh hiệu quả"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:gravity="center_vertical"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/featured_read_time"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:alpha="0.7"
+                                    android:text="5 phút đọc"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp" />
+
+                                <View
+                                    android:layout_width="4dp"
+                                    android:layout_height="4dp"
+                                    android:layout_marginStart="8dp"
+                                    android:layout_marginEnd="8dp"
+                                    android:background="@drawable/white_dot" />
+
+                                <TextView
+                                    android:id="@+id/featured_source"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:alpha="0.7"
+                                    android:text="BBC Learning"
+                                    android:textColor="#FFFFFF"
+                                    android:textSize="12sp" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </androidx.cardview.widget.CardView>
+
+                <!-- Quick Actions -->
+                <LinearLayout
+                    android:id="@+id/quick_actions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp">
+
+                    <LinearLayout
+                        android:id="@+id/action_favorites"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/action_card_background"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_favorite"
+                            app:tint="#FF6B9D" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Yêu thích"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/action_history"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/action_card_background"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_recent_history"
+                            app:tint="#64B5F6" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="Lịch sử"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Video Lessons Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="🎬 Video Lessons"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/see_all_videos_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xem tất cả ›"
+                        android:textColor="#64B5F6"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Video Lessons RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/video_lessons_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:clipToPadding="false"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="4dp"
+                    android:orientation="horizontal"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_video_lesson" />
+
+                <!-- Section Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="28dp"
+                    android:layout_marginEnd="20dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📰 Dành cho bạn"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/see_all_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Xem tất cả ›"
+                        android:textColor="#64B5F6"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Loading Indicator -->
+                <ProgressBar
+                    android:id="@+id/loading_indicator"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="40dp"
+                    android:indeterminateTint="#64B5F6"
+                    android:visibility="gone" />
+
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/empty_state"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="40dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📭"
+                        android:textSize="64sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="Chưa có bài viết"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:alpha="0.6"
+                        android:gravity="center"
+                        android:text="Kéo xuống để làm mới\nvà tải nội dung mới"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <!-- Articles RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/articles_recycler_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:clipToPadding="false"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    tools:itemCount="3"
+                    tools:listitem="@layout/item_newspaper_article" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- Floating Action Button (Scan) -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_scan"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="90dp"
+        android:text="Scan"
+        app:backgroundTint="#4CAF50"
+        app:icon="@android:drawable/ic_menu_camera"
+        app:iconTint="#FFFFFF" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

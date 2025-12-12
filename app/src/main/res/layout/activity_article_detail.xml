@@ -80,6 +80,16 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/article_source"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="8dp"
+                android:text="Source"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp" />
+
+            <TextView
                 android:id="@+id/article_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -90,7 +100,7 @@
                 android:textSize="12sp" />
 
             <TextView
-                android:id="@+id/article_body"
+                android:id="@+id/article_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -161,6 +171,16 @@
             android:text="1:31"
             android:textColor="@android:color/white"
             android:textSize="12sp" />
+        <ImageButton
+            android:id="@+id/favorite_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_favorite"/>
+        <ImageButton
+            android:id="@+id/share_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_share"/>
 
     </LinearLayout>
 

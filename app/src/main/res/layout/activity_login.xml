@@ -1,124 +1,244 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1E"
-    tools:context=".LoginActivity">
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/title_login"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="32dp"
-        android:text="Đăng nhập"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:padding="24dp">
 
-    <EditText
-        android:id="@+id/email_input_login"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/edit_text_background"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:padding="12dp"
-        android:textColor="@android:color/white"
-        android:textColorHint="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_login" />
+        <!-- Logo/Icon -->
+        <ImageView
+            android:id="@+id/app_logo"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="40dp"
+            android:src="@drawable/ic_profile"
+            app:tint="#64B5F6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_layout_login"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        app:hintEnabled="false"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email_input_login">
+        <!-- Title -->
+        <TextView
+            android:id="@+id/title_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Chào mừng trở lại"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_logo" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password_input_login"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/edit_text_background"
-            android:hint="Mật khẩu"
-            android:inputType="textPassword"
-            android:padding="12dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#9A9A9A" />
-    </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:id="@+id/subtitle_login"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:alpha="0.7"
+            android:text="Đăng nhập để tiếp tục học"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_login" />
 
-    <TextView
-        android:id="@+id/forgot_password_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        android:text="Quên mật khẩu"
-        android:textColor="#4A80F0"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password_layout_login" />
+        <!-- Email Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/email_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtitle_login">
 
-    <Button
-        android:id="@+id/login_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#4A80F0"
-        android:text="Đăng nhập"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/forgot_password_text" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-    <TextView
-        android:id="@+id/or_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="hoặc"
-        android:textColor="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_button" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_dialog_email"
+                    app:tint="#64B5F6" />
 
-    <ImageButton
-        android:id="@+id/google_login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_google_logo"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/or_text" />
+                <EditText
+                    android:id="@+id/email_input_login"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-    <TextView
-        android:id="@+id/register_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="Bạn chưa có tài khoản? Đăng ký ngay"
-        android:textColor="#9A9A9A"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <!-- Password Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/password_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/email_card">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_lock_lock"
+                    app:tint="#64B5F6" />
+
+                <EditText
+                    android:id="@+id/password_input_login"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Mật khẩu"
+                    android:inputType="textPassword"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Forgot Password -->
+        <TextView
+            android:id="@+id/forgot_password_link"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Quên mật khẩu?"
+            android:textColor="#64B5F6"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/password_card" />
+
+        <!-- Login Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/login_button"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:text="Đăng nhập"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#4A80F0"
+            app:cornerRadius="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/forgot_password_link" />
+
+        <!-- Divider -->
+        <LinearLayout
+            android:id="@+id/divider_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/login_button">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#2C2C2E" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:alpha="0.5"
+                android:text="hoặc"
+                android:textColor="#FFFFFF"
+                android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#2C2C2E" />
+        </LinearLayout>
+
+        <!-- Register Link -->
+        <LinearLayout
+            android:id="@+id/register_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/divider_layout">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                android:text="Chưa có tài khoản? "
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/register_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đăng ký"
+                android:textColor="#64B5F6"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:indeterminateTint="#64B5F6"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/login_button"
+            app:layout_constraintEnd_toEndOf="@id/login_button"
+            app:layout_constraintStart_toStartOf="@id/login_button"
+            app:layout_constraintTop_toTopOf="@id/login_button" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

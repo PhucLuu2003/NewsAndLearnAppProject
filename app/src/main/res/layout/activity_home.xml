@@ -183,7 +183,7 @@
                 <ImageView
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@android:drawable/ic_menu_find"
+                    android:src="@drawable/ic_search"
                     app:tint="@android:color/white" />
                 <TextView
                     android:layout_width="wrap_content"

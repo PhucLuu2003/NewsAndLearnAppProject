@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -11,15 +13,54 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.NewsAndLearn">
+        
+        <!-- Login Activity as Launcher -->
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".Activity.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Main Activity -->
+        <activity
+            android:name=".Activity.MainActivity"
+            android:exported="false" />
+        
+        <!-- Register Activity -->
+        <activity
+            android:name=".Activity.RegisterActivity"
+            android:exported="false" />
+        
+        <!-- Level Selection Activity -->
+        <activity
+            android:name=".Activity.LevelSelectionActivity"
+            android:exported="false" />
+        
+        <!-- Topic Selection Activity -->
+        <activity
+            android:name=".Activity.TopicSelectionActivity"
+            android:exported="false" />
+        
+        <!-- Search Activity -->
+        <activity
+            android:name=".Activity.SearchActivity"
+            android:exported="false" />
+        
+        <!-- Article Detail Activity -->
+        <activity
+            android:name=".Activity.ArticleDetailActivity"
+            android:exported="false" />
+        
+        <!-- Video Lesson Activity -->
+        <activity
+            android:name=".Activity.VideoLessonActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize" />
+        
     </application>
 
 </manifest>

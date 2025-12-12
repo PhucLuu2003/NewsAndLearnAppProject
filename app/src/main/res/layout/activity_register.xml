@@ -1,128 +1,298 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1E"
-    tools:context=".RegisterActivity">
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
 
-    <ImageView
-        android:id="@+id/back_arrow"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/ic_arrow_back"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@android:color/white" />
+        android:padding="24dp">
 
-    <TextView
-        android:id="@+id/title_register"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="Tạo tài khoản"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/back_arrow" />
+        <!-- Back Button -->
+        <ImageView
+            android:id="@+id/back_arrow"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/circle_button_background"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/email_input"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/edit_text_background"
-        android:hint="Email"
-        android:inputType="textEmailAddress"
-        android:padding="12dp"
-        android:textColor="@android:color/white"
-        android:textColorHint="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_register" />
+        <!-- Logo/Icon -->
+        <ImageView
+            android:id="@+id/app_logo"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="24dp"
+            android:src="@drawable/ic_profile"
+            app:tint="#64B5F6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/back_arrow" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/password_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        app:hintEnabled="false"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/email_input">
+        <!-- Title -->
+        <TextView
+            android:id="@+id/title_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Tạo tài khoản mới"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/app_logo" />
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/password_input"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/edit_text_background"
-            android:hint="Mật khẩu"
-            android:inputType="textPassword"
-            android:padding="12dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#9A9A9A" />
-    </com.google.android.material.textfield.TextInputLayout>
+        <TextView
+            android:id="@+id/subtitle_register"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:alpha="0.7"
+            android:text="Bắt đầu hành trình học tiếng Anh"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/title_register" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/confirm_password_layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="16dp"
-        app:hintEnabled="false"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="#9A9A9A"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password_layout">
+        <!-- Username Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/username_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtitle_register">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/confirm_password_input"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:background="@drawable/edit_text_background"
-            android:hint="Nhập lại mật khẩu"
-            android:inputType="textPassword"
-            android:padding="12dp"
-            android:textColor="@android:color/white"
-            android:textColorHint="#9A9A9A" />
-    </com.google.android.material.textfield.TextInputLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
 
-    <Button
-        android:id="@+id/continue_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
-        android:backgroundTint="#4A80F0"
-        android:text="Tiếp tục"
-        android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/login_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    app:tint="#64B5F6" />
 
-    <TextView
-        android:id="@+id/login_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:text="Bạn đã có tài khoản? Đăng nhập"
-        android:textColor="#9A9A9A"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+                <EditText
+                    android:id="@+id/username_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Tên người dùng"
+                    android:inputType="text"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Email Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/email_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/username_card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_dialog_email"
+                    app:tint="#64B5F6" />
+
+                <EditText
+                    android:id="@+id/email_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Password Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/password_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/email_card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_lock_lock"
+                    app:tint="#64B5F6" />
+
+                <EditText
+                    android:id="@+id/password_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Mật khẩu (tối thiểu 6 ký tự)"
+                    android:inputType="textPassword"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Confirm Password Input Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/confirm_password_card"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#1A1A1D"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/password_card">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_gravity="center_vertical"
+                    android:src="@android:drawable/ic_lock_lock"
+                    app:tint="#64B5F6" />
+
+                <EditText
+                    android:id="@+id/confirm_password_input"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:hint="Xác nhận mật khẩu"
+                    android:inputType="textPassword"
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Register Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/confirm_button"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:text="Đăng ký"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="#4CAF50"
+            app:cornerRadius="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/confirm_password_card" />
+
+        <!-- Login Link -->
+        <LinearLayout
+            android:id="@+id/login_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/confirm_button">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                android:text="Đã có tài khoản? "
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/login_link"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đăng nhập"
+                android:textColor="#64B5F6"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:indeterminateTint="#64B5F6"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/confirm_button"
+            app:layout_constraintEnd_toEndOf="@id/confirm_button"
+            app:layout_constraintStart_toStartOf="@id/confirm_button"
+            app:layout_constraintTop_toTopOf="@id/confirm_button" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

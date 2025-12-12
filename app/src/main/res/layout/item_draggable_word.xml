@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Item layout for draggable words -->
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/word_card"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    app:cardBackgroundColor="#2C2C2E"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="4dp"
+    app:strokeColor="#4A80F0"
+    app:strokeWidth="2dp">
+
+    <TextView
+        android:id="@+id/word_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="word"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        android:gravity="center" />
+
+</com.google.android.material.card.MaterialCardView>

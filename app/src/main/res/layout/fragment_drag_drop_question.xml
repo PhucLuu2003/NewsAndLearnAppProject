@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp">
+
+    <!-- Question Title -->
+    <TextView
+        android:id="@+id/question_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Điền từ còn thiếu"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Sentence with Blank (Drag-and-Drop Zone) -->
+    <LinearLayout
+        android:id="@+id/sentence_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:padding="12dp"
+        android:background="@drawable/sentence_container_background"
+        app:layout_constraintTop_toBottomOf="@id/question_title">
+
+        <!-- Text before blank -->
+        <TextView
+            android:id="@+id/text_before_blank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I am"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Drop Zone (Blank space with dashed border) -->
+        <FrameLayout
+            android:id="@+id/drop_zone"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:minWidth="100dp"
+            android:background="@drawable/drop_zone_background"
+            android:layout_marginEnd="8dp">
+
+            <TextView
+                android:id="@+id/dropped_word"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+
+        <!-- Text after blank -->
+        <TextView
+            android:id="@+id/text_after_blank"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="to school every day."
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- Instruction Text -->
+    <TextView
+        android:id="@+id/instruction_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kéo từ bên dưới vào chỗ trống"
+        android:textColor="#999999"
+        android:textSize="14sp"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/sentence_container" />
+
+    <!-- Draggable Words Container -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/draggable_words_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        app:layout_constraintTop_toBottomOf="@id/instruction_text" />
+
+    <!-- Explanation Card (shown when answer is incorrect) -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/explanation_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#2C2C2E"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/draggable_words_container">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/ic_info"
+                app:tint="#64B5F6"
+                android:layout_marginEnd="12dp" />
+
+            <TextView
+                android:id="@+id/explanation_text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Explanation text goes here"
+                android:textColor="#CCCCCC"
+                android:textSize="14sp"
+                android:lineSpacingExtra="4dp" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Submit Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/submit_button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:text="Kiểm tra"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:enabled="false"
+        app:backgroundTint="#4A80F0"
+        app:cornerRadius="16dp"
+        app:elevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/explanation_card" />
+
+    <!-- Continue Button (shown after correct answer) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/continue_button"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="24dp"
+        android:text="Tiếp tục"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:backgroundTint="#4CAF50"
+        app:cornerRadius="16dp"
+        app:elevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/explanation_card" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

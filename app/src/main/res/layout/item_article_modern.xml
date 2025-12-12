@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Modern Article Card Item -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/article_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    app:cardBackgroundColor="#1A1A1D"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeWidth="0dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <!-- Article Image (Optional) -->
+        <ImageView
+            android:id="@+id/article_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:background="#2C2C2E"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@drawable/ic_profile" />
+
+        <!-- Content Container -->
+        <LinearLayout
+            android:id="@+id/content_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toStartOf="@+id/favorite_btn"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <!-- Category & Level Badge -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/article_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/category_badge_background"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:text="Học tập"
+                    android:textColor="#64B5F6"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/article_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/level_badge_background"
+                    android:paddingStart="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="4dp"
+                    android:text="EASY"
+                    android:textColor="#4CAF50"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Article Title -->
+            <TextView
+                android:id="@+id/article_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="10 Phương pháp học tiếng Anh hiệu quả nhất 2024"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <!-- Article Excerpt -->
+            <TextView
+                android:id="@+id/article_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:alpha="0.7"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Khám phá những phương pháp học tiếng Anh được chứng minh..."
+                android:textColor="#FFFFFF"
+                android:textSize="13sp" />
+
+            <!-- Metadata Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <!-- Source -->
+                <TextView
+                    android:id="@+id/article_source"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:alpha="0.6"
+                    android:drawablePadding="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="BBC Learning"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    app:drawableStartCompat="@android:drawable/ic_menu_compass" />
+
+                <!-- Reading Time -->
+                <TextView
+                    android:id="@+id/article_reading_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:alpha="0.6"
+                    android:drawablePadding="4dp"
+                    android:text="5 phút"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    app:drawableStartCompat="@android:drawable/ic_menu_recent_history" />
+
+                <!-- Views -->
+                <TextView
+                    android:id="@+id/article_views"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:alpha="0.6"
+                    android:drawablePadding="4dp"
+                    android:text="1.2k"
+                    android:textColor="#FFFFFF"
+                    android:textSize="11sp"
+                    app:drawableStartCompat="@android:drawable/ic_menu_view" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Favorite Button -->
+        <ImageView
+            android:id="@+id/favorite_btn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_favorite_border"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="#666666" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

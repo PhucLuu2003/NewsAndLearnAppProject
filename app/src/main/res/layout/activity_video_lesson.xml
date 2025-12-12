@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000">
+
+    <!-- Video Player - FULL SCREEN -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="visible"
+        app:controller_layout_id="@layout/custom_player_control"
+        app:show_buffering="when_playing"
+        app:resize_mode="fit"
+        app:surface_type="surface_view"
+        app:use_controller="true"
+        app:show_timeout="5000" />
+
+    <!-- Video Overlay -->
+    <View
+        android:id="@+id/video_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:visibility="gone"
+        android:alpha="0" />
+
+    <!-- Title Overlay (Top) -->
+    <LinearLayout
+        android:id="@+id/title_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="@drawable/gradient_overlay_top">
+
+        <TextView
+            android:id="@+id/lesson_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lesson Title"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/lesson_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Level A1"
+            android:textColor="#4CAF50"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="@drawable/level_badge_background" />
+    </LinearLayout>
+
+    <!-- Back Button -->
+    <ImageView
+        android:id="@+id/back_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:layout_gravity="start|top"
+        android:src="@android:drawable/ic_menu_revert"
+        android:background="@drawable/circle_button_background"
+        android:padding="8dp"
+        app:tint="#FFFFFF"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Progress Container (Bottom) -->
+    <LinearLayout
+        android:id="@+id/progress_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/question_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Câu hỏi 1/5"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:background="#4A80F0"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:layout_marginEnd="8dp" />
+
+        <ProgressBar
+            android:id="@+id/lesson_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="8dp"
+            android:layout_weight="1"
+            android:progressTint="#4A80F0"
+            android:progressBackgroundTint="#2C2C2E"
+            android:max="100"
+            android:progress="0" />
+    </LinearLayout>
+
+    <!-- Question Container - Bottom Sheet -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/question_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:cardBackgroundColor="#1A1A1D"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="16dp"
+        android:visibility="gone"
+        android:translationY="1000dp">
+
+        <FrameLayout
+            android:id="@+id/question_fragment_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="300dp"
+            android:padding="20dp" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- Feedback Icons -->
+    <ImageView
+        android:id="@+id/correct_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_check_circle"
+        android:visibility="gone"
+        app:tint="#4CAF50" />
+
+    <ImageView
+        android:id="@+id/incorrect_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_error_circle"
+        android:visibility="gone"
+        app:tint="#F44336" />
+
+    <!-- Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/loading_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminateTint="#4A80F0"
+        android:visibility="gone" />
+
+</FrameLayout>
