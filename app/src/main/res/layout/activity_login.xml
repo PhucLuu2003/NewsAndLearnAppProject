@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1C1C1E"
-    tools:context=".LoginActivity">
+    tools:context=".Activity.LoginActivity">
 
     <TextView
         android:id="@+id/title_login"
@@ -105,7 +105,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:background="@android:color/transparent"
-        android:src="@drawable/ic_google_logo"
+        android:src="@drawable/ic_google"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/or_text" />
@@ -117,6 +117,9 @@
         android:layout_marginBottom="32dp"
         android:text="Bạn chưa có tài khoản? Đăng ký ngay"
         android:textColor="#9A9A9A"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

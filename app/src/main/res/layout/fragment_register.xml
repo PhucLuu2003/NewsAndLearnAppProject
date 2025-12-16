@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#1C1C1E"
-    tools:context=".RegisterActivity">
+    tools:context=".Activity.AuthOnboardingActivity">
 
     <ImageView
         android:id="@+id/back_arrow"
@@ -32,11 +32,28 @@
         app:layout_constraintTop_toBottomOf="@+id/back_arrow" />
 
     <EditText
-        android:id="@+id/email_input"
+        android:id="@+id/name_input"
         android:layout_width="0dp"
         android:layout_height="50dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/edit_text_background"
+        android:hint="Full Name"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:textColor="@android:color/white"
+        android:textColorHint="#9A9A9A"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_register" />
+
+    <EditText
+        android:id="@+id/email_input"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/edit_text_background"
         android:hint="Email"
@@ -46,7 +63,7 @@
         android:textColorHint="#9A9A9A"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_register" />
+        app:layout_constraintTop_toBottomOf="@+id/name_input" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/password_layout"
@@ -101,7 +118,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/continue_button"
+        android:id="@+id/btnCountinuetoRegister"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -110,12 +127,12 @@
         android:backgroundTint="#4A80F0"
         android:text="Tiếp tục"
         android:textColor="@android:color/white"
-        app:layout_constraintBottom_toTopOf="@+id/login_text"
+        app:layout_constraintBottom_toTopOf="@+id/tvHaveAccount"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/login_text"
+        android:id="@+id/tvHaveAccount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"

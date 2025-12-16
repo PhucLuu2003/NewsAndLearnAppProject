@@ -3,11 +3,7 @@ package com.example.newsandlearn.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.newsandlearn.Fragment.FavoriteFragment;
@@ -31,10 +27,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        db.collection("test").document("hello")
-                .set(Collections.singletonMap("msg", "Firebase is connected!"))
-                .addOnSuccessListener(a -> Log.d("FIREBASE", "SUCCESS"))
-                .addOnFailureListener(e -> Log.e("FIREBASE", "ERROR"));
 
         bottomNav = findViewById(R.id.bottom_nav);
         getSupportFragmentManager().beginTransaction()
@@ -54,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 selected = new ProfileFragment();
             }
 
-            // Note: If selected is still null, no navigation will occur.
             if (selected != null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, selected)
