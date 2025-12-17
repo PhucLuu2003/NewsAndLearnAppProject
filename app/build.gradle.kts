@@ -20,6 +20,7 @@ android {
     }
     buildFeatures{
         buildConfig = true
+        viewBinding = true
     }
 
     buildTypes {
@@ -63,4 +64,7 @@ dependencies {
     // Glide for image loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
+    
+    // CircleImageView for circular avatars
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }

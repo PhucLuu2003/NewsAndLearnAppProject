@@ -1,20 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Item layout for multiple choice options (Pill-shaped buttons) -->
-<com.google.android.material.card.MaterialCardView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Premium Multiple Choice Option -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/option_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
-    app:cardBackgroundColor="#2C2C2E"
-    app:cardCornerRadius="28dp"
-    app:cardElevation="2dp"
-    app:strokeColor="#4A80F0"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    app:cardBackgroundColor="#FFFFFF"
     app:strokeWidth="2dp"
-    android:clickable="true"
-    android:focusable="true"
-    android:foreground="?android:attr/selectableItemBackground">
+    app:strokeColor="#E0E0E0">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -23,38 +19,34 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Option Letter (A, B, C, D) -->
         <TextView
             android:id="@+id/option_letter"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:text="A"
-            android:textColor="#4A80F0"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/badge_rounded_background"
+            android:backgroundTint="#E3F2FD"
             android:gravity="center"
-            android:background="@drawable/option_letter_background"
-            android:layout_marginEnd="16dp" />
+            android:text="A"
+            android:textColor="#64B5F6"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-        <!-- Option Text -->
         <TextView
             android:id="@+id/option_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Option text"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:lineSpacingExtra="2dp" />
+            android:textSize="15sp"
+            android:textColor="#333333" />
 
-        <!-- Status Icon (Checkmark or X) -->
         <ImageView
             android:id="@+id/status_icon"
             android:layout_width="24dp"
             android:layout_height="24dp"
+            android:layout_marginStart="8dp"
             android:visibility="gone"
-            android:layout_marginStart="8dp" />
-
+            android:src="@android:drawable/checkbox_on_background" />
     </LinearLayout>
-
 </com.google.android.material.card.MaterialCardView>

@@ -8,12 +8,16 @@ import androidx.fragment.app.Fragment;
 
 import com.example.newsandlearn.Fragment.FavoriteFragment;
 import com.example.newsandlearn.Fragment.HomeFragment;
+import com.example.newsandlearn.Fragment.LearnFragment;
 import com.example.newsandlearn.Fragment.ProfileFragment;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.AddLessonDataHelper;
+import com.example.newsandlearn.Utils.SampleDataHelper;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import android.widget.Toast;
 
 import java.util.Collections;
 
@@ -33,13 +37,32 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(a -> Log.d("FIREBASE", "SUCCESS"))
                 .addOnFailureListener(e -> Log.e("FIREBASE", "ERROR"));
 
-        // Upload bài học lên Firebase
-        // Lưu ý: Code này sẽ chạy mỗi khi app khởi động
-        // Sau khi upload thành công, bạn nên comment hoặc thêm SharedPreferences check
-        AddLessonDataHelper.addDirectionsLesson();
-        AddLessonDataHelper.addRestaurantLesson();
-        // Hoặc upload tất cả cùng lúc:
-        // AddLessonDataHelper.addAllLessons();
+        // Upload sample data for learning modules (chỉ chạy 1 lần)
+        android.content.SharedPreferences prefs = getSharedPreferences("app_prefs", MODE_PRIVATE);
+        boolean dataUploaded = prefs.getBoolean("sample_data_uploaded", false);
+
+        if (!dataUploaded) {
+            Log.d("MainActivity", "Uploading sample data to Firebase...");
+
+            // Upload lessons
+            AddLessonDataHelper.addDirectionsLesson();
+            AddLessonDataHelper.addRestaurantLesson();
+
+            SampleDataHelper sampleHelper = new SampleDataHelper();
+            sampleHelper.generateAllSampleData(new SampleDataHelper.OnCompleteListener() {
+                @Override
+                public void onSuccess() {
+                    Log.d("MainActivity", "✅ Sample data uploaded successfully!");
+                    prefs.edit().putBoolean("sample_data_uploaded", true).apply();
+                    Toast.makeText(MainActivity.this, "Sample data uploaded!", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    Log.e("MainActivity", "❌ Failed to upload sample data: " + e.getMessage());
+                }
+            });
+        }
 
         bottomNav = findViewById(R.id.bottom_nav);
         getSupportFragmentManager().beginTransaction()
@@ -53,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
             // Replacing the switch statement with if-else if-else
             if (itemId == R.id.nav_home) {
                 selected = new HomeFragment();
+            } else if (itemId == R.id.nav_learn) {
+                selected = new LearnFragment();
             } else if (itemId == R.id.nav_favorite) {
                 selected = new FavoriteFragment();
             } else if (itemId == R.id.nav_profile) {

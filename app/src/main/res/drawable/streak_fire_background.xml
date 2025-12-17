@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Streak Fire Background -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:startColor="#FF6B00"
+        android:endColor="#FF3D00"
+        android:angle="135"
+        android:type="linear" />
+    <size
+        android:width="48dp"
+        android:height="48dp" />
+</shape>

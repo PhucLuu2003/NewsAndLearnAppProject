@@ -22,7 +22,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+import com.example.newsandlearn.Utils.AnimationHelper;
 import androidx.fragment.app.Fragment;
 
 import com.example.newsandlearn.Fragment.DragDropQuestionFragment;
@@ -61,7 +61,7 @@ public class VideoLessonActivity extends AppCompatActivity implements
     private PlayerView playerView;
     private ExoPlayer player;
     private View videoOverlay;
-    private CardView questionContainer;
+    private android.view.View questionContainer;
     private FrameLayout questionFragmentContainer;
     private ImageView correctIcon, incorrectIcon, backButton;
     private ProgressBar loadingIndicator, lessonProgress;
@@ -477,7 +477,10 @@ public class VideoLessonActivity extends AppCompatActivity implements
     }
 
     private void setupListeners() {
-        backButton.setOnClickListener(v -> onBackPressed());
+        backButton.setOnClickListener(v -> {
+            AnimationHelper.scaleUp(VideoLessonActivity.this, backButton);
+            onBackPressed();
+        });
     }
 
     @Override

@@ -48,6 +48,13 @@ public class VideoLessonsAdapter extends RecyclerView.Adapter<VideoLessonsAdapte
     public void onBindViewHolder(@NonNull VideoLessonViewHolder holder, int position) {
         VideoLesson lesson = videoLessons.get(position);
         holder.bind(lesson);
+        
+        // Horizontal animation for horizontal list? Or just fade/scale.
+        // Let's use itemFallDown but maybe slightly different for horizontal. 
+        // Actually itemFallDown works fine or we can do a slideInRight.
+        // Let's stick to itemFallDown for consistency or create a new one.
+        // For now, itemFallDown is safe.
+        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(context, holder.itemView, position);
     }
 
     @Override
@@ -93,16 +100,18 @@ public class VideoLessonsAdapter extends RecyclerView.Adapter<VideoLessonsAdapte
             // Load thumbnail image using Glide
             Glide.with(context)
                     .load(lesson.getThumbnailUrl())
-                    .placeholder(R.drawable.video_placeholder) // Custom placeholder
-                    .error(R.drawable.video_placeholder) // Custom error drawable
+                    .placeholder(R.drawable.rounded_rect_8dp) // Use generic drawable as placeholder
+                    .error(R.drawable.rounded_rect_8dp)
                     .centerCrop()
                     .into(videoThumbnail);
 
-            // Set level badge color based on level
+            // Set level badge background tint based on level
             setLevelBadgeColor(level);
 
             // Click listener
             videoLessonCard.setOnClickListener(v -> {
+                com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, videoLessonCard);
+                
                 // Update view count
                 updateViewCount(lesson);
 
@@ -140,7 +149,10 @@ public class VideoLessonsAdapter extends RecyclerView.Adapter<VideoLessonsAdapte
                 default:
                     color = context.getColor(R.color.green);
             }
-            levelBadge.setTextColor(color);
+            // Use backgroundTintList for the badge
+            levelBadge.setBackgroundTintList(android.content.res.ColorStateList.valueOf(color));
+            // Keep text white as defined in XML
+            levelBadge.setTextColor(0xFFFFFFFF);
         }
 
         private String formatViews(int views) {

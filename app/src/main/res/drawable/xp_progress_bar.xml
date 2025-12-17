@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- XP Progress Bar with Gradient -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle">
+            <corners android:radius="12dp" />
+            <solid android:color="#2A2A2D" />
+        </shape>
+    </item>
+    
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle">
+                <corners android:radius="12dp" />
+                <gradient
+                    android:startColor="@color/gradient_blue_purple_start"
+                    android:endColor="@color/gradient_blue_purple_end"
+                    android:angle="0" />
+            </shape>
+        </clip>
+    </item>
+</layer-list>

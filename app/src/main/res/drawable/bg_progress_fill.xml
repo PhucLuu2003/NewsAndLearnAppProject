@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 📊 Progress Bar Fill (Gradient) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:angle="0"
+        android:startColor="#F59E0B"
+        android:endColor="#FB923C"
+        android:type="linear" />
+    <corners android:radius="100dp" />
+    <size android:height="10dp" />
+</shape>

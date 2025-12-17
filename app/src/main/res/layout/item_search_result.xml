@@ -1,81 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- Premium Search Result Card -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:layout_marginBottom="12dp"
+    android:layout_marginHorizontal="4dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
+    app:cardBackgroundColor="#FFFFFF">
 
-    <ImageView
-        android:id="@+id/thumbnail"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:scaleType="centerCrop"
-        android:src="@android:color/darker_gray" 
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/article_title"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="Drinking carrot juice could boost immune system"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/article_time"
-        app:layout_constraintStart_toEndOf="@+id/thumbnail"
-        app:layout_constraintTop_toTopOf="@+id/thumbnail" />
+        android:orientation="vertical"
+        android:padding="16dp">
 
-    <TextView
-        android:id="@+id/article_time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:drawablePadding="4dp"
-        android:text="1 min"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp"
-        app:drawableStartCompat="@android:drawable/ic_menu_recent_history" 
-        app:drawableTint="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/article_title" />
+        <!-- Header Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/article_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:text="2023-12-15 19:32:36"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/article_time" />
+            <!-- Type Badge -->
+            <TextView
+                android:id="@+id/result_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ARTICLE"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/badge_rounded_background"
+                android:backgroundTint="#64B5F6"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:elevation="2dp" />
 
-    <TextView
-        android:id="@+id/article_source"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="「FOX」"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/thumbnail"
-        app:layout_constraintStart_toStartOf="@+id/article_title" />
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
 
-    <TextView
-        android:id="@+id/article_views"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:drawablePadding="4dp"
-        android:text="7205"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp"
-        app:drawableStartCompat="@android:drawable/ic_menu_view" 
-        app:drawableTint="@android:color/darker_gray"
-        app:layout_constraintBottom_toBottomOf="@+id/article_source"
-        app:layout_constraintStart_toEndOf="@+id/article_source" />
+            <!-- Level Badge -->
+            <TextView
+                android:id="@+id/result_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="B1"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/badge_rounded_background"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="5dp"
+                android:elevation="2dp" />
+        </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Title -->
+        <TextView
+            android:id="@+id/result_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Search Result Title"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A1D"
+            android:maxLines="2"
+            android:ellipsize="end" />
+
+        <!-- Description -->
+        <TextView
+            android:id="@+id/result_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Brief description of the search result..."
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:lineSpacingExtra="2dp" />
+
+        <!-- Footer Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/result_category"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Category"
+                android:textSize="12sp"
+                android:textColor="#999999"
+                android:drawablePadding="4dp"
+                app:drawableStartCompat="@android:drawable/ic_menu_compass"
+                app:drawableTint="#64B5F6" />
+
+            <TextView
+                android:id="@+id/result_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2 days ago"
+                android:textSize="12sp"
+                android:textColor="#999999" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

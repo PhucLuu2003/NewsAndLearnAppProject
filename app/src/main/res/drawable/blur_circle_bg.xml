@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="#40000000" /> <!-- Semi-transparent black for contrast on light images, or white on dark -->
+    <!-- Let's use semi-transparent black assuming light images, or a "blur" effect simulation -->
+    <solid android:color="#66000000" /> 
+    <stroke android:width="1dp" android:color="#33FFFFFF" />
+</shape>

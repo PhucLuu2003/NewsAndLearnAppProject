@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Compact Vocabulary Card - Light Theme -->
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="4dp"
+    android:layout_marginBottom="12dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Accent Left Bar -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="match_parent"
+            android:background="@color/primary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"> 
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <!-- Mastery Badge -->
+                <TextView
+                    android:id="@+id/mastery_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:text="Learning"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"
+                    android:background="@drawable/badge_rounded_background"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="5dp"
+                    android:elevation="2dp" />
+
+                <!-- Word -->
+                <TextView
+                    android:id="@+id/word_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_toStartOf="@id/mastery_badge"
+                    android:layout_marginEnd="10dp"
+                    android:text="Ambitious"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/text_primary"
+                    android:fontFamily="sans-serif-medium"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Phonetic -->
+                <TextView
+                    android:id="@+id/phonetic_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/word_text"
+                    android:layout_marginTop="3dp"
+                    android:text="/æmˈbɪʃ.əs/"
+                    android:textSize="13sp"
+                    android:textColor="@color/primary"
+                    android:fontFamily="monospace" />
+
+                <!-- Translation -->
+                <TextView
+                    android:id="@+id/translation_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/phonetic_text"
+                    android:layout_marginTop="12dp"
+                    android:text="Đầy tham vọng, có nhiều hoài bão"
+                    android:textSize="14sp"
+                    android:textColor="@color/text_secondary"
+                    android:lineSpacingExtra="2dp"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
+
+            </RelativeLayout>
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border_secondary" />
+
+            <!-- Bottom Action Area -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="14dp"
+                android:paddingVertical="10dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="@color/background_secondary">
+
+                <!-- Circular Progress -->
+                <FrameLayout
+                    android:layout_width="40dp"
+                    android:layout_height="40dp">
+                    
+                    <ProgressBar
+                        android:id="@+id/mastery_progress"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:progress="60"
+                        android:max="100"
+                        android:progressDrawable="@drawable/circular_progress_small"
+                        android:indeterminate="false" />
+                        
+                    <TextView
+                        android:id="@+id/mastery_percentage_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="60%"
+                        android:textSize="9sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/next_review_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Next review: 2 days"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary" />
+                </LinearLayout>
+
+                <!-- Action Buttons -->
+                <ImageView
+                    android:id="@+id/speaker_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_volume"
+                    android:padding="8dp"
+                    android:background="@drawable/circle_button_bg"
+                    app:tint="@color/primary" />
+
+                <ImageView
+                    android:id="@+id/favorite_button"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="6dp"
+                    android:src="@drawable/ic_favorite_border"
+                    android:padding="8dp"
+                    android:background="@drawable/circle_button_bg"
+                    app:tint="@color/text_hint" />
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

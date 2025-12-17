@@ -3,17 +3,204 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     
-    <!-- Video Lesson Colors -->
-    <color name="dark_background">#0D0D0F</color>
-    <color name="dark_card">#1A1A1D</color>
-    <color name="dark_card_secondary">#2C2C2E</color>
-    <color name="blue">#4A80F0</color>
-    <color name="blue_light">#64B5F6</color>
-    <color name="green">#4CAF50</color>
-    <color name="green_translucent">#334CAF50</color>
-    <color name="red">#F44336</color>
-    <color name="red_translucent">#33F44336</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#CCCCCC</color>
-    <color name="text_hint">#666666</color>
+    <!-- ========== MODERN LIGHT THEME COLOR SYSTEM ========== -->
+    
+    <!-- Primary Brand Colors - Vibrant Blue Gradient -->
+    <color name="primary">#4F46E5</color>              <!-- Indigo 600 - Main brand color -->
+    <color name="primary_dark">#4338CA</color>         <!-- Indigo 700 -->
+    <color name="primary_light">#818CF8</color>        <!-- Indigo 400 -->
+    <color name="primary_ultra_light">#C7D2FE</color>  <!-- Indigo 200 -->
+    
+    <!-- Secondary Colors - Purple Accent -->
+    <color name="secondary">#7C3AED</color>            <!-- Violet 600 -->
+    <color name="secondary_dark">#6D28D9</color>       <!-- Violet 700 -->
+    <color name="secondary_light">#A78BFA</color>      <!-- Violet 400 -->
+    
+    <!-- Status & Feedback Colors -->
+    <color name="success">#10B981</color>              <!-- Emerald 500 -->
+    <color name="success_dark">#059669</color>         <!-- Emerald 600 -->
+    <color name="success_light">#6EE7B7</color>        <!-- Emerald 300 -->
+    <color name="success_bg">#D1FAE5</color>           <!-- Emerald 100 -->
+    
+    <color name="warning">#F59E0B</color>              <!-- Amber 500 -->
+    <color name="warning_dark">#D97706</color>         <!-- Amber 600 -->
+    <color name="warning_light">#FCD34D</color>        <!-- Amber 300 -->
+    <color name="warning_bg">#FEF3C7</color>           <!-- Amber 100 -->
+    
+    <color name="error">#EF4444</color>                <!-- Red 500 -->
+    <color name="error_dark">#DC2626</color>           <!-- Red 600 -->
+    <color name="error_light">#FCA5A5</color>          <!-- Red 300 -->
+    <color name="error_bg">#FEE2E2</color>             <!-- Red 100 -->
+    
+    <color name="info">#3B82F6</color>                 <!-- Blue 500 -->
+    <color name="info_dark">#2563EB</color>            <!-- Blue 600 -->
+    <color name="info_light">#93C5FD</color>           <!-- Blue 300 -->
+    
+    <!-- Background & Surface Colors -->
+    <color name="background_primary">#F8FAFC</color>   <!-- Slate 50 - Main background -->
+    <color name="background_secondary">#F1F5F9</color> <!-- Slate 100 -->
+    <color name="surface_primary">#FFFFFF</color>      <!-- White - Cards, sheets -->
+    <color name="surface_secondary">#FAFBFC</color>    <!-- Off-white -->
+    <color name="surface_elevated">#FFFFFF</color>     <!-- Elevated surfaces -->
+    
+    <!-- Text Colors - High Contrast for Readability -->
+    <color name="text_primary">#0F172A</color>         <!-- Slate 900 - Main text -->
+    <color name="text_secondary">#475569</color>       <!-- Slate 600 - Secondary text -->
+    <color name="text_tertiary">#94A3B8</color>        <!-- Slate 400 - Hints -->
+    <color name="text_hint">@color/text_tertiary</color>
+    <color name="text_disabled">#CBD5E1</color>        <!-- Slate 300 - Disabled -->
+    <color name="text_on_primary">#FFFFFF</color>      <!-- White text on primary -->
+    
+    <!-- Module Colors - Vibrant & Distinct -->
+    <color name="module_vocabulary">#8B5CF6</color>    <!-- Violet 500 - Purple -->
+    <color name="module_vocabulary_light">#DDD6FE</color>
+    <color name="module_grammar">#3B82F6</color>       <!-- Blue 500 -->
+    <color name="module_grammar_light">#DBEAFE</color>
+    <color name="module_listening">#10B981</color>     <!-- Emerald 500 - Green -->
+    <color name="module_listening_light">#D1FAE5</color>
+    <color name="module_speaking">#F59E0B</color>      <!-- Amber 500 - Orange -->
+    <color name="module_speaking_light">#FEF3C7</color>
+    <color name="module_reading">#EC4899</color>       <!-- Pink 500 -->
+    <color name="module_reading_light">#FCE7F3</color>
+    <color name="module_writing">#EF4444</color>       <!-- Red 500 -->
+    <color name="module_writing_light">#FEE2E2</color>
+    
+    <!-- Gradient Colors -->
+    <color name="gradient_start">#4F46E5</color>       <!-- Indigo -->
+    <color name="gradient_end">#7C3AED</color>         <!-- Violet -->
+    <color name="gradient_blue_start">#3B82F6</color>
+    <color name="gradient_blue_end">#8B5CF6</color>
+    <color name="gradient_green_start">#10B981</color>
+    <color name="gradient_green_end">#3B82F6</color>
+    <color name="gradient_pink_start">#EC4899</color>
+    <color name="gradient_pink_end">#F59E0B</color>
+    <color name="gradient_gold_start">#FBBF24</color>
+    <color name="gradient_gold_end">#F59E0B</color>
+    
+    <!-- Achievement & Badge Colors -->
+    <color name="badge_new">#64748B</color>            <!-- Slate 500 -->
+    <color name="badge_learning">#F59E0B</color>       <!-- Amber -->
+    <color name="badge_known">#3B82F6</color>          <!-- Blue -->
+    <color name="badge_mastered">#10B981</color>       <!-- Emerald -->
+    
+    <color name="tier_bronze">#CD7F32</color>
+    <color name="tier_silver">#94A3B8</color>
+    <color name="tier_gold">#FBBF24</color>
+    <color name="tier_platinum">#E2E8F0</color>
+    <color name="tier_diamond">#60A5FA</color>
+    
+    <!-- Border & Divider Colors -->
+    <color name="border_light">#F1F5F9</color>         <!-- Slate 100 -->
+    <color name="border_primary">#E2E8F0</color>       <!-- Slate 200 -->
+    <color name="border_secondary">#CBD5E1</color>     <!-- Slate 300 -->
+    <color name="divider">#E2E8F0</color>
+    
+    <!-- Overlay & Shadow Colors -->
+    <color name="overlay_dark">#80000000</color>       <!-- 50% black -->
+    <color name="overlay_light">#40000000</color>      <!-- 25% black -->
+    
+    <!-- ========== PROFILE SCREEN COLORS ========== -->
+    
+    <!-- Profile Gradient (Purple → Blue) -->
+    <color name="profile_gradient_start">#8B5CF6</color>   <!-- Violet 500 -->
+    <color name="profile_gradient_mid">#6366F1</color>     <!-- Indigo 500 -->
+    <color name="profile_gradient_end">#3B82F6</color>     <!-- Blue 500 -->
+    
+    <!-- Achievement & XP Accent (Yellow/Orange) -->
+    <color name="xp_accent">#F59E0B</color>                <!-- Amber 500 -->
+    <color name="xp_accent_light">#FCD34D</color>          <!-- Amber 300 -->
+    <color name="streak_fire">#EF4444</color>              <!-- Red 500 for fire emoji -->
+    <color name="streak_accent">#FB923C</color>            <!-- Orange 400 -->
+    
+    <!-- Pastel Backgrounds -->
+    <color name="profile_bg">#FAFBFF</color>               <!-- Very light lavender -->
+    <color name="card_bg">#FFFFFF</color>                  <!-- White cards -->
+    <color name="card_bg_secondary">#F8FAFC</color>        <!-- Slate 50 -->
+    
+    <!-- Level Badge Colors -->
+    <color name="level_beginner">#10B981</color>           <!-- Green -->
+    <color name="level_intermediate">#F59E0B</color>       <!-- Orange -->
+    <color name="level_advanced">#EF4444</color>           <!-- Red -->
+    <color name="level_expert">#8B5CF6</color>             <!-- Purple -->
+    
+    <!-- Progress & Stats Colors -->
+    <color name="progress_bg">#E5E7EB</color>              <!-- Gray 200 -->
+    <color name="progress_fill">#F59E0B</color>            <!-- Amber gradient -->
+    <color name="stat_icon_bg_1">#EDE9FE</color>           <!-- Violet 100 -->
+    <color name="stat_icon_bg_2">#DBEAFE</color>           <!-- Blue 100 -->
+    <color name="stat_icon_bg_3">#D1FAE5</color>           <!-- Green 100 -->
+    <color name="stat_icon_bg_4">#FEF3C7</color>           <!-- Amber 100 -->
+    <color name="scrim">#B3000000</color>              <!-- 70% black -->
+    
+    <!-- Special Effects -->
+    <color name="shimmer_base">#F1F5F9</color>
+    <color name="shimmer_highlight">#FFFFFF</color>
+    <color name="ripple">#1A4F46E5</color>             <!-- 10% primary -->
+    
+    <!-- Accent Colors -->
+    <color name="accent_blue">#3B82F6</color>
+    <color name="accent_purple">#8B5CF6</color>
+    <color name="accent_pink">#EC4899</color>
+    <color name="accent_green">#10B981</color>
+    <color name="accent_orange">#F59E0B</color>
+    <color name="accent_red">#EF4444</color>
+    
+    <!-- SwipeRefresh Colors -->
+    <color name="purple_500">#8B5CF6</color>
+    <color name="purple_700">#6D28D9</color>
+    <color name="blue_500">#3B82F6</color>
+    
+    <!-- Transparent -->
+    <color name="transparent">#00000000</color>
+    
+    <!-- Legacy Support (for backward compatibility) -->
+    <color name="dark_background">#F8FAFC</color>
+    <color name="dark_card">#FFFFFF</color>
+    <color name="blue">#3B82F6</color>
+    <color name="green">#10B981</color>
+    <color name="red">#EF4444</color>
+    <color name="card_background">#FFFFFF</color>
+
+    <!-- FIXED MISSING RESOURCES -->
+    <!-- Bottom Navigation -->
+    <color name="bottom_nav_selected">@color/primary</color>
+    <color name="bottom_nav_unselected">@color/text_tertiary</color>
+
+    <color name="green_translucent">#3310B981</color>
+    <color name="red_translucent">#33EF4444</color>
+    <color name="gradient_pink_orange_start">#EC4899</color>
+    <color name="blue_light">#93C5FD</color>
+
+    <!-- Glass Effect -->
+    <color name="glass_white">#CCFFFFFF</color>
+    <color name="glass_border">#33FFFFFF</color>
+
+    <!-- Specific Gradients -->
+    <color name="gradient_blue_purple_start">#3B82F6</color>
+    <color name="gradient_blue_purple_end">#7C3AED</color>
+    
+    <color name="gradient_gold_orange_start">#FBBF24</color>
+    <color name="gradient_gold_orange_end">#F59E0B</color>
+
+    <color name="gradient_green_blue_start">#10B981</color>
+    <color name="gradient_green_blue_end">#06B6D4</color>
+
+    <!-- Module Specific Gradients (Primary/Secondary) -->
+    <color name="module_vocab_primary">#8B5CF6</color>
+    <color name="module_vocab_secondary">#A78BFA</color>
+
+    <color name="module_grammar_primary">#3B82F6</color>
+    <color name="module_grammar_secondary">#60A5FA</color>
+
+    <color name="module_listening_primary">#10B981</color>
+    <color name="module_listening_secondary">#34D399</color>
+
+    <color name="module_speaking_primary">#F59E0B</color>
+    <color name="module_speaking_secondary">#FBBF24</color>
+
+    <color name="module_reading_primary">#EC4899</color>
+    <color name="module_reading_secondary">#F472B6</color>
+
+    <color name="module_writing_primary">#EF4444</color>
+    <color name="module_writing_secondary">#F87171</color>
 </resources>

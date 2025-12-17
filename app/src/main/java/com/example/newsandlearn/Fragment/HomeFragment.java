@@ -21,15 +21,14 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.newsandlearn.Activity.ArticleDetailActivity;
 import com.example.newsandlearn.Activity.SearchActivity;
-import com.example.newsandlearn.Activity.VideoLessonActivity;
 import com.example.newsandlearn.Adapter.ArticleAdapter;
 import com.example.newsandlearn.Adapter.VideoLessonsAdapter;
 import com.example.newsandlearn.Model.Article;
 import com.example.newsandlearn.Model.VideoLesson;
 import com.example.newsandlearn.R;
+import com.example.newsandlearn.Utils.AnimationHelper;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -42,30 +41,31 @@ import java.util.Locale;
 
 /**
  * Modern HomeFragment with Firebase integration
- * Features: Pull-to-refresh, Level filtering, Featured content, Dark mode
- * optimized
  */
 public class HomeFragment extends Fragment {
 
     // UI Components
-    private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView articlesRecyclerView;
-    private RecyclerView videoLessonsRecycler;
-    private ProgressBar loadingIndicator;
-    private LinearLayout emptyState;
     private TextView usernameText;
     private ImageView profileAvatar;
-    private ImageView notificationBtn;
-    private ImageView settingsBtn;
+    private View notificationBtn;
+    private View settingsBtn;
     private LinearLayout searchBarHome;
     private ChipGroup levelChipGroup;
     private Chip chipAll, chipEasy, chipMedium, chipHard;
     private CardView heroCard;
     private TextView featuredTitle, featuredReadTime, featuredSource;
-    private LinearLayout actionFavorites, actionHistory;
     private TextView seeAllBtn;
     private TextView seeAllVideosBtn;
-    private ExtendedFloatingActionButton fabScan;
+    private SwipeRefreshLayout swipeRefresh;
+    private RecyclerView articlesRecyclerView;
+    private RecyclerView videoLessonsRecycler;
+    private ProgressBar loadingIndicator;
+    private TextView emptyState;
+
+    // Gamification UI
+    private LinearLayout statsCard;
+    private TextView streakCount;
+    private TextView xpText;
 
     // Data & Adapter
     private ArticleAdapter adapter;
@@ -107,6 +107,9 @@ public class HomeFragment extends Fragment {
         loadUserInfo();
         loadArticles();
         loadVideoLessons();
+        
+        // Animate entrance
+        animateEntrance();
 
         return view;
     }
@@ -139,10 +142,6 @@ public class HomeFragment extends Fragment {
         featuredReadTime = view.findViewById(R.id.featured_read_time);
         featuredSource = view.findViewById(R.id.featured_source);
 
-        // Quick Actions
-        actionFavorites = view.findViewById(R.id.action_favorites);
-        actionHistory = view.findViewById(R.id.action_history);
-
         // Section
         seeAllBtn = view.findViewById(R.id.see_all_btn);
         seeAllVideosBtn = view.findViewById(R.id.see_all_videos_btn);
@@ -151,8 +150,10 @@ public class HomeFragment extends Fragment {
         articlesRecyclerView = view.findViewById(R.id.articles_recycler_view);
         videoLessonsRecycler = view.findViewById(R.id.video_lessons_recycler);
 
-        // FAB
-        fabScan = view.findViewById(R.id.fab_scan);
+        // Gamification
+        statsCard = view.findViewById(R.id.stats_card);
+        streakCount = view.findViewById(R.id.streak_count);
+        xpText = view.findViewById(R.id.user_level);
     }
 
     private void setupRecyclerView() {
@@ -192,13 +193,16 @@ public class HomeFragment extends Fragment {
 
         // Search Bar
         searchBarHome.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SearchActivity.class);
-            startActivity(intent);
+            AnimationHelper.scaleUp(requireContext(), v);
+            v.postDelayed(() -> {
+                Intent intent = new Intent(getActivity(), SearchActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }, 150);
         });
 
         // Header Buttons
         notificationBtn.setOnClickListener(v -> Toast.makeText(getContext(), "Thông báo", Toast.LENGTH_SHORT).show());
-
         settingsBtn.setOnClickListener(v -> Toast.makeText(getContext(), "Cài đặt", Toast.LENGTH_SHORT).show());
 
         // Level Chips
@@ -217,21 +221,14 @@ public class HomeFragment extends Fragment {
 
         // Hero Card
         heroCard.setOnClickListener(v -> {
-            if (featuredArticle != null) {
-                openArticleDetail(featuredArticle);
-            }
+            AnimationHelper.buttonPress(requireContext(), v);
+            v.postDelayed(() -> {
+                AnimationHelper.buttonRelease(requireContext(), v);
+                if (featuredArticle != null) {
+                    openArticleDetail(featuredArticle);
+                }
+            }, 100);
         });
-
-        // Quick Actions
-        actionFavorites.setOnClickListener(v -> {
-            // Navigate to favorite tab (index 1)
-            if (getActivity() instanceof androidx.fragment.app.FragmentActivity) {
-                // TODO: Switch to Favorite tab
-                Toast.makeText(getContext(), "Yêu thích", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        actionHistory.setOnClickListener(v -> Toast.makeText(getContext(), "Lịch sử đọc", Toast.LENGTH_SHORT).show());
 
         // See All
         seeAllBtn.setOnClickListener(v -> {
@@ -242,12 +239,15 @@ public class HomeFragment extends Fragment {
         // See All Videos
         seeAllVideosBtn.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Tất cả Video Lessons", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to all video lessons screen
         });
 
-        // FAB Scan
-        fabScan.setOnClickListener(
-                v -> Toast.makeText(getContext(), "Tính năng Scan đang phát triển", Toast.LENGTH_SHORT).show());
+        // Stats card click for details
+        if (statsCard != null) {
+            statsCard.setOnClickListener(v -> {
+                AnimationHelper.pulse(requireContext(), v);
+                Toast.makeText(getContext(), "Tap to view detailed stats", Toast.LENGTH_SHORT).show();
+            });
+        }
     }
 
     private void loadUserInfo() {
@@ -259,6 +259,12 @@ public class HomeFragment extends Fragment {
                             String username = document.getString("username");
                             if (username != null) {
                                 usernameText.setText(username);
+                            }
+                            
+                            // Load streak
+                            Long streak = document.getLong("currentStreak");
+                            if (streak != null && streakCount != null) {
+                                streakCount.setText(String.valueOf(streak));
                             }
                         }
                     })
@@ -315,7 +321,6 @@ public class HomeFragment extends Fragment {
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
                     isLoading = false;
-                    Toast.makeText(getContext(), "Không thể tải dữ liệu", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -411,6 +416,15 @@ public class HomeFragment extends Fragment {
                     });
         }
     }
+    
+    private void animateEntrance() {
+        // Staggered entrance animations for main sections
+        if (getView() == null) return;
+        
+        if (heroCard != null) AnimationHelper.itemFallDown(requireContext(), heroCard, 3);
+        if (videoLessonsRecycler != null) AnimationHelper.itemFallDown(requireContext(), videoLessonsRecycler, 5);
+        if (articlesRecyclerView != null) AnimationHelper.itemFallDown(requireContext(), articlesRecyclerView, 6);
+    }
 
     private List<Article> createSampleArticles() {
         List<Article> articles = new ArrayList<>();
@@ -456,32 +470,6 @@ public class HomeFragment extends Fragment {
                     10,
                     false));
 
-            articles.add(new Article(
-                    "4",
-                    "100 Cụm động từ phổ biến trong tiếng Anh",
-                    "Danh sách các phrasal verbs quan trọng kèm ví dụ minh họa...",
-                    "",
-                    "Từ vựng",
-                    "medium",
-                    "Oxford Learner's",
-                    sdf.parse("2024-01-12"),
-                    1100,
-                    8,
-                    false));
-
-            articles.add(new Article(
-                    "5",
-                    "Luyện phát âm chuẩn giọng Anh - Mỹ",
-                    "Những mẹo nhỏ giúp bạn phát âm tiếng Anh tự nhiên hơn...",
-                    "",
-                    "Phát âm",
-                    "easy",
-                    "Rachel's English",
-                    sdf.parse("2024-01-11"),
-                    980,
-                    6,
-                    false));
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -489,9 +477,6 @@ public class HomeFragment extends Fragment {
         return articles;
     }
 
-    /**
-     * Load video lessons from Firebase Firestore
-     */
     private void loadVideoLessons() {
         if (getContext() == null)
             return;
@@ -506,48 +491,31 @@ public class HomeFragment extends Fragment {
                     videoLessons.clear();
 
                     if (queryDocumentSnapshots.isEmpty()) {
-                        android.util.Log.d("HomeFragment", "No video lessons found in Firebase");
                         return;
                     }
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         try {
-                            // Log document data
-                            android.util.Log.d("HomeFragment",
-                                    "Document: " + document.getId() + " => " + document.getData());
-
                             VideoLesson lesson = document.toObject(VideoLesson.class);
                             if (lesson != null) {
-                                // Set ID from document if not present
                                 if (lesson.getId() == null || lesson.getId().isEmpty()) {
                                     lesson.setId(document.getId());
                                 }
                                 videoLessons.add(lesson);
-                                android.util.Log.d("HomeFragment", "Added lesson: " + lesson.getTitle());
                             }
                         } catch (Exception e) {
                             android.util.Log.e("HomeFragment", "Error parsing lesson: " + e.getMessage(), e);
                         }
                     }
 
-                    android.util.Log.d("HomeFragment", "Total lessons loaded: " + videoLessons.size());
-
                     if (videoLessonsAdapter != null && !videoLessons.isEmpty()) {
                         videoLessonsAdapter.updateData(videoLessons);
-                        android.util.Log.d("HomeFragment", "Video lessons updated successfully");
                     }
                 })
                 .addOnFailureListener(e -> {
                     if (getContext() == null)
                         return;
-
                     android.util.Log.e("HomeFragment", "Error loading video lessons", e);
-                    // Only show error if it's a real error, not just missing data
-                    if (!e.getMessage().contains("NOT_FOUND")) {
-                        Toast.makeText(getContext(),
-                                "Lỗi tải video: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                    }
                 });
     }
 

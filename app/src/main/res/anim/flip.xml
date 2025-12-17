@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Flip animation (3D card flip effect) -->
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <objectAnimator
+        android:duration="300"
+        android:propertyName="rotationY"
+        android:valueFrom="0"
+        android:valueTo="180"
+        android:interpolator="@android:anim/accelerate_decelerate_interpolator" />
+</set>

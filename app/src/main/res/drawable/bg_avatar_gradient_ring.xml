@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ✨ Avatar Gradient Border Ring -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <gradient
+        android:angle="135"
+        android:startColor="#F59E0B"
+        android:centerColor="#EC4899"
+        android:endColor="#8B5CF6"
+        android:type="linear" />
+    <size
+        android:width="136dp"
+        android:height="136dp" />
+</shape>

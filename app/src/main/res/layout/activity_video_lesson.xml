@@ -36,49 +36,66 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top"
         android:orientation="vertical"
-        android:padding="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="48dp"
+        android:paddingHorizontal="16dp"
         android:background="@drawable/gradient_overlay_top">
 
-        <TextView
-            android:id="@+id/lesson_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lesson Title"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:maxLines="2"
-            android:ellipsize="end" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/lesson_level"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Level A1"
-            android:textColor="#4CAF50"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:background="@drawable/level_badge_background" />
+            <ImageView
+                android:id="@+id/back_button"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="@drawable/circle_button_bg"
+                android:backgroundTint="#33FFFFFF"
+                android:padding="8dp"
+                app:tint="#FFFFFF"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <LinearLayout
+                 android:layout_width="0dp"
+                 android:layout_height="wrap_content"
+                 android:layout_weight="1"
+                 android:orientation="vertical"
+                 android:layout_marginStart="16dp">
+
+                <TextView
+                    android:id="@+id/lesson_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Lesson Title"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <TextView
+                    android:id="@+id/lesson_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Level A1"
+                    android:textColor="#4CAF50"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:background="@drawable/level_badge_background" />
+            </LinearLayout>
+
+        </LinearLayout>
+        
     </LinearLayout>
-
-    <!-- Back Button -->
-    <ImageView
-        android:id="@+id/back_button"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_margin="16dp"
-        android:layout_gravity="start|top"
-        android:src="@android:drawable/ic_menu_revert"
-        android:background="@drawable/circle_button_background"
-        android:padding="8dp"
-        app:tint="#FFFFFF"
-        android:clickable="true"
-        android:focusable="true" />
 
     <!-- Progress Container (Bottom) -->
     <LinearLayout
@@ -95,47 +112,55 @@
             android:id="@+id/question_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Câu hỏi 1/5"
+            android:text="Q 1/5"
             android:textColor="#FFFFFF"
             android:textSize="14sp"
-            android:background="#4A80F0"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"
+            android:background="@drawable/badge_background_blue"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="4dp"
             android:layout_marginEnd="8dp" />
 
         <ProgressBar
             android:id="@+id/lesson_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"
-            android:layout_height="8dp"
+            android:layout_height="6dp"
             android:layout_weight="1"
-            android:progressTint="#4A80F0"
-            android:progressBackgroundTint="#2C2C2E"
+            android:progressDrawable="@drawable/xp_progress_bar"
             android:max="100"
             android:progress="0" />
     </LinearLayout>
 
-    <!-- Question Container - Bottom Sheet -->
-    <androidx.cardview.widget.CardView
+    <!-- Question Container - Bottom Sheet Style -->
+    <LinearLayout
         android:id="@+id/question_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        app:cardBackgroundColor="#1A1A1D"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="16dp"
+        android:orientation="vertical"
+        android:background="@drawable/bottom_sheet_background"
         android:visibility="gone"
-        android:translationY="1000dp">
+        android:translationY="500dp"
+        android:elevation="20dp">
+        
+        <!-- Drag Handle Indicator -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/rounded_rect_8dp"
+            android:backgroundTint="#66FFFFFF"/>
 
         <FrameLayout
             android:id="@+id/question_fragment_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:minHeight="300dp"
-            android:padding="20dp" />
-    </androidx.cardview.widget.CardView>
+            android:padding="16dp" />
+            
+    </LinearLayout>
 
     <!-- Feedback Icons -->
     <ImageView

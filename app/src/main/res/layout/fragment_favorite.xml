@@ -4,18 +4,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2C2C2E">
+    android:background="@color/background_primary">
 
     <!-- Top Bar -->
     <TextView
         android:id="@+id/favorites_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="💜 Yêu thích"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:text="My Favorites"
+        android:textColor="@color/text_primary"
+        android:textSize="28sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -44,8 +44,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="Chưa có bài viết yêu thích"
-            android:textColor="@android:color/white"
+            android:text="No favorites yet"
+            android:textColor="@color/text_primary"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -54,8 +54,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
-            android:text="Nhấn vào biểu tượng trái tim\nđể lưu bài viết yêu thích"
-            android:textColor="#9E9E9E"
+            android:text="Tap the heart icon on any article\nto save it here."
+            android:textColor="@color/text_secondary"
             android:textSize="14sp" />
 
     </LinearLayout>
