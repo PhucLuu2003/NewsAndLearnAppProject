@@ -58,6 +58,9 @@ dependencies {
     implementation("androidx.media3:media3-ui:1.2.1")
     implementation("androidx.media3:media3-exoplayer-dash:1.2.1")
     
+    // YouTube Player for in-app YouTube playback
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.0")
+    
     // Lottie for animations (optional but recommended)
     implementation("com.airbnb.android:lottie:6.1.0")
     
@@ -67,4 +70,20 @@ dependencies {
     
     // CircleImageView for circular avatars
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    
+    // Gson for JSON parsing (Dictionary & Translation APIs)
+    implementation("com.google.code.gson:gson:2.10.1")
+    
+    // Gemini AI for Reading Assistant
+    implementation("com.google.ai.client.generativeai:generativeai:0.1.2")
+    
+    // MPAndroidChart for beautiful analytics charts
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    
+    // OkHttp for API calls
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    
+    // Retrofit for REST API (optional, for future use)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }

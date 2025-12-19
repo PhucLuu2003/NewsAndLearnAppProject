@@ -3,6 +3,7 @@ package com.example.newsandlearn.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,24 +20,35 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.newsandlearn.Activity.FlashcardActivity;
+import com.example.newsandlearn.Activity.QuizActivity;
 import com.example.newsandlearn.Adapter.VocabularyAdapter;
 import com.example.newsandlearn.Dialog.AddWordDialog;
+import com.example.newsandlearn.Fragment.VocabularySetsFragment;
+import com.example.newsandlearn.Model.UserVocabulary;
 import com.example.newsandlearn.Model.Vocabulary;
+import com.example.newsandlearn.Model.VocabularyWithProgress;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressManager;
+import com.example.newsandlearn.Utils.SampleDataHelper;
+import com.example.newsandlearn.Utils.FirebaseDataSeeder;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 /**
  * VocabularyFragment - Displays user's vocabulary with filtering and stats
+ * Uses new two-collection structure: vocabularies (public) + user_vocabulary
+ * (progress)
  */
 public class VocabularyFragment extends Fragment {
 
@@ -50,11 +62,11 @@ public class VocabularyFragment extends Fragment {
     private TextView wordsLearnedCount, toReviewCount, masteryPercentage;
     private ChipGroup filterChipGroup;
     private Chip chipAll, chipLearning, chipMastered, chipFavorites;
-    private MaterialButton practiceButton, addWordButton;
+    private MaterialButton practiceButton, addWordButton, quizButton, setsButton, btnAddSampleData;
 
     // Data
-    private List<Vocabulary> allVocabulary;
-    private List<Vocabulary> filteredVocabulary;
+    private List<VocabularyWithProgress> allVocabulary;
+    private List<VocabularyWithProgress> filteredVocabulary;
     private VocabularyAdapter adapter;
     private String currentFilter = "all";
 
@@ -71,7 +83,7 @@ public class VocabularyFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_vocabulary, container, false);
 
         initializeServices();
@@ -110,28 +122,33 @@ public class VocabularyFragment extends Fragment {
         vocabularyRecyclerView = view.findViewById(R.id.vocabulary_recycler_view);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
         emptyState = view.findViewById(R.id.empty_state);
+        btnAddSampleData = view.findViewById(R.id.btn_add_sample_data);
 
         // Buttons
         practiceButton = view.findViewById(R.id.practice_button);
         addWordButton = view.findViewById(R.id.add_word_button);
+        quizButton = view.findViewById(R.id.quiz_button);
+        setsButton = view.findViewById(R.id.sets_button);
     }
 
     private void setupRecyclerView() {
         vocabularyRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new VocabularyAdapter(getContext(), filteredVocabulary, new VocabularyAdapter.VocabularyListener() {
             @Override
-            public void onVocabularyClick(Vocabulary vocabulary) {
-                // TODO: Open detail view
-                Toast.makeText(getContext(), "Detail: " + vocabulary.getWord(), Toast.LENGTH_SHORT).show();
+            public void onVocabularyClick(VocabularyWithProgress vocabulary) {
+                // Open vocabulary detail activity
+                Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.VocabularyDetailActivity.class);
+                intent.putExtra("vocabulary_id", vocabulary.getId());
+                startActivity(intent);
             }
 
             @Override
-            public void onSpeakerClick(Vocabulary vocabulary) {
+            public void onSpeakerClick(VocabularyWithProgress vocabulary) {
                 speakWord(vocabulary.getWord());
             }
 
             @Override
-            public void onFavoriteClick(Vocabulary vocabulary) {
+            public void onFavoriteClick(VocabularyWithProgress vocabulary) {
                 toggleFavorite(vocabulary);
             }
         });
@@ -176,6 +193,62 @@ public class VocabularyFragment extends Fragment {
             });
             dialog.show(getParentFragmentManager(), "AddWordDialog");
         });
+
+        // Quiz button
+        quizButton.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), QuizActivity.class);
+            startActivity(intent);
+        });
+
+        // Sets button
+        setsButton.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction()
+                    .replace(getId(), new VocabularySetsFragment())
+                    .addToBackStack(null)
+                    .commit();
+        });
+
+        // Add Sample Data Button
+        if (btnAddSampleData != null) {
+            btnAddSampleData.setOnClickListener(v -> {
+                showLoading(true);
+                new FirebaseDataSeeder().seedAllData(new FirebaseDataSeeder.SeedCallback() {
+                    @Override
+                    public void onSuccess(String message) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                showLoading(false);
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                                loadVocabulary();
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onProgress(String message) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(String error) {
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                showLoading(false);
+                                String message = "Failed: " + error;
+                                if (error.contains("PERMISSION_DENIED")) {
+                                    message = "Permission Denied: Please update Firestore Rules (see FIRESTORE_SETUP.md)";
+                                }
+                                Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
+                            });
+                        }
+                    }
+                });
+            });
+        }
     }
 
     private void setupTextToSpeech() {
@@ -186,6 +259,11 @@ public class VocabularyFragment extends Fragment {
         });
     }
 
+    /**
+     * Load vocabulary using new two-collection structure
+     * Step 1: Load user's vocabulary progress from user_vocabulary
+     * Step 2: Load actual vocabulary data from vocabularies collection
+     */
     private void loadVocabulary() {
         if (auth.getCurrentUser() == null) {
             showEmptyState();
@@ -195,35 +273,110 @@ public class VocabularyFragment extends Fragment {
         showLoading(true);
         String userId = auth.getCurrentUser().getUid();
 
+        // Step 1: Load user's vocabulary progress
         db.collection("users").document(userId)
-                .collection("vocabulary")
+                .collection("user_vocabulary")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    allVocabulary.clear();
-                    
+                    List<String> vocabIds = new ArrayList<>();
+                    Map<String, UserVocabulary> progressMap = new HashMap<>();
+
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Vocabulary vocab = document.toObject(Vocabulary.class);
-                        if (vocab != null) {
-                            allVocabulary.add(vocab);
+                        UserVocabulary userVocab = document.toObject(UserVocabulary.class);
+                        if (userVocab != null && userVocab.getVocabularyId() != null) {
+                            vocabIds.add(userVocab.getVocabularyId());
+                            progressMap.put(userVocab.getVocabularyId(), userVocab);
                         }
                     }
 
-                    updateStats();
-                    filterVocabulary();
-                    showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                    if (vocabIds.isEmpty()) {
+                        allVocabulary.clear();
+                        updateStats();
+                        filterVocabulary();
+                        showLoading(false);
+                        swipeRefresh.setRefreshing(false);
+                        return;
+                    }
+
+                    // Step 2: Load actual vocabulary data in batches (Firestore limit is 10 for
+                    // 'in' query)
+                    loadVocabularyDetails(vocabIds, progressMap);
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error loading user vocabulary", e);
                     Toast.makeText(getContext(), "Error loading vocabulary", Toast.LENGTH_SHORT).show();
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
                 });
     }
 
+    /**
+     * Load vocabulary details from public vocabularies collection
+     * Handles batching for Firestore's 10-item limit on 'in' queries
+     */
+    private void loadVocabularyDetails(List<String> vocabIds, Map<String, UserVocabulary> progressMap) {
+        allVocabulary.clear();
+
+        // Split into batches of 10 (Firestore limit)
+        List<List<String>> batches = partition(vocabIds, 10);
+        final int[] completedBatches = { 0 };
+
+        for (List<String> batch : batches) {
+            db.collection("vocabularies")
+                    .whereIn(FieldPath.documentId(), batch)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        for (QueryDocumentSnapshot doc : querySnapshot) {
+                            Vocabulary vocab = doc.toObject(Vocabulary.class);
+                            if (vocab != null) {
+                                vocab.setId(doc.getId());
+                                UserVocabulary progress = progressMap.get(vocab.getId());
+
+                                VocabularyWithProgress item = new VocabularyWithProgress();
+                                item.setVocabulary(vocab);
+                                item.setUserProgress(progress);
+                                allVocabulary.add(item);
+                            }
+                        }
+
+                        completedBatches[0]++;
+                        if (completedBatches[0] == batches.size()) {
+                            // All batches completed
+                            updateStats();
+                            filterVocabulary();
+                            showLoading(false);
+                            swipeRefresh.setRefreshing(false);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error loading vocabulary batch", e);
+                        completedBatches[0]++;
+                        if (completedBatches[0] == batches.size()) {
+                            Toast.makeText(getContext(), "Some vocabulary failed to load", Toast.LENGTH_SHORT).show();
+                            updateStats();
+                            filterVocabulary();
+                            showLoading(false);
+                            swipeRefresh.setRefreshing(false);
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Helper method to partition list into chunks
+     */
+    private <T> List<List<T>> partition(List<T> list, int size) {
+        List<List<T>> partitions = new ArrayList<>();
+        for (int i = 0; i < list.size(); i += size) {
+            partitions.add(list.subList(i, Math.min(i + size, list.size())));
+        }
+        return partitions;
+    }
+
     private void filterVocabulary() {
         filteredVocabulary.clear();
 
-        for (Vocabulary vocab : allVocabulary) {
+        for (VocabularyWithProgress vocab : allVocabulary) {
             boolean shouldInclude = false;
 
             switch (currentFilter) {
@@ -260,7 +413,7 @@ public class VocabularyFragment extends Fragment {
         int toReview = 0;
         int totalMastery = 0;
 
-        for (Vocabulary vocab : allVocabulary) {
+        for (VocabularyWithProgress vocab : allVocabulary) {
             if (vocab.needsReview()) {
                 toReview++;
             }
@@ -284,20 +437,29 @@ public class VocabularyFragment extends Fragment {
         }
     }
 
-    private void toggleFavorite(Vocabulary vocabulary) {
-        vocabulary.setFavorite(!vocabulary.isFavorite());
+    private void toggleFavorite(VocabularyWithProgress vocabulary) {
+        UserVocabulary userProgress = vocabulary.getUserProgress();
+        if (userProgress == null)
+            return;
+
+        userProgress.setFavorite(!userProgress.isFavorite());
         adapter.notifyDataSetChanged();
 
         // Save to Firebase
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
             db.collection("users").document(userId)
-                    .collection("vocabulary").document(vocabulary.getId())
-                    .set(vocabulary)
+                    .collection("user_vocabulary").document(vocabulary.getId())
+                    .update("favorite", userProgress.isFavorite())
                     .addOnSuccessListener(aVoid -> {
-                        String message = vocabulary.isFavorite() ? 
-                                "Added to favorites" : "Removed from favorites";
+                        String message = userProgress.isFavorite() ? "Added to favorites" : "Removed from favorites";
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Error updating favorite", e);
+                        // Revert on failure
+                        userProgress.setFavorite(!userProgress.isFavorite());
+                        adapter.notifyDataSetChanged();
                     });
         }
     }

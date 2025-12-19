@@ -6,19 +6,26 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
-    <!-- Video Player - FULL SCREEN -->
+    <!-- ExoPlayer View - FULL SCREEN (for MP4/HLS) -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#000000"
-        android:visibility="visible"
-        app:controller_layout_id="@layout/custom_player_control"
         app:show_buffering="when_playing"
         app:resize_mode="fit"
-        app:surface_type="surface_view"
+        app:controller_layout_id="@layout/exo_player_control_view"
         app:use_controller="true"
-        app:show_timeout="5000" />
+        app:hide_on_touch="false"
+        android:visibility="visible" />
+
+    <!-- WebView for YouTube playback -->
+    <WebView
+        android:id="@+id/youtube_webview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#000000"
+        android:visibility="gone" />
 
     <!-- Video Overlay -->
     <View

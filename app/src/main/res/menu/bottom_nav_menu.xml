@@ -9,9 +9,13 @@
         android:icon="@drawable/ic_add"
         android:title="Learn" />
     <item
-        android:id="@+id/nav_favorite"
-        android:icon="@drawable/ic_favorite"
-        android:title="Favorite" />
+        android:id="@+id/nav_games"
+        android:icon="@drawable/ic_game"
+        android:title="Games" />
+    <item
+        android:id="@+id/nav_article"
+        android:icon="@drawable/ic_article"
+        android:title="Articles" />
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/ic_profile"

@@ -307,11 +307,32 @@ public class ProgressManager {
                 .collection("daily_tasks").document(today)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    List<DailyTask> tasks;
+                    List<DailyTask> tasks = new ArrayList<>();
                     if (documentSnapshot.exists()) {
-                        // Load existing tasks
-                        tasks = (List<DailyTask>) documentSnapshot.get("tasks");
-                        if (tasks == null) tasks = new ArrayList<>();
+                        // Load existing tasks - properly convert from HashMap
+                        List<Map<String, Object>> taskMaps = (List<Map<String, Object>>) documentSnapshot.get("tasks");
+                        if (taskMaps != null) {
+                            for (Map<String, Object> taskMap : taskMaps) {
+                                try {
+                                    DailyTask task = new DailyTask(
+                                        (String) taskMap.get("id"),
+                                        (String) taskMap.get("title"),
+                                        (String) taskMap.get("description"),
+                                        DailyTask.TaskType.valueOf((String) taskMap.get("type")),
+                                        ((Long) taskMap.get("targetValue")).intValue(),
+                                        (String) taskMap.get("unit"),
+                                        ((Long) taskMap.get("xpReward")).intValue()
+                                    );
+                                    // Set current progress
+                                    if (taskMap.containsKey("currentValue")) {
+                                        task.updateProgress(((Long) taskMap.get("currentValue")).intValue());
+                                    }
+                                    tasks.add(task);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error parsing task", e);
+                                }
+                            }
+                        }
                     } else {
                         // Generate new tasks for today
                         tasks = generateDailyTasks();

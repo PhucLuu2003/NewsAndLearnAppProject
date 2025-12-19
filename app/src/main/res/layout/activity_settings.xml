@@ -240,6 +240,64 @@
 
             </androidx.cardview.widget.CardView>
 
+            <!-- Developer Options -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Developer Tools"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_secondary" />
+
+            <Button
+                android:id="@+id/seed_data_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:text="🌱 Seed Sample Data"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rounded_rect_8dp"
+                android:backgroundTint="@color/primary" />
+
+            <Button
+                android:id="@+id/reseed_videos_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:text="🎬 Fix Video Lessons (Clear &amp; Reseed)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rounded_rect_8dp"
+                android:backgroundTint="@color/accent" />
+
+            <Button
+                android:id="@+id/admin_panel_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:text="🔧 Admin Panel"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rounded_rect_8dp"
+                android:backgroundTint="@color/blue" />
+
+            <Button
+                android:id="@+id/seed_learn_modules_button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="12dp"
+                android:text="📚 Seed Learn Modules"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:background="@drawable/rounded_rect_8dp"
+                android:backgroundTint="@color/purple" />
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

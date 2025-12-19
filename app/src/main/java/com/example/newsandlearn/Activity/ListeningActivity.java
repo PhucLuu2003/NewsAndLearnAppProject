@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.newsandlearn.Adapter.ListeningQuestionAdapter;
 import com.example.newsandlearn.Model.ListeningLesson;
 import com.example.newsandlearn.Model.UserProgress;
 import com.example.newsandlearn.R;
@@ -41,6 +42,7 @@ public class ListeningActivity extends AppCompatActivity {
     private Handler handler;
     private float playbackSpeed = 1.0f;
     private boolean isPlaying = false;
+    private ListeningQuestionAdapter questionsAdapter;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -139,9 +141,11 @@ public class ListeningActivity extends AppCompatActivity {
         lessonTitle.setText(lesson.getTitle());
         totalTime.setText(lesson.getFormattedDuration());
 
-        // TODO: Setup questions adapter
-        // questionsAdapter = new ListeningQuestionAdapter(lesson.getQuestions());
-        // questionsRecyclerView.setAdapter(questionsAdapter);
+        // Setup questions adapter
+        if (lesson.getQuestions() != null && !lesson.getQuestions().isEmpty()) {
+            questionsAdapter = new ListeningQuestionAdapter(this, lesson.getQuestions());
+            questionsRecyclerView.setAdapter(questionsAdapter);
+        }
     }
 
     /**
@@ -203,18 +207,22 @@ public class ListeningActivity extends AppCompatActivity {
     }
 
     private void submitAnswers() {
-        // TODO: Calculate score from questions
-        int score = 85; // Placeholder
+        // Calculate score from questions adapter
+        int score = 0;
+        if (questionsAdapter != null) {
+            score = questionsAdapter.calculateScore();
+        }
 
         lesson.setCompleted(true);
         lesson.setUserScore(score);
         saveProgress();
 
         // Award XP
+        final int finalScore = score;
         progressManager.addXP(50, new ProgressManager.ProgressCallback() {
             @Override
             public void onSuccess(UserProgress progress) {
-                Toast.makeText(ListeningActivity.this, "Great! Score: " + score + "% (+50 XP)", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ListeningActivity.this, "Great! Score: " + finalScore + "% (+50 XP)", Toast.LENGTH_SHORT).show();
                 finish();
             }
             

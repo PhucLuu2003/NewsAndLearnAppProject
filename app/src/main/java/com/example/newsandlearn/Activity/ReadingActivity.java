@@ -88,7 +88,7 @@ public class ReadingActivity extends AppCompatActivity {
      * Load article from Firebase - DYNAMIC
      */
     private void loadArticleFromFirebase() {
-        db.collection("reading_articles").document(articleId)
+        db.collection("reading_lessons").document(articleId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     article = documentSnapshot.toObject(ReadingArticle.class);
@@ -106,7 +106,7 @@ public class ReadingActivity extends AppCompatActivity {
                             public void onFailure(Exception e) {}
                         });
                     } else {
-                        Toast.makeText(this, "Article not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Lesson not found", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
@@ -118,13 +118,23 @@ public class ReadingActivity extends AppCompatActivity {
 
     private void displayArticle() {
         articleTitle.setText(article.getTitle());
-        articleContent.setText(article.getContent());
+        
+        // Prefer passage over content (reading_lessons use 'passage')
+        String textToDisplay = article.getPassage() != null ? article.getPassage() : article.getContent();
+        if (textToDisplay != null) {
+            articleContent.setText(textToDisplay);
+        }
         
         if (article.getAuthor() != null) {
             authorText.setText("By " + article.getAuthor());
         }
         
-        readTime.setText(article.getEstimatedMinutes() + " min read");
+        // Calculate read time from word count if not set
+        int readTimeMinutes = article.getEstimatedMinutes();
+        if (readTimeMinutes == 0 && article.getWordCount() > 0) {
+            readTimeMinutes = article.getWordCount() / 200; // Average reading speed
+        }
+        readTime.setText(readTimeMinutes + " min read");
 
         // TODO: Load image from Firebase Storage
         // Glide.with(this).load(article.getImageUrl()).into(articleImage);

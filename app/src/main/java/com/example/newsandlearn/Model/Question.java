@@ -14,7 +14,8 @@ public class Question implements Serializable {
         DRAG_AND_DROP, // Fill-in-the-blank with drag and drop
         MULTIPLE_CHOICE, // Multiple choice with 3-4 options
         FILL_IN_THE_BLANK, // Fill-in-the-blank question
-        TRUE_OR_FALSE // True or False question
+        TRUE_OR_FALSE, // True or False question
+        OPEN_ENDED // Open ended question
     }
 
     private String id;
@@ -28,6 +29,35 @@ public class Question implements Serializable {
 
     // Empty constructor for Firestore
     public Question() {
+    }
+
+    // Compatibility Setters for Seeder
+    public void setTimestamp(int seconds) {
+        this.appearAtSecond = seconds;
+    }
+
+    public void setQuestionType(String typeStr) {
+        if (typeStr == null) return;
+        switch (typeStr.toLowerCase()) {
+            case "multiple_choice":
+                this.type = QuestionType.MULTIPLE_CHOICE;
+                break;
+            case "true_false":
+            case "true_or_false":
+                this.type = QuestionType.TRUE_OR_FALSE;
+                break;
+            case "drag_and_drop":
+                this.type = QuestionType.DRAG_AND_DROP;
+                break;
+            case "fill_in_the_blank":
+                this.type = QuestionType.FILL_IN_THE_BLANK;
+                break;
+            case "open_ended":
+                this.type = QuestionType.OPEN_ENDED;
+                break;
+            default:
+                this.type = QuestionType.MULTIPLE_CHOICE;
+        }
     }
 
     /**

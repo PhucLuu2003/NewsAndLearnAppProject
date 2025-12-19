@@ -11,6 +11,8 @@ public class Article implements Serializable {
     private String category;
     private String level; // "easy", "medium", "hard"
     private String source;
+    private String authorName;
+    private String authorAvatar; // URL to author/source avatar
     private Date publishedDate;
     private int views;
     private int readingTime; // in minutes
@@ -137,5 +139,21 @@ public class Article implements Serializable {
 
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
+    }
+
+    public String getAuthorName() {
+        return authorName;
+    }
+
+    public void setAuthorName(String authorName) {
+        this.authorName = authorName;
+    }
+
+    public String getAuthorAvatar() {
+        return authorAvatar;
+    }
+
+    public void setAuthorAvatar(String authorAvatar) {
+        this.authorAvatar = authorAvatar;
     }
 }

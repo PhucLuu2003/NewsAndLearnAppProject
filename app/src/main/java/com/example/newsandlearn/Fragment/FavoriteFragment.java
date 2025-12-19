@@ -97,7 +97,8 @@ public class FavoriteFragment extends Fragment {
 
     private void openArticleDetail(Article article) {
         Intent intent = new Intent(getActivity(), ArticleDetailActivity.class);
-        intent.putExtra("article", article);
+        // Pass article ID to load from Firebase
+        intent.putExtra("article_id", article.getId());
         startActivity(intent);
     }
 

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_primary"
+    android:padding="16dp">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="🔧 Admin Panel"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="@color/text_primary"
+        android:gravity="center"
+        android:paddingBottom="8dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Quản lý dữ liệu Firebase"
+        android:textSize="14sp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:paddingBottom="24dp" />
+
+    <!-- Buttons Container -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Seed All Data -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_all"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🚀 Seed Tất Cả Dữ Liệu"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/blue"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Update Video URLs -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_update_video_urls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🔄 Đổi Video URLs sang MP4"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/green"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider"
+                android:layout_marginVertical="16dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Seed từng loại dữ liệu:"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:textStyle="bold"
+                android:paddingBottom="12dp" />
+
+            <!-- Seed Articles -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_articles"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📰 Seed Articles"
+                android:textSize="14sp"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/blue"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Seed Videos -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_videos"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎥 Seed Video Lessons"
+                android:textSize="14sp"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/blue"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Seed Vocabularies -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_vocab"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📚 Seed Vocabularies"
+                android:textSize="14sp"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/blue"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Seed Game Data -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_game"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🎮 Seed Game Data (RPG)"
+                android:textSize="14sp"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/green"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Seed Learn Modules -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_seed_learn_modules"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📚 Seed Learn Modules"
+                android:textSize="14sp"
+                android:padding="12dp"
+                app:cornerRadius="12dp"
+                app:strokeColor="@color/purple"
+                android:layout_marginBottom="16dp" />
+
+
+            <!-- Progress Bar -->
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminateTint="@color/blue"
+                android:visibility="gone"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Status Log -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="4dp"
+                android:layout_marginBottom="16dp">
+
+                <ScrollView
+                    android:id="@+id/scroll_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="300dp"
+                    android:padding="12dp"
+                    android:background="@color/surface_primary">
+
+                    <TextView
+                        android:id="@+id/tv_status"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📋 Status Log:\n"
+                        android:textSize="12sp"
+                        android:textColor="@color/text_primary"
+                        android:fontFamily="monospace"
+                        android:lineSpacingExtra="4dp" />
+
+                </ScrollView>
+
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

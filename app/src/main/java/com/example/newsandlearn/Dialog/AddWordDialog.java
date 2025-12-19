@@ -12,8 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 
+import com.example.newsandlearn.Model.Vocabulary;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressHelper;
+import com.example.newsandlearn.Utils.VocabularyHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
@@ -34,6 +36,7 @@ public class AddWordDialog extends DialogFragment {
     
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private VocabularyHelper vocabularyHelper;
     private OnWordAddedListener listener;
 
     public interface OnWordAddedListener {
@@ -58,6 +61,7 @@ public class AddWordDialog extends DialogFragment {
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+        vocabularyHelper = VocabularyHelper.getInstance();
 
         // Initialize views
         initializeViews(view);
@@ -100,49 +104,42 @@ public class AddWordDialog extends DialogFragment {
         }
 
         // Get selected level
-        String level = "beginner";
+        String level = "B1";
         int selectedId = levelChipGroup.getCheckedChipId();
         if (selectedId == R.id.chip_intermediate) {
-            level = "intermediate";
+            level = "B2";
         } else if (selectedId == R.id.chip_advanced) {
-            level = "advanced";
+            level = "C1";
         }
 
-        // Save to Firebase
+        // Save using VocabularyHelper
         saveToFirebase(word, definition, example, level);
     }
 
-    private void saveToFirebase(String word, String definition, String example, String level) {
+    private void saveToFirebase(String word, String translation, String example, String level) {
         if (auth.getCurrentUser() == null) {
             Toast.makeText(getContext(), "Please login first", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        String userId = auth.getCurrentUser().getUid();
-        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                .format(new Date());
-
-        Map<String, Object> vocabularyData = new HashMap<>();
-        vocabularyData.put("word", word);
-        vocabularyData.put("definition", definition);
-        vocabularyData.put("example", example);
-        vocabularyData.put("level", level);
-        vocabularyData.put("status", "new");
-        vocabularyData.put("mastery", 0);
-        vocabularyData.put("favorite", false);
-        vocabularyData.put("addedAt", timestamp);
-        vocabularyData.put("reviewCount", 0);
-        vocabularyData.put("lastReviewed", null);
-        vocabularyData.put("nextReview", null);
+        // Create Vocabulary object
+        Vocabulary vocabulary = new Vocabulary();
+        vocabulary.setWord(word);
+        vocabulary.setTranslation(translation);
+        vocabulary.setExample(example);
+        vocabulary.setLevel(level);
+        vocabulary.setCategory("custom");
+        vocabulary.setCreatedBy(auth.getCurrentUser().getUid());
+        vocabulary.setPublic(false); // User-created words are private
+        vocabulary.setCreatedAt(new Date());
 
         // Show loading
         saveButton.setEnabled(false);
         saveButton.setText("Saving...");
 
-        db.collection("users").document(userId)
-                .collection("vocabulary")
-                .add(vocabularyData)
-                .addOnSuccessListener(documentReference -> {
+        // Use VocabularyHelper to add vocabulary
+        vocabularyHelper.addVocabularyManually(vocabulary)
+                .addOnSuccessListener(message -> {
                     // Update progress
                     ProgressHelper.updateModuleProgress("vocabulary", 1);
                     

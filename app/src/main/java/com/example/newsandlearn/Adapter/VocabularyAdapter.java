@@ -11,7 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.newsandlearn.Model.Vocabulary;
+import com.example.newsandlearn.Model.VocabularyWithProgress;
 import com.example.newsandlearn.R;
 
 import java.text.SimpleDateFormat;
@@ -22,20 +22,21 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * VocabularyAdapter - RecyclerView adapter for vocabulary list
+ * Uses VocabularyWithProgress to display vocabulary with user's learning progress
  */
 public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.VocabularyViewHolder> {
 
     private Context context;
-    private List<Vocabulary> vocabularyList;
+    private List<VocabularyWithProgress> vocabularyList;
     private VocabularyListener listener;
 
     public interface VocabularyListener {
-        void onVocabularyClick(Vocabulary vocabulary);
-        void onSpeakerClick(Vocabulary vocabulary);
-        void onFavoriteClick(Vocabulary vocabulary);
+        void onVocabularyClick(VocabularyWithProgress vocabulary);
+        void onSpeakerClick(VocabularyWithProgress vocabulary);
+        void onFavoriteClick(VocabularyWithProgress vocabulary);
     }
 
-    public VocabularyAdapter(Context context, List<Vocabulary> vocabularyList, VocabularyListener listener) {
+    public VocabularyAdapter(Context context, List<VocabularyWithProgress> vocabularyList, VocabularyListener listener) {
         this.context = context;
         this.vocabularyList = vocabularyList;
         this.listener = listener;
@@ -50,7 +51,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
 
     @Override
     public void onBindViewHolder(@NonNull VocabularyViewHolder holder, int position) {
-        Vocabulary vocabulary = vocabularyList.get(position);
+        VocabularyWithProgress vocabulary = vocabularyList.get(position);
         holder.bind(vocabulary);
         
         // Add animation
@@ -84,7 +85,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
             favoriteButton = itemView.findViewById(R.id.favorite_button);
         }
 
-        public void bind(Vocabulary vocabulary) {
+        public void bind(VocabularyWithProgress vocabulary) {
             // Set word and translation
             wordText.setText(vocabulary.getWord());
             translationText.setText(vocabulary.getTranslation());
@@ -172,7 +173,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
             masteryBadge.setBackgroundResource(backgroundRes);
         }
 
-        private String getNextReviewText(Vocabulary vocabulary) {
+        private String getNextReviewText(VocabularyWithProgress vocabulary) {
             if (vocabulary.getNextReview() == null) {
                 return "now";
             }
@@ -197,7 +198,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
         }
     }
 
-    public void updateData(List<Vocabulary> newVocabularyList) {
+    public void updateData(List<VocabularyWithProgress> newVocabularyList) {
         this.vocabularyList = newVocabularyList;
         notifyDataSetChanged();
     }

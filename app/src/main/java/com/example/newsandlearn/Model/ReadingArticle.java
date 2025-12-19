@@ -16,6 +16,7 @@ public class ReadingArticle implements Parcelable {
     private String id;
     private String title;
     private String content;              // Full article text from Firebase
+    private String passage;              // Reading passage (alternative to content)
     private String summary;
     private String imageUrl;             // Cover image from Firebase Storage
     private String level;                // A1, A2, B1, B2, C1, C2
@@ -165,6 +166,9 @@ public class ReadingArticle implements Parcelable {
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
 
+    public String getPassage() { return passage; }
+    public void setPassage(String passage) { this.passage = passage; }
+
     public String getSummary() { return summary; }
     public void setSummary(String summary) { this.summary = summary; }
 
@@ -173,6 +177,10 @@ public class ReadingArticle implements Parcelable {
 
     public String getLevel() { return level; }
     public void setLevel(String level) { this.level = level; }
+    
+    // Alias for compatibility with new code
+    public String getDifficulty() { return level; }
+    public void setDifficulty(String difficulty) { this.level = difficulty; }
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }

@@ -90,21 +90,35 @@ public class GrammarLessonActivity extends AppCompatActivity {
                         String level = document.getString("level");
                         String titleStr = document.getString("title");
                         String description = document.getString("description");
-                        String explanation = document.getString("explanation");
-                        String examples = document.getString("examples");
-                        String rules = document.getString("rules");
+                        String content = document.getString("content");
 
                         if (level != null) levelBadge.setText(level);
                         if (titleStr != null) lessonTitle.setText(titleStr);
                         if (description != null) lessonDescription.setText(description);
-                        if (explanation != null) explanationText.setText(explanation);
-                        if (examples != null) examplesText.setText(examples);
                         
-                        if (rules != null && !rules.isEmpty()) {
-                            rulesText.setText(rules);
-                            rulesCard.setVisibility(View.VISIBLE);
-                        } else {
+                        // Display content in explanation text (main content area)
+                        if (content != null && !content.isEmpty()) {
+                            explanationText.setText(content);
+                            // Hide examples and rules cards since we're using single content field
+                            if (findViewById(R.id.examples_card) != null) {
+                                findViewById(R.id.examples_card).setVisibility(View.GONE);
+                            }
                             rulesCard.setVisibility(View.GONE);
+                        } else {
+                            // Fallback to old format if content is not available
+                            String explanation = document.getString("explanation");
+                            String examples = document.getString("examples");
+                            String rules = document.getString("rules");
+                            
+                            if (explanation != null) explanationText.setText(explanation);
+                            if (examples != null) examplesText.setText(examples);
+                            
+                            if (rules != null && !rules.isEmpty()) {
+                                rulesText.setText(rules);
+                                rulesCard.setVisibility(View.VISIBLE);
+                            } else {
+                                rulesCard.setVisibility(View.GONE);
+                            }
                         }
 
                         // Check if user completed this lesson

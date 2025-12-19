@@ -3,12 +3,18 @@ package com.example.newsandlearn.Model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
- * Vocabulary Model - Represents a single vocabulary word
- * Implements Spaced Repetition System (SRS) for effective learning
+ * Vocabulary Model - Represents a public vocabulary word
+ * Stored in 'vocabularies' collection (root level)
+ * This is the master vocabulary data shared across all users
  */
+import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.PropertyName;
+
 public class Vocabulary implements Parcelable {
     
     // Basic Information
@@ -17,33 +23,37 @@ public class Vocabulary implements Parcelable {
     private String translation;       // Vietnamese translation
     private String pronunciation;     // IPA or phonetic spelling
     private String partOfSpeech;      // noun, verb, adjective, etc.
-    private String example;           // Example sentence
-    private String exampleTranslation; // Vietnamese translation of example
+    private String definition;        // English definition
+    private String example;           // Example sentence (Legacy, PRIMARY)
+    private String exampleTranslation; // Vietnamese translation of example (Legacy, PRIMARY)
     
     // Categorization
     private String level;             // A1, A2, B1, B2, C1, C2
     private String category;          // topic/theme (business, travel, etc.)
-    private String sourceArticleId;   // ID of article where word was found (optional)
     
-    // Learning Progress (SRS - Spaced Repetition System)
-    private int mastery;              // 0-5 (0=new, 1-4=learning, 5=mastered)
-    private int reviewCount;          // Number of times reviewed
-    private Date lastReviewed;        // Last review timestamp
-    private Date nextReview;          // Next scheduled review
-    private Date createdAt;           // When word was added
-    
-    // Additional
-    private boolean isFavorite;       // User marked as favorite
+    // Additional Information
+    private List<String> synonyms;    // List of synonyms
+    private List<String> antonyms;    // List of antonyms
+    private List<String> examples;    // List of examples
+    private List<String> exampleTranslations; // List of example translations
     private String imageUrl;          // Optional image for visual learning
     private String audioUrl;          // Optional audio pronunciation URL
+    
+    // Metadata
+    private Date createdAt;           // When word was added to system
+    private String createdBy;         // "system" or userId who created it
+    private boolean isPublic;         // Public words vs user-created private words
 
     // Constructors
     public Vocabulary() {
         // Required empty constructor for Firebase
         this.createdAt = new Date();
-        this.mastery = 0;
-        this.reviewCount = 0;
-        this.isFavorite = false;
+        this.isPublic = true;
+        this.synonyms = new ArrayList<>();
+        this.antonyms = new ArrayList<>();
+        this.examples = new ArrayList<>();
+        this.exampleTranslations = new ArrayList<>();
+        this.createdBy = "system";
     }
 
     public Vocabulary(String id, String word, String translation, String pronunciation,
@@ -59,9 +69,14 @@ public class Vocabulary implements Parcelable {
         this.level = level;
         this.category = category;
         this.createdAt = new Date();
-        this.mastery = 0;
-        this.reviewCount = 0;
-        this.isFavorite = false;
+        this.isPublic = true;
+        this.synonyms = new ArrayList<>();
+        this.antonyms = new ArrayList<>();
+        this.examples = new ArrayList<>();
+        if (example != null) this.examples.add(example);
+        this.exampleTranslations = new ArrayList<>();
+        if (exampleTranslation != null) this.exampleTranslations.add(exampleTranslation);
+        this.createdBy = "system";
     }
 
     // Parcelable implementation
@@ -71,22 +86,21 @@ public class Vocabulary implements Parcelable {
         translation = in.readString();
         pronunciation = in.readString();
         partOfSpeech = in.readString();
+        definition = in.readString();
         example = in.readString();
         exampleTranslation = in.readString();
         level = in.readString();
         category = in.readString();
-        sourceArticleId = in.readString();
-        mastery = in.readInt();
-        reviewCount = in.readInt();
-        long lastReviewedTime = in.readLong();
-        lastReviewed = lastReviewedTime != -1 ? new Date(lastReviewedTime) : null;
-        long nextReviewTime = in.readLong();
-        nextReview = nextReviewTime != -1 ? new Date(nextReviewTime) : null;
-        long createdAtTime = in.readLong();
-        createdAt = createdAtTime != -1 ? new Date(createdAtTime) : new Date();
-        isFavorite = in.readByte() != 0;
+        synonyms = in.createStringArrayList();
+        antonyms = in.createStringArrayList();
+        examples = in.createStringArrayList();
+        exampleTranslations = in.createStringArrayList();
         imageUrl = in.readString();
         audioUrl = in.readString();
+        long createdAtTime = in.readLong();
+        createdAt = createdAtTime != -1 ? new Date(createdAtTime) : new Date();
+        createdBy = in.readString();
+        isPublic = in.readByte() != 0;
     }
 
     @Override
@@ -96,19 +110,20 @@ public class Vocabulary implements Parcelable {
         dest.writeString(translation);
         dest.writeString(pronunciation);
         dest.writeString(partOfSpeech);
+        dest.writeString(definition);
         dest.writeString(example);
         dest.writeString(exampleTranslation);
         dest.writeString(level);
         dest.writeString(category);
-        dest.writeString(sourceArticleId);
-        dest.writeInt(mastery);
-        dest.writeInt(reviewCount);
-        dest.writeLong(lastReviewed != null ? lastReviewed.getTime() : -1);
-        dest.writeLong(nextReview != null ? nextReview.getTime() : -1);
-        dest.writeLong(createdAt != null ? createdAt.getTime() : -1);
-        dest.writeByte((byte) (isFavorite ? 1 : 0));
+        dest.writeStringList(synonyms);
+        dest.writeStringList(antonyms);
+        dest.writeStringList(examples);
+        dest.writeStringList(exampleTranslations);
         dest.writeString(imageUrl);
         dest.writeString(audioUrl);
+        dest.writeLong(createdAt != null ? createdAt.getTime() : -1);
+        dest.writeString(createdBy);
+        dest.writeByte((byte) (isPublic ? 1 : 0));
     }
 
     @Override
@@ -128,96 +143,6 @@ public class Vocabulary implements Parcelable {
         }
     };
 
-    // SRS Helper Methods
-    
-    /**
-     * Calculate next review date based on mastery level
-     * Uses spaced repetition intervals
-     */
-    public void calculateNextReview() {
-        if (lastReviewed == null) {
-            lastReviewed = new Date();
-        }
-        
-        long currentTime = lastReviewed.getTime();
-        long intervalMillis;
-        
-        // Spaced repetition intervals based on mastery
-        switch (mastery) {
-            case 0: // New word
-                intervalMillis = 0; // Review immediately
-                break;
-            case 1: // Just learned
-                intervalMillis = 1000L * 60 * 60 * 24; // 1 day
-                break;
-            case 2: // Getting familiar
-                intervalMillis = 1000L * 60 * 60 * 24 * 3; // 3 days
-                break;
-            case 3: // Know it
-                intervalMillis = 1000L * 60 * 60 * 24 * 7; // 1 week
-                break;
-            case 4: // Know it well
-                intervalMillis = 1000L * 60 * 60 * 24 * 14; // 2 weeks
-                break;
-            case 5: // Mastered
-                intervalMillis = 1000L * 60 * 60 * 24 * 30; // 1 month
-                break;
-            default:
-                intervalMillis = 1000L * 60 * 60 * 24; // Default 1 day
-        }
-        
-        nextReview = new Date(currentTime + intervalMillis);
-    }
-    
-    /**
-     * Update mastery when user answers correctly
-     */
-    public void markCorrect() {
-        if (mastery < 5) {
-            mastery++;
-        }
-        reviewCount++;
-        lastReviewed = new Date();
-        calculateNextReview();
-    }
-    
-    /**
-     * Update mastery when user answers incorrectly
-     */
-    public void markIncorrect() {
-        if (mastery > 0) {
-            mastery = Math.max(0, mastery - 1);
-        }
-        reviewCount++;
-        lastReviewed = new Date();
-        calculateNextReview();
-    }
-    
-    /**
-     * Check if word needs review
-     */
-    public boolean needsReview() {
-        if (nextReview == null) {
-            return true;
-        }
-        return new Date().after(nextReview);
-    }
-    
-    /**
-     * Get mastery level as string
-     */
-    public String getMasteryLevel() {
-        switch (mastery) {
-            case 0: return "New";
-            case 1: return "Learning";
-            case 2: return "Familiar";
-            case 3: return "Known";
-            case 4: return "Well Known";
-            case 5: return "Mastered";
-            default: return "Unknown";
-        }
-    }
-
     // Getters and Setters
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -230,15 +155,108 @@ public class Vocabulary implements Parcelable {
 
     public String getPronunciation() { return pronunciation; }
     public void setPronunciation(String pronunciation) { this.pronunciation = pronunciation; }
+    
+    // Alias for seeder compatibility
+    public void setPhonetic(String phonetic) { setPronunciation(phonetic); }
 
     public String getPartOfSpeech() { return partOfSpeech; }
     public void setPartOfSpeech(String partOfSpeech) { this.partOfSpeech = partOfSpeech; }
 
-    public String getExample() { return example; }
-    public void setExample(String example) { this.example = example; }
+    public String getDefinition() { return definition; }
+    public void setDefinition(String definition) { this.definition = definition; }
 
+
+
+    @Exclude
+    public String getExample() { return example; }
+
+    @Exclude
+    public void setExample(String example) { 
+        this.example = example; 
+        // Keep lists in sync
+        if (this.examples == null) this.examples = new ArrayList<>();
+        if (example != null && !this.examples.contains(example)) this.examples.add(0, example);
+    }
+
+    @PropertyName("example")
+    public void setExampleField(Object exampleObj) {
+        if (exampleObj instanceof String) {
+            setExample((String) exampleObj);
+        } else if (exampleObj instanceof List) {
+            List<?> list = (List<?>) exampleObj;
+            if (!list.isEmpty()) {
+                Object first = list.get(0);
+                if (first instanceof String) {
+                    setExample((String) first);
+                    // Also populate the full list if needed
+                    if (this.examples == null) this.examples = new ArrayList<>();
+                    for (Object item : list) {
+                        if (item instanceof String && !this.examples.contains(item)) {
+                            this.examples.add((String) item);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @PropertyName("example")
+    public Object getExampleField() {
+        return example;
+    }
+
+    @Exclude
     public String getExampleTranslation() { return exampleTranslation; }
-    public void setExampleTranslation(String exampleTranslation) { this.exampleTranslation = exampleTranslation; }
+
+    @Exclude
+    public void setExampleTranslation(String exampleTranslation) { 
+        this.exampleTranslation = exampleTranslation;
+        // Keep lists in sync
+        if (this.exampleTranslations == null) this.exampleTranslations = new ArrayList<>();
+        if (exampleTranslation != null && !this.exampleTranslations.contains(exampleTranslation)) this.exampleTranslations.add(0, exampleTranslation);
+    }
+
+    @PropertyName("exampleTranslation")
+    public void setExampleTranslationField(Object exampleObj) {
+        if (exampleObj instanceof String) {
+            setExampleTranslation((String) exampleObj);
+        } else if (exampleObj instanceof List) {
+            List<?> list = (List<?>) exampleObj;
+            if (!list.isEmpty()) {
+                Object first = list.get(0);
+                if (first instanceof String) {
+                    setExampleTranslation((String) first);
+                    if (this.exampleTranslations == null) this.exampleTranslations = new ArrayList<>();
+                    for (Object item : list) {
+                        if (item instanceof String && !this.exampleTranslations.contains(item)) {
+                            this.exampleTranslations.add((String) item);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @PropertyName("exampleTranslation")
+    public Object getExampleTranslationField() {
+        return exampleTranslation;
+    }
+    
+    public List<String> getExamples() { return examples; }
+    public void setExamples(List<String> examples) { 
+        this.examples = examples;
+        if (examples != null && !examples.isEmpty()) {
+            this.example = examples.get(0);
+        }
+    }
+    
+    public List<String> getExampleTranslations() { return exampleTranslations; }
+    public void setExampleTranslations(List<String> exampleTranslations) { 
+        this.exampleTranslations = exampleTranslations;
+        if (exampleTranslations != null && !exampleTranslations.isEmpty()) {
+            this.exampleTranslation = exampleTranslations.get(0);
+        }
+    }
 
     public String getLevel() { return level; }
     public void setLevel(String level) { this.level = level; }
@@ -246,30 +264,24 @@ public class Vocabulary implements Parcelable {
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    public String getSourceArticleId() { return sourceArticleId; }
-    public void setSourceArticleId(String sourceArticleId) { this.sourceArticleId = sourceArticleId; }
+    public List<String> getSynonyms() { return synonyms; }
+    public void setSynonyms(List<String> synonyms) { this.synonyms = synonyms; }
 
-    public int getMastery() { return mastery; }
-    public void setMastery(int mastery) { this.mastery = mastery; }
-
-    public int getReviewCount() { return reviewCount; }
-    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
-
-    public Date getLastReviewed() { return lastReviewed; }
-    public void setLastReviewed(Date lastReviewed) { this.lastReviewed = lastReviewed; }
-
-    public Date getNextReview() { return nextReview; }
-    public void setNextReview(Date nextReview) { this.nextReview = nextReview; }
-
-    public Date getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-
-    public boolean isFavorite() { return isFavorite; }
-    public void setFavorite(boolean favorite) { isFavorite = favorite; }
+    public List<String> getAntonyms() { return antonyms; }
+    public void setAntonyms(List<String> antonyms) { this.antonyms = antonyms; }
 
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getAudioUrl() { return audioUrl; }
     public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
+
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
+    public String getCreatedBy() { return createdBy; }
+    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+
+    public boolean isPublic() { return isPublic; }
+    public void setPublic(boolean aPublic) { isPublic = aPublic; }
 }

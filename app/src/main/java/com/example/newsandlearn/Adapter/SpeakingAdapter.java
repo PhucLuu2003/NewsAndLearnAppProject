@@ -65,8 +65,8 @@ public class SpeakingAdapter extends RecyclerView.Adapter<SpeakingAdapter.Speaki
         public SpeakingViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            lessonTitle = itemView.findViewById(R.id.lesson_title);
-            levelText = itemView.findViewById(R.id.level_text);
+            lessonTitle = itemView.findViewById(R.id.prompt_title);
+            levelText = itemView.findViewById(R.id.level_badge);
             durationText = itemView.findViewById(R.id.duration_text);
             promptsText = itemView.findViewById(R.id.prompts_text);
             scoreLayout = itemView.findViewById(R.id.score_layout);

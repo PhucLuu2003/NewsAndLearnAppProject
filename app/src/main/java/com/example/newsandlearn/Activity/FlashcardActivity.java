@@ -22,9 +22,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
+import com.example.newsandlearn.Model.UserVocabulary;
 import com.example.newsandlearn.Model.Vocabulary;
+import com.example.newsandlearn.Model.VocabularyWithProgress;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressManager;
+import com.example.newsandlearn.Utils.VocabularyHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -65,7 +68,7 @@ public class FlashcardActivity extends AppCompatActivity {
     private MaterialButton doneButton;
 
     // Data
-    private List<Vocabulary> vocabularyList;
+    private List<VocabularyWithProgress> vocabularyList;
     private int currentIndex = 0;
     private boolean isShowingFront = true;
     private int correctCount = 0;
@@ -149,40 +152,94 @@ public class FlashcardActivity extends AppCompatActivity {
         String userId = auth.getCurrentUser().getUid();
         vocabularyList = new ArrayList<>();
 
-        // Load user's vocabulary
+        // Load user's vocabulary using new structure
         db.collection("users").document(userId)
-                .collection("vocabulary")
+                .collection("user_vocabulary")
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
+                .addOnSuccessListener(userVocabSnapshot -> {
                     vocabularyList.clear();
-                    queryDocumentSnapshots.forEach(doc -> {
-                        Vocabulary vocab = doc.toObject(Vocabulary.class);
-                        if (vocab != null) {
+                    
+                    // Collect vocabulary IDs and progress
+                    List<String> vocabIds = new ArrayList<>();
+                    java.util.Map<String, UserVocabulary> progressMap = new java.util.HashMap<>();
+                    
+                    userVocabSnapshot.forEach(doc -> {
+                        UserVocabulary userVocab = doc.toObject(UserVocabulary.class);
+                        if (userVocab != null && userVocab.getVocabularyId() != null) {
                             // Filter based on review_only flag
-                            if (!reviewOnly || vocab.needsReview()) {
-                                vocabularyList.add(vocab);
+                            if (!reviewOnly || userVocab.needsReview()) {
+                                vocabIds.add(userVocab.getVocabularyId());
+                                progressMap.put(userVocab.getVocabularyId(), userVocab);
                             }
                         }
                     });
-
-                    if (vocabularyList.isEmpty()) {
+                    
+                    if (vocabIds.isEmpty()) {
                         Toast.makeText(this, "No vocabulary to review", Toast.LENGTH_SHORT).show();
                         finish();
                         return;
                     }
+                    
+                    // Load vocabulary details in batches
+                    loadVocabularyDetails(vocabIds, progressMap);
 
-                    // Shuffle for variety
-                    Collections.shuffle(vocabularyList);
-
-                    // Show first card
-                    showCard(0);
-                    updateProgress();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Error loading vocabulary: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     finish();
                 });
+    }
+    
+    private void loadVocabularyDetails(List<String> vocabIds, java.util.Map<String, UserVocabulary> progressMap) {
+        // Split into batches of 10 (Firestore limit)
+        List<List<String>> batches = new ArrayList<>();
+        for (int i = 0; i < vocabIds.size(); i += 10) {
+            batches.add(vocabIds.subList(i, Math.min(i + 10, vocabIds.size())));
+        }
+        
+        final int[] completedBatches = {0};
+        
+        for (List<String> batch : batches) {
+            db.collection("vocabularies")
+                    .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        querySnapshot.forEach(doc -> {
+                            Vocabulary vocab = doc.toObject(Vocabulary.class);
+                            if (vocab != null) {
+                                vocab.setId(doc.getId());
+                                UserVocabulary progress = progressMap.get(vocab.getId());
+                                
+                                VocabularyWithProgress item = new VocabularyWithProgress();
+                                item.setVocabulary(vocab);
+                                item.setUserProgress(progress);
+                                vocabularyList.add(item);
+                            }
+                        });
+                        
+                        completedBatches[0]++;
+                        if (completedBatches[0] == batches.size()) {
+                            // All batches loaded
+                            if (vocabularyList.isEmpty()) {
+                                Toast.makeText(this, "No vocabulary to review", Toast.LENGTH_SHORT).show();
+                                finish();
+                                return;
+                            }
+                            
+                            // Shuffle for variety
+                            Collections.shuffle(vocabularyList);
+                            
+                            // Show first card
+                            showCard(0);
+                            updateProgress();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error loading vocabulary details", Toast.LENGTH_SHORT).show();
+                        finish();
+                    });
+        }
     }
 
     private void setupListeners() {
@@ -254,7 +311,7 @@ public class FlashcardActivity extends AppCompatActivity {
         }
 
         currentIndex = index;
-        Vocabulary vocab = vocabularyList.get(currentIndex);
+        VocabularyWithProgress vocab = vocabularyList.get(currentIndex);
 
         // Reset to front
         if (!isShowingFront) {
@@ -354,21 +411,31 @@ public class FlashcardActivity extends AppCompatActivity {
     private void handleAnswer(boolean knowIt) {
         if (currentIndex >= vocabularyList.size()) return;
 
-        Vocabulary vocab = vocabularyList.get(currentIndex);
+        VocabularyWithProgress vocab = vocabularyList.get(currentIndex);
+        UserVocabulary userProgress = vocab.getUserProgress();
+        
+        if (userProgress == null) return;
 
         // Update mastery
         if (knowIt) {
-            vocab.markCorrect();
+            userProgress.markCorrect();
             correctCount++;
             showFeedback(true);
         } else {
-            vocab.markIncorrect();
+            userProgress.markIncorrect();
             incorrectCount++;
             showFeedback(false);
         }
 
-        // Save to Firebase
-        saveVocabularyProgress(vocab);
+        // Save to Firebase using VocabularyHelper
+        VocabularyHelper.getInstance()
+                .updateVocabularyProgress(vocab.getId(), userProgress)
+                .addOnSuccessListener(aVoid -> {
+                    progressManager.trackWordsLearned(1, null);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error saving progress", Toast.LENGTH_SHORT).show();
+                });
 
         // Move to next card after delay
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -403,21 +470,7 @@ public class FlashcardActivity extends AppCompatActivity {
         remainingCount.setText("⋯ " + (vocabularyList.size() - currentIndex - 1));
     }
 
-    private void saveVocabularyProgress(Vocabulary vocab) {
-        if (auth.getCurrentUser() == null) return;
 
-        String userId = auth.getCurrentUser().getUid();
-        db.collection("users").document(userId)
-                .collection("vocabulary").document(vocab.getId())
-                .set(vocab)
-                .addOnSuccessListener(aVoid -> {
-                    // Track progress
-                    progressManager.trackWordsLearned(1, null);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error saving progress", Toast.LENGTH_SHORT).show();
-                });
-    }
 
     private void updateProgress() {
         int total = vocabularyList.size();

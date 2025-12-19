@@ -6,7 +6,8 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.newsandlearn.Fragment.FavoriteFragment;
+import com.example.newsandlearn.Fragment.ArticleFragment;
+import com.example.newsandlearn.Fragment.GamesFragment;
 import com.example.newsandlearn.Fragment.HomeFragment;
 import com.example.newsandlearn.Fragment.LearnFragment;
 import com.example.newsandlearn.Fragment.ProfileFragment;
@@ -78,8 +79,10 @@ public class MainActivity extends AppCompatActivity {
                 selected = new HomeFragment();
             } else if (itemId == R.id.nav_learn) {
                 selected = new LearnFragment();
-            } else if (itemId == R.id.nav_favorite) {
-                selected = new FavoriteFragment();
+            } else if (itemId == R.id.nav_games) {
+                selected = new GamesFragment();
+            } else if (itemId == R.id.nav_article) {
+                selected = new ArticleFragment();
             } else if (itemId == R.id.nav_profile) {
                 selected = new ProfileFragment();
             }

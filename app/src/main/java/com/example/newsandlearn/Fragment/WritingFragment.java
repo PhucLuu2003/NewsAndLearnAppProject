@@ -1,5 +1,6 @@
 package com.example.newsandlearn.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,7 +86,10 @@ public class WritingFragment extends Fragment {
     private void setupRecyclerView() {
         writingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new WritingAdapter(getContext(), filteredPrompts, prompt -> {
-            Toast.makeText(getContext(), "Prompt: " + prompt.getTitle(), Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.WritingActivity.class);
+            intent.putExtra("prompt_id", prompt.getId());
+            intent.putExtra("title", prompt.getTitle());
+            startActivity(intent);
         });
         writingRecyclerView.setAdapter(adapter);
     }

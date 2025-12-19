@@ -1,5 +1,6 @@
 package com.example.newsandlearn.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,7 +87,11 @@ public class SpeakingFragment extends Fragment {
     private void setupRecyclerView() {
         speakingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new SpeakingAdapter(getContext(), filteredLessons, lesson -> {
-            Toast.makeText(getContext(), "Lesson: " + lesson.getTitle(), Toast.LENGTH_SHORT).show();
+            // Open speaking activity
+            Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.SpeakingActivity.class);
+            intent.putExtra("lesson_id", lesson.getId());
+            intent.putExtra("title", lesson.getTitle());
+            startActivity(intent);
         });
         speakingRecyclerView.setAdapter(adapter);
     }

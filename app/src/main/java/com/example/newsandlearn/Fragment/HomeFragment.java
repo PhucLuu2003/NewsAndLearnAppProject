@@ -21,6 +21,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.newsandlearn.Activity.ArticleDetailActivity;
 import com.example.newsandlearn.Activity.SearchActivity;
+import com.example.newsandlearn.Activity.SettingsActivity;
 import com.example.newsandlearn.Adapter.ArticleAdapter;
 import com.example.newsandlearn.Adapter.VideoLessonsAdapter;
 import com.example.newsandlearn.Model.Article;
@@ -50,17 +51,12 @@ public class HomeFragment extends Fragment {
     private View notificationBtn;
     private View settingsBtn;
     private LinearLayout searchBarHome;
-    private ChipGroup levelChipGroup;
-    private Chip chipAll, chipEasy, chipMedium, chipHard;
     private CardView heroCard;
     private TextView featuredTitle, featuredReadTime, featuredSource;
-    private TextView seeAllBtn;
     private TextView seeAllVideosBtn;
     private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView articlesRecyclerView;
     private RecyclerView videoLessonsRecycler;
     private ProgressBar loadingIndicator;
-    private TextView emptyState;
 
     // Gamification UI
     private LinearLayout statsCard;
@@ -68,7 +64,6 @@ public class HomeFragment extends Fragment {
     private TextView xpText;
 
     // Data & Adapter
-    private ArticleAdapter adapter;
     private VideoLessonsAdapter videoLessonsAdapter;
     private List<Article> allArticles = new ArrayList<>();
     private List<VideoLesson> videoLessons = new ArrayList<>();
@@ -99,15 +94,14 @@ public class HomeFragment extends Fragment {
 
         // Initialize views
         initializeViews(view);
-        setupRecyclerView();
         setupVideoLessonsRecyclerView();
         setupListeners();
 
         // Load data
         loadUserInfo();
-        loadArticles();
+        loadArticles(); // For hero card only
         loadVideoLessons();
-        
+
         // Animate entrance
         animateEntrance();
 
@@ -118,7 +112,6 @@ public class HomeFragment extends Fragment {
         // Refresh & Loading
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
-        emptyState = view.findViewById(R.id.empty_state);
 
         // Header
         profileAvatar = view.findViewById(R.id.profile_avatar);
@@ -129,13 +122,6 @@ public class HomeFragment extends Fragment {
         // Search
         searchBarHome = view.findViewById(R.id.search_bar_home);
 
-        // Level Chips
-        levelChipGroup = view.findViewById(R.id.level_chip_group);
-        chipAll = view.findViewById(R.id.chip_all);
-        chipEasy = view.findViewById(R.id.chip_easy);
-        chipMedium = view.findViewById(R.id.chip_medium);
-        chipHard = view.findViewById(R.id.chip_hard);
-
         // Hero Section
         heroCard = view.findViewById(R.id.hero_card);
         featuredTitle = view.findViewById(R.id.featured_title);
@@ -143,11 +129,9 @@ public class HomeFragment extends Fragment {
         featuredSource = view.findViewById(R.id.featured_source);
 
         // Section
-        seeAllBtn = view.findViewById(R.id.see_all_btn);
         seeAllVideosBtn = view.findViewById(R.id.see_all_videos_btn);
 
         // RecyclerView
-        articlesRecyclerView = view.findViewById(R.id.articles_recycler_view);
         videoLessonsRecycler = view.findViewById(R.id.video_lessons_recycler);
 
         // Gamification
@@ -156,21 +140,7 @@ public class HomeFragment extends Fragment {
         xpText = view.findViewById(R.id.user_level);
     }
 
-    private void setupRecyclerView() {
-        articlesRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ArticleAdapter(getContext(), new ArticleAdapter.OnArticleClickListener() {
-            @Override
-            public void onArticleClick(Article article) {
-                openArticleDetail(article);
-            }
-
-            @Override
-            public void onFavoriteClick(Article article) {
-                toggleFavorite(article);
-            }
-        });
-        articlesRecyclerView.setAdapter(adapter);
-    }
+    // Removed setupRecyclerView - articles now in dedicated tab
 
     private void setupVideoLessonsRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),
@@ -203,20 +173,9 @@ public class HomeFragment extends Fragment {
 
         // Header Buttons
         notificationBtn.setOnClickListener(v -> Toast.makeText(getContext(), "Thông báo", Toast.LENGTH_SHORT).show());
-        settingsBtn.setOnClickListener(v -> Toast.makeText(getContext(), "Cài đặt", Toast.LENGTH_SHORT).show());
-
-        // Level Chips
-        levelChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.chip_all) {
-                currentLevel = "all";
-            } else if (checkedId == R.id.chip_easy) {
-                currentLevel = "easy";
-            } else if (checkedId == R.id.chip_medium) {
-                currentLevel = "medium";
-            } else if (checkedId == R.id.chip_hard) {
-                currentLevel = "hard";
-            }
-            filterArticlesByLevel();
+        settingsBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SettingsActivity.class);
+            startActivity(intent);
         });
 
         // Hero Card
@@ -230,15 +189,14 @@ public class HomeFragment extends Fragment {
             }, 100);
         });
 
-        // See All
-        seeAllBtn.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SearchActivity.class);
-            startActivity(intent);
-        });
-
         // See All Videos
         seeAllVideosBtn.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Tất cả Video Lessons", Toast.LENGTH_SHORT).show();
+            AnimationHelper.scaleUp(requireContext(), v);
+            v.postDelayed(() -> {
+                Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.AllVideosActivity.class);
+                startActivity(intent);
+                requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }, 150);
         });
 
         // Stats card click for details
@@ -260,7 +218,7 @@ public class HomeFragment extends Fragment {
                             if (username != null) {
                                 usernameText.setText(username);
                             }
-                            
+
                             // Load streak
                             Long streak = document.getLong("currentStreak");
                             if (streak != null && streakCount != null) {
@@ -294,33 +252,50 @@ public class HomeFragment extends Fragment {
                         allArticles.add(article);
                     }
 
-                    // If no articles from Firebase, create sample data
-                    if (allArticles.isEmpty()) {
-                        allArticles = createSampleArticles();
-                    }
-
                     // Set featured article (first one)
                     if (!allArticles.isEmpty()) {
                         featuredArticle = allArticles.get(0);
                         updateHeroSection(featuredArticle);
+                    } else {
+                        // Show message if no articles found
+                        Toast.makeText(getContext(),
+                                "Chưa có bài viết. Vui lòng seed dữ liệu.",
+                                Toast.LENGTH_LONG).show();
                     }
 
-                    filterArticlesByLevel();
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
                     isLoading = false;
                 })
                 .addOnFailureListener(e -> {
-                    // Fallback to sample data
-                    allArticles = createSampleArticles();
-                    if (!allArticles.isEmpty()) {
-                        featuredArticle = allArticles.get(0);
-                        updateHeroSection(featuredArticle);
-                    }
-                    filterArticlesByLevel();
+                    allArticles.clear();
+                    Toast.makeText(getContext(),
+                            "Lỗi tải bài viết: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
                     isLoading = false;
+                });
+    }
+
+    private void loadVideoLessons() {
+        db.collection("video_lessons")
+                .limit(10)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    videoLessons.clear();
+                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                        VideoLesson lesson = document.toObject(VideoLesson.class);
+                        if (lesson != null) {
+                            videoLessons.add(lesson);
+                        }
+                    }
+                    if (videoLessonsAdapter != null) {
+                        videoLessonsAdapter.notifyDataSetChanged();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Error loading videos: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -351,30 +326,7 @@ public class HomeFragment extends Fragment {
                 isFavorite != null ? isFavorite : false);
     }
 
-    private void filterArticlesByLevel() {
-        List<Article> filteredArticles = new ArrayList<>();
-
-        if (currentLevel.equals("all")) {
-            filteredArticles.addAll(allArticles);
-        } else {
-            for (Article article : allArticles) {
-                if (article.getLevel().equalsIgnoreCase(currentLevel)) {
-                    filteredArticles.add(article);
-                }
-            }
-        }
-
-        adapter.setArticles(filteredArticles);
-
-        // Show empty state if no articles
-        if (filteredArticles.isEmpty()) {
-            emptyState.setVisibility(View.VISIBLE);
-            articlesRecyclerView.setVisibility(View.GONE);
-        } else {
-            emptyState.setVisibility(View.GONE);
-            articlesRecyclerView.setVisibility(View.VISIBLE);
-        }
-    }
+    // Removed filterArticlesByLevel - articles now in dedicated tab
 
     private void updateHeroSection(Article article) {
         if (article != null) {
@@ -387,8 +339,6 @@ public class HomeFragment extends Fragment {
     private void showLoading(boolean show) {
         if (show) {
             loadingIndicator.setVisibility(View.VISIBLE);
-            articlesRecyclerView.setVisibility(View.GONE);
-            emptyState.setVisibility(View.GONE);
         } else {
             loadingIndicator.setVisibility(View.GONE);
         }
@@ -396,136 +346,28 @@ public class HomeFragment extends Fragment {
 
     private void openArticleDetail(Article article) {
         Intent intent = new Intent(getActivity(), ArticleDetailActivity.class);
-        intent.putExtra("article", article);
+        // Pass article ID to load from Firebase
+        intent.putExtra("article_id", article.getId());
         startActivity(intent);
     }
 
-    private void toggleFavorite(Article article) {
-        article.setFavorite(!article.isFavorite());
-        adapter.notifyDataSetChanged();
+    // Removed toggleFavorite - handled in ArticleFragment
 
-        // Update in Firebase
-        if (mAuth.getCurrentUser() != null) {
-            String userId = mAuth.getCurrentUser().getUid();
-            db.collection("users").document(userId)
-                    .collection("favorites").document(article.getId())
-                    .set(article)
-                    .addOnSuccessListener(aVoid -> {
-                        String message = article.isFavorite() ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích";
-                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                    });
-        }
-    }
-    
     private void animateEntrance() {
         // Staggered entrance animations for main sections
-        if (getView() == null) return;
-        
-        if (heroCard != null) AnimationHelper.itemFallDown(requireContext(), heroCard, 3);
-        if (videoLessonsRecycler != null) AnimationHelper.itemFallDown(requireContext(), videoLessonsRecycler, 5);
-        if (articlesRecyclerView != null) AnimationHelper.itemFallDown(requireContext(), articlesRecyclerView, 6);
-    }
-
-    private List<Article> createSampleArticles() {
-        List<Article> articles = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
-        try {
-            articles.add(new Article(
-                    "1",
-                    "10 Phương pháp học tiếng Anh hiệu quả nhất 2024",
-                    "Khám phá những phương pháp học tiếng Anh được chứng minh mang lại hiệu quả cao nhất...",
-                    "",
-                    "Học tập",
-                    "easy",
-                    "BBC Learning English",
-                    sdf.parse("2024-01-15"),
-                    1250,
-                    5,
-                    false));
-
-            articles.add(new Article(
-                    "2",
-                    "Cách cải thiện kỹ năng nghe tiếng Anh",
-                    "Những bài tập và phương pháp giúp bạn nâng cao khả năng nghe hiểu tiếng Anh...",
-                    "",
-                    "Kỹ năng",
-                    "medium",
-                    "English Central",
-                    sdf.parse("2024-01-14"),
-                    890,
-                    7,
-                    false));
-
-            articles.add(new Article(
-                    "3",
-                    "Ngữ pháp tiếng Anh nâng cao: Câu điều kiện",
-                    "Hướng dẫn chi tiết về các loại câu điều kiện trong tiếng Anh...",
-                    "",
-                    "Ngữ pháp",
-                    "hard",
-                    "Cambridge English",
-                    sdf.parse("2024-01-13"),
-                    650,
-                    10,
-                    false));
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return articles;
-    }
-
-    private void loadVideoLessons() {
-        if (getContext() == null)
+        if (getView() == null)
             return;
 
-        db.collection("video_lessons")
-                .limit(10)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    if (getContext() == null)
-                        return;
-
-                    videoLessons.clear();
-
-                    if (queryDocumentSnapshots.isEmpty()) {
-                        return;
-                    }
-
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        try {
-                            VideoLesson lesson = document.toObject(VideoLesson.class);
-                            if (lesson != null) {
-                                if (lesson.getId() == null || lesson.getId().isEmpty()) {
-                                    lesson.setId(document.getId());
-                                }
-                                videoLessons.add(lesson);
-                            }
-                        } catch (Exception e) {
-                            android.util.Log.e("HomeFragment", "Error parsing lesson: " + e.getMessage(), e);
-                        }
-                    }
-
-                    if (videoLessonsAdapter != null && !videoLessons.isEmpty()) {
-                        videoLessonsAdapter.updateData(videoLessons);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    if (getContext() == null)
-                        return;
-                    android.util.Log.e("HomeFragment", "Error loading video lessons", e);
-                });
+        if (heroCard != null)
+            AnimationHelper.itemFallDown(requireContext(), heroCard, 3);
+        if (videoLessonsRecycler != null)
+            AnimationHelper.itemFallDown(requireContext(), videoLessonsRecycler, 5);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         // Refresh data when returning to fragment
-        if (adapter != null && !allArticles.isEmpty()) {
-            adapter.notifyDataSetChanged();
-        }
         if (videoLessonsAdapter != null && !videoLessons.isEmpty()) {
             videoLessonsAdapter.notifyDataSetChanged();
         }

@@ -20,7 +20,10 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.newsandlearn.Adapter.ReadingAdapter;
 import com.example.newsandlearn.Model.ReadingArticle;
+import com.example.newsandlearn.Model.ReadingGamification;
 import com.example.newsandlearn.R;
+import com.example.newsandlearn.Utils.GamificationManager;
+import com.example.newsandlearn.Utils.SmartRecommendationEngine;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -30,25 +33,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ReadingFragment - Displays reading articles from Firebase
- * All articles loaded dynamically, NO hard-coded content
+ * ReadingFragment - Enhanced with Gamification and Smart Recommendations
+ * Features: XP/Level display, AI recommendations, trending articles
  */
 public class ReadingFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView readingRecyclerView;
+    private RecyclerView readingRecyclerView, recommendedRecyclerView;
     private ProgressBar loadingIndicator;
-    private LinearLayout emptyState;
-    private TextView articlesRead, avgScore;
+    private LinearLayout emptyState, gamificationCard, recommendedSection;
+    private TextView articlesRead, avgScore, levelText, xpText;
+    private ProgressBar levelProgressBar;
     private ChipGroup categoryChipGroup;
 
     private List<ReadingArticle> allArticles;
     private List<ReadingArticle> filteredArticles;
-    private ReadingAdapter adapter;
+    private List<ReadingArticle> recommendedArticles;
+    private ReadingAdapter adapter, recommendedAdapter;
     private String currentCategory = "all";
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+    private GamificationManager gamificationManager;
+    private SmartRecommendationEngine recommendationEngine;
 
     public ReadingFragment() {}
 
@@ -62,6 +69,8 @@ public class ReadingFragment extends Fragment {
         initializeViews(view);
         setupRecyclerView();
         setupListeners();
+        loadGamificationData();
+        loadRecommendations();
         loadReadingArticles();
 
         return view;
@@ -70,8 +79,11 @@ public class ReadingFragment extends Fragment {
     private void initializeServices() {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
+        gamificationManager = GamificationManager.getInstance();
+        recommendationEngine = SmartRecommendationEngine.getInstance();
         allArticles = new ArrayList<>();
         filteredArticles = new ArrayList<>();
+        recommendedArticles = new ArrayList<>();
     }
 
     private void initializeViews(View view) {
@@ -93,9 +105,9 @@ public class ReadingFragment extends Fragment {
     private void setupRecyclerView() {
         readingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ReadingAdapter(getContext(), filteredArticles, article -> {
-            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.ArticleDetailActivity.class);
-            // Pass the article object (Must be Serializable/Parcelable)
-            intent.putExtra("article_data", article); 
+            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.ReadingActivity.class);
+            // Pass article ID to load from Firebase
+            intent.putExtra("article_id", article.getId()); 
             startActivity(intent);
         });
         readingRecyclerView.setAdapter(adapter);
@@ -236,9 +248,80 @@ public class ReadingFragment extends Fragment {
         readingRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    /**
+     * Load gamification data (XP, Level, Badges)
+     */
+    private void loadGamificationData() {
+        if (auth.getCurrentUser() == null) return;
+
+        gamificationManager.loadGamification(new GamificationManager.GamificationCallback() {
+            @Override
+            public void onSuccess(ReadingGamification gamification) {
+                if (getActivity() == null) return;
+                
+                // Update gamification UI (if views exist)
+                // levelText.setText("Level " + gamification.getCurrentLevel());
+                // xpText.setText(gamification.getCurrentLevelXP() + " / " + gamification.getNextLevelXP() + " XP");
+                // levelProgressBar.setProgress(gamification.getLevelProgress());
+                
+                // Show new badges if any
+                List<ReadingGamification.Badge> newBadges = gamification.getNewBadges();
+                if (!newBadges.isEmpty()) {
+                    showBadgeEarnedDialog(newBadges.get(0));
+                    gamification.markBadgesAsSeen();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // Silently fail - gamification is optional
+            }
+        });
+    }
+
+    /**
+     * Load smart recommendations
+     */
+    private void loadRecommendations() {
+        recommendationEngine.getRecommendations(5, new SmartRecommendationEngine.RecommendationCallback() {
+            @Override
+            public void onSuccess(List<ReadingArticle> recommendations) {
+                if (getActivity() == null) return;
+                
+                recommendedArticles.clear();
+                recommendedArticles.addAll(recommendations);
+                
+                // Update recommended adapter if it exists
+                // if (recommendedAdapter != null) {
+                //     recommendedAdapter.notifyDataSetChanged();
+                // }
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                // Silently fail - recommendations are optional
+            }
+        });
+    }
+
+    /**
+     * Show badge earned dialog
+     */
+    private void showBadgeEarnedDialog(ReadingGamification.Badge badge) {
+        if (getActivity() == null) return;
+        
+        new androidx.appcompat.app.AlertDialog.Builder(getActivity())
+            .setTitle("🏆 Badge Earned!")
+            .setMessage("Congratulations! You earned the \"" + badge.getName() + "\" badge!\n\n" + 
+                       badge.getDescription())
+            .setPositiveButton("Awesome!", null)
+            .show();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         loadReadingArticles();
+        loadGamificationData(); // Refresh gamification data
     }
 }
