@@ -2,6 +2,7 @@ package com.example.newsandlearn.Model;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 public class Article implements Serializable {
     private String id;
@@ -17,6 +18,9 @@ public class Article implements Serializable {
     private int views;
     private int readingTime; // in minutes
     private boolean isFavorite;
+    private int progress; // Reading progress 0-100%
+    private List<String> tags; // Article tags for filtering
+
 
     // Empty constructor for Firebase
     public Article() {
@@ -156,4 +160,21 @@ public class Article implements Serializable {
     public void setAuthorAvatar(String authorAvatar) {
         this.authorAvatar = authorAvatar;
     }
+
+    public int getProgress() {
+        return progress;
+    }
+
+    public void setProgress(int progress) {
+        this.progress = progress;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
 }
+

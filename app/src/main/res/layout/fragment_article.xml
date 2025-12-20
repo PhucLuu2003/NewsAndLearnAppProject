@@ -4,18 +4,19 @@
     android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_primary">
+    android:background="#F5F7FA">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Header -->
+            <!-- Header with Gradient -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -26,8 +27,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="📰 Articles"
-                    android:textSize="32sp"
+                    android:text="📰 Discover Articles"
+                    android:textSize="28sp"
                     android:textStyle="bold"
                     android:textColor="@android:color/white"
                     android:layout_marginBottom="8dp" />
@@ -35,18 +36,61 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Read and learn English"
-                    android:textSize="16sp"
+                    android:text="Read, learn, and improve your English"
+                    android:textSize="15sp"
                     android:textColor="@android:color/white"
                     android:alpha="0.9" />
             </LinearLayout>
+
+            <!-- Search Bar -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="-24dp"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp">
+
+                    <ImageView
+                        android:id="@+id/search_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="#9C27B0"
+                        android:layout_marginStart="8dp" />
+
+                    <EditText
+                        android:id="@+id/search_edit_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="8dp"
+                        android:hint="Search articles..."
+                        android:textSize="15sp"
+                        android:textColorHint="#999999"
+                        android:background="@null"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionSearch" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Filter Chips -->
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="none"
-                android:paddingVertical="16dp"
+                android:paddingVertical="8dp"
                 android:paddingHorizontal="16dp">
 
                 <com.google.android.material.chip.ChipGroup
@@ -62,41 +106,86 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="All"
-                        android:checked="true" />
+                        android:checked="true"
+                        app:chipBackgroundColor="@color/chip_background_selector"
+                        app:chipStrokeWidth="0dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_easy"
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Easy" />
+                        android:text="Easy"
+                        app:chipBackgroundColor="@color/chip_background_selector"
+                        app:chipStrokeWidth="0dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_medium"
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Medium" />
+                        android:text="Medium"
+                        app:chipBackgroundColor="@color/chip_background_selector"
+                        app:chipStrokeWidth="0dp" />
 
                     <com.google.android.material.chip.Chip
                         android:id="@+id/chip_hard"
                         style="@style/Widget.Material3.Chip.Filter"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Hard" />
+                        android:text="Hard"
+                        app:chipBackgroundColor="@color/chip_background_selector"
+                        app:chipStrokeWidth="0dp" />
                 </com.google.android.material.chip.ChipGroup>
             </HorizontalScrollView>
 
-            <!-- Articles List -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_articles"
+            <!-- Content Container -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="80dp"
-                android:clipToPadding="false" />
+                android:layout_height="wrap_content">
+
+                <!-- Articles List -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_articles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="80dp"
+                    android:clipToPadding="false"
+                    android:overScrollMode="never" />
+
+                <!-- Empty State -->
+                <LinearLayout
+                    android:id="@+id/empty_state_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="40dp"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="120dp"
+                        android:layout_height="120dp"
+                        android:src="@drawable/ic_empty_articles"
+                        android:alpha="0.6"
+                        app:tint="#9C27B0" />
+
+                    <TextView
+                        android:id="@+id/empty_state_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="24dp"
+                        android:text="📰 No articles available yet.\nCheck back soon!"
+                        android:textSize="16sp"
+                        android:textColor="#666666"
+                        android:textAlignment="center"
+                        android:lineSpacingExtra="4dp" />
+                </LinearLayout>
+            </FrameLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+

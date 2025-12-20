@@ -1,5 +1,7 @@
 package com.example.newsandlearn.Activity;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Color;
@@ -14,7 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
+
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -98,6 +103,8 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private AIReadingCoach aiCoach;
     private BionicReadingManager bionicManager;
     private VocabularyMapGenerator vocabMapGenerator;
+    private View aiAssistantBubble;
+    private View floatingToolBar;
     private RealtimeHighlightManager highlightManager;
     private VoiceFeedbackManager voiceFeedback;
     private InteractiveQuizManager quizManager;
@@ -177,6 +184,12 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         btnSettings = findViewById(R.id.btn_settings);
         btnCollections = findViewById(R.id.btn_collections);
         btnAnalytics = findViewById(R.id.btn_analytics);
+        aiAssistantBubble = findViewById(R.id.ai_assistant_bubble);
+        floatingToolBar = findViewById(R.id.floating_tool_bar);
+        
+        setupAIAssistant();
+        setupFloatingToolBar();
+        applyInitialContentAnimations();
     }
 
     private void setupToolbar() {
@@ -209,6 +222,23 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         favoriteButton.setOnClickListener(v -> toggleFavorite());
     }
 
+    private void setupFloatingToolBar() {
+        findViewById(R.id.float_btn_tts).setOnClickListener(v -> toggleTTS());
+        findViewById(R.id.float_btn_settings).setOnClickListener(v -> showReadingSettings());
+        findViewById(R.id.float_btn_ai).setOnClickListener(v -> showAICoach());
+        findViewById(R.id.float_btn_analytics).setOnClickListener(v -> {
+            startActivity(new Intent(this, ReadingAnalyticsActivity.class));
+        });
+    }
+
+    private void setupAIAssistant() {
+        aiAssistantBubble.setOnClickListener(v -> showAICoach());
+        
+        // Pulse animation
+        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
+        aiAssistantBubble.startAnimation(pulse);
+    }
+
     private void setupScrollListener() {
         scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) 
                 (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
@@ -221,7 +251,43 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 int progress = (int) ((scrollY / (float) maxScroll) * 100);
                 updateProgress(progress);
             }
+            
+            // Content parallax/fade effect
+            float alpha = 1.0f - (scrollY / 1000f);
+            if (alpha < 0) alpha = 0;
+            articleImage.setAlpha(alpha);
+            
+            // Expand/Collapse AI Bubble based on scroll
+            if (scrollY > oldScrollY && scrollY > 200) {
+                // Scrolling down - Hide main toolbars, show floating bar
+                aiAssistantBubble.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(300).start();
+                floatingToolBar.setVisibility(View.VISIBLE);
+                floatingToolBar.animate().alpha(1f).translationY(0).setDuration(400).start();
+                toolbar.animate().alpha(0f).setDuration(300).start();
+            } else if (scrollY < oldScrollY) {
+                // Scrolling up - Show main toolbars, hide floating bar
+                aiAssistantBubble.animate().scaleX(1.1f).scaleY(1.1f).alpha(1.0f).setDuration(300).start();
+                floatingToolBar.animate().alpha(0f).translationY(100).setDuration(300).withEndAction(() -> floatingToolBar.setVisibility(View.GONE)).start();
+                toolbar.animate().alpha(1f).setDuration(300).start();
+            }
         });
+    }
+
+    private void applyInitialContentAnimations() {
+        // Initial state
+        categoryBadge.setAlpha(0f);
+        categoryBadge.setTranslationY(50f);
+        levelBadge.setAlpha(0f);
+        levelBadge.setTranslationY(50f);
+        articleTitle.setAlpha(0f);
+        articleTitle.setTranslationY(50f);
+        articleContent.setAlpha(0f);
+        
+        // Animate in
+        categoryBadge.animate().alpha(1f).translationY(0).setDuration(500).setStartDelay(300).start();
+        levelBadge.animate().alpha(1f).translationY(0).setDuration(500).setStartDelay(400).start();
+        articleTitle.animate().alpha(1f).translationY(0).setDuration(600).setStartDelay(500).start();
+        articleContent.animate().alpha(1f).setDuration(800).setStartDelay(700).start();
     }
 
     private void setupTextSelection() {
@@ -596,22 +662,55 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     }
     
     private void applyTheme(String theme) {
+        String oldTheme = readingTheme;
         readingTheme = theme;
         
-        switch (theme) {
-            case "light":
-                articleContent.setBackgroundColor(Color.WHITE);
-                articleContent.setTextColor(Color.parseColor("#212121"));
-                break;
-            case "dark":
-                articleContent.setBackgroundColor(Color.parseColor("#212121"));
-                articleContent.setTextColor(Color.WHITE);
-                break;
-            case "sepia":
-                articleContent.setBackgroundColor(Color.parseColor("#F4ECD8"));
-                articleContent.setTextColor(Color.parseColor("#5F4B32"));
-                break;
+        int bgColorStart, bgColorEnd, textColorStart, textColorEnd;
+        
+        // Get start colors
+        if ("light".equals(oldTheme)) {
+            bgColorStart = Color.WHITE;
+            textColorStart = Color.parseColor("#1A1A2E");
+        } else if ("sepia".equals(oldTheme)) {
+            bgColorStart = Color.parseColor("#F4ECD8");
+            textColorStart = Color.parseColor("#5B4636");
+        } else {
+            bgColorStart = Color.parseColor("#121212");
+            textColorStart = Color.parseColor("#E0E0E0");
         }
+
+        // Get end colors
+        if ("light".equals(theme)) {
+            bgColorEnd = Color.WHITE;
+            textColorEnd = Color.parseColor("#1A1A2E");
+            collapsingToolbar.setCollapsedTitleTextColor(Color.WHITE);
+        } else if ("sepia".equals(theme)) {
+            bgColorEnd = Color.parseColor("#F4ECD8");
+            textColorEnd = Color.parseColor("#5B4636");
+            collapsingToolbar.setCollapsedTitleTextColor(Color.parseColor("#5B4636"));
+        } else {
+            bgColorEnd = Color.parseColor("#121212");
+            textColorEnd = Color.parseColor("#E0E0E0");
+            collapsingToolbar.setCollapsedTitleTextColor(Color.WHITE);
+        }
+
+        // Animate background color
+        ValueAnimator colorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), bgColorStart, bgColorEnd);
+        colorAnimation.setDuration(500);
+        colorAnimation.addUpdateListener(anim -> {
+            articleContent.setBackgroundColor((int) anim.getAnimatedValue());
+            scrollView.setBackgroundColor((int) anim.getAnimatedValue());
+        });
+        colorAnimation.start();
+
+        // Animate text color
+        ValueAnimator textColorAnimation = ValueAnimator.ofObject(new ArgbEvaluator(), textColorStart, textColorEnd);
+        textColorAnimation.setDuration(500);
+        textColorAnimation.addUpdateListener(anim -> {
+            articleContent.setTextColor((int) anim.getAnimatedValue());
+            articleTitle.setTextColor((int) anim.getAnimatedValue());
+        });
+        textColorAnimation.start();
     }
 
     // ==================== COLLECTIONS FUNCTIONALITY ====================
@@ -731,8 +830,25 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private void updateProgress(int progress) {
         if (progress > currentProgress) {
             currentProgress = progress;
-            readingProgress.setProgress(progress);
+            
+            // Smooth progress update with animation
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                 readingProgress.setProgress(progress, true);
+            } else {
+                 readingProgress.setProgress(progress);
+            }
+            
             progressText.setText(progress + "%");
+            
+            // Pulse text on significant changes
+            if (progress % 5 == 0) {
+                progressText.animate()
+                        .scaleX(1.2f)
+                        .scaleY(1.2f)
+                        .setDuration(200)
+                        .withEndAction(() -> progressText.animate().scaleX(1f).scaleY(1f).setDuration(200))
+                        .start();
+            }
 
             // Update Firebase every 25%
             if (progress % 25 == 0 && progress > 0) {
