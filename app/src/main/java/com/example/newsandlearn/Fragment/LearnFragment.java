@@ -84,6 +84,10 @@ public class LearnFragment extends Fragment {
         writingCard = view.findViewById(R.id.writing_card);
         dailyGoalCard = view.findViewById(R.id.daily_goal_card);
         
+        // Hide Speaking and Writing modules
+        if (speakingCard != null) speakingCard.setVisibility(View.GONE);
+        if (writingCard != null) writingCard.setVisibility(View.GONE);
+        
         // Progress
         dailyGoalProgress = view.findViewById(R.id.daily_goal_progress);
         goalProgressText = view.findViewById(R.id.goal_progress_text);
@@ -96,9 +100,10 @@ public class LearnFragment extends Fragment {
         setupCardListener(vocabularyCard, new VocabularyFragment(), "Vocabulary");
         setupCardListener(grammarCard, new GrammarFragment(), "Grammar");
         setupCardListener(listeningCard, new ListeningFragment(), "Listening");
-        setupCardListener(speakingCard, new SpeakingFragment(), "Speaking");
+        // Speaking and Writing are hidden
+        // setupCardListener(speakingCard, new SpeakingFragment(), "Speaking");
         setupCardListener(readingCard, new ReadingFragment(), "Reading");
-        setupCardListener(writingCard, new WritingFragment(), "Writing");
+        // setupCardListener(writingCard, new WritingFragment(), "Writing");
     }
 
     private void setupCardListener(CardView card, Fragment fragment, String moduleName) {
@@ -142,14 +147,14 @@ public class LearnFragment extends Fragment {
     private void animateCardsOnLoad() {
         if (getContext() == null) return;
         
-        // Staggered fade-in animation for cards
+        // Staggered fade-in animation for cards (Speaking and Writing hidden)
         animateCardEntrance(dailyGoalCard, 0);
         animateCardEntrance(vocabularyCard, 100);
         animateCardEntrance(grammarCard, 150);
         animateCardEntrance(listeningCard, 200);
-        animateCardEntrance(speakingCard, 250);
-        animateCardEntrance(readingCard, 300);
-        animateCardEntrance(writingCard, 350);
+        // animateCardEntrance(speakingCard, 250);
+        animateCardEntrance(readingCard, 250); // Moved up
+        // animateCardEntrance(writingCard, 350);
     }
     
     private void animateCardEntrance(View view, long delay) {

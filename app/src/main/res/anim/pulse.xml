@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Pulse animation for notifications and badges -->
 <set xmlns:android="http://schemas.android.com/apk/res/android"
-    android:interpolator="@android:anim/accelerate_decelerate_interpolator"
-    android:repeatCount="infinite"
-    android:repeatMode="reverse">
+    android:duration="300"
+    android:fillAfter="true"
+    android:interpolator="@android:anim/decelerate_interpolator">
+    
     <scale
-        android:duration="1000"
         android:fromXScale="1.0"
         android:fromYScale="1.0"
-        android:toXScale="1.15"
-        android:toYScale="1.15"
         android:pivotX="50%"
-        android:pivotY="50%" />
+        android:pivotY="50%"
+        android:toXScale="1.05"
+        android:toYScale="1.05" />
+    
     <alpha
-        android:duration="1000"
         android:fromAlpha="1.0"
-        android:toAlpha="0.7" />
+        android:toAlpha="0.95" />
 </set>

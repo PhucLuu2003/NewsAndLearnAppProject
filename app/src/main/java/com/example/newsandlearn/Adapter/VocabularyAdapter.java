@@ -45,7 +45,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
     @NonNull
     @Override
     public VocabularyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.item_vocabulary_card, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.item_vocabulary_card_enhanced, parent, false);
         return new VocabularyViewHolder(view);
     }
 
@@ -65,8 +65,8 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
 
     class VocabularyViewHolder extends RecyclerView.ViewHolder {
         
-        TextView wordText, translationText, masteryBadge, phoneticText; // Added phoneticText
-        TextView nextReviewText, masteryPercentageText; // Added masteryPercentageText, removed reviewCountText
+        TextView wordText, translationText, masteryBadge, phoneticText;
+        TextView nextReviewText, masteryPercentageText, streakText; // Added streakText
         ProgressBar masteryProgress;
         ImageView speakerButton, favoriteButton;
 
@@ -75,12 +75,12 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
             
             wordText = itemView.findViewById(R.id.word_text);
             translationText = itemView.findViewById(R.id.translation_text);
-            phoneticText = itemView.findViewById(R.id.phonetic_text); // Bind new view
+            phoneticText = itemView.findViewById(R.id.phonetic_text);
             masteryBadge = itemView.findViewById(R.id.mastery_badge);
-            // reviewCountText removed from layout
             nextReviewText = itemView.findViewById(R.id.next_review_text);
             masteryProgress = itemView.findViewById(R.id.mastery_progress);
-            masteryPercentageText = itemView.findViewById(R.id.mastery_percentage_text); // Bind new view
+            masteryPercentageText = itemView.findViewById(R.id.mastery_percentage_text);
+            streakText = itemView.findViewById(R.id.streak_text); // Bind streak text
             speakerButton = itemView.findViewById(R.id.speaker_button);
             favoriteButton = itemView.findViewById(R.id.favorite_button);
         }
@@ -111,6 +111,14 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
 
             // Set review info
             nextReviewText.setText("Next review: " + getNextReviewText(vocabulary));
+            
+            // Set streak info (placeholder for now)
+            if (streakText != null) {
+                // TODO: Add streak field to VocabularyWithProgress model
+                // For now, show a default streak
+                streakText.setText("🔥 Keep learning!");
+                streakText.setVisibility(View.VISIBLE);
+            }
 
             // Set favorite icon
             if (vocabulary.isFavorite()) {

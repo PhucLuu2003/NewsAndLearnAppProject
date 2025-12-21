@@ -134,7 +134,7 @@ public class ReadingFragment extends Fragment {
     private void loadReadingArticles() {
         showLoading(true);
 
-        db.collection("reading_articles")
+        db.collection("reading_lessons")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     allArticles.clear();

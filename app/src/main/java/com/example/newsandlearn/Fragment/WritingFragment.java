@@ -115,10 +115,18 @@ public class WritingFragment extends Fragment {
     private void loadWritingPrompts() {
         showLoading(true);
 
-        db.collection("writing_prompts")
+        db.collection("writing_lessons")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     allPrompts.clear();
+
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Toast.makeText(getContext(), "No writing lessons found. Please seed data from Settings.", Toast.LENGTH_LONG).show();
+                        showLoading(false);
+                        swipeRefresh.setRefreshing(false);
+                        showEmptyState();
+                        return;
+                    }
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         WritingPrompt prompt = document.toObject(WritingPrompt.class);
@@ -137,9 +145,11 @@ public class WritingFragment extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    String errorMsg = "Error loading prompts: " + e.getMessage();
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
+                    showEmptyState();
                 });
     }
 

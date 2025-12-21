@@ -1,0 +1,140 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Users collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // User vocabulary subcollection
+      match /user_vocabulary/{vocabId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User reading progress
+      match /reading_progress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User writing submissions
+      match /writing_submissions/{submissionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User listening progress
+      match /listening_progress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User speaking recordings
+      match /speaking_recordings/{recordingId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // User grammar progress
+      match /grammar_progress/{progressId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Public vocabularies collection (read-only for all authenticated users)
+    match /vocabularies/{vocabId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+    }
+    
+    // Articles collection (read-only for all authenticated users)
+    match /articles/{articleId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+    }
+    
+    // Video lessons collection (read-only for all authenticated users)
+    match /video_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+    }
+    
+    // Reading lessons collection (read-only for all authenticated users)
+    match /reading_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+      
+      // Reading lesson exercises subcollection
+      match /exercises/{exerciseId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null;
+      }
+      
+      // Reading lesson passages subcollection
+      match /passages/{passageId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null;
+      }
+    }
+    
+    // Writing lessons collection (read-only for all authenticated users)
+    match /writing_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+      
+      // Writing prompts subcollection
+      match /prompts/{promptId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.token.admin == true;
+      }
+      
+      // Writing templates subcollection
+      match /templates/{templateId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null && request.auth.token.admin == true;
+      }
+    }
+    
+    // Grammar lessons collection (read-only for all authenticated users)
+    match /grammar_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+      
+      // Grammar exercises subcollection
+      match /exercises/{exerciseId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null; // Allow seeding
+      }
+    }
+    
+    // Listening lessons collection (read-only for all authenticated users)
+    match /listening_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+      
+      // Listening exercises subcollection
+      match /exercises/{exerciseId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null; // Allow seeding
+      }
+    }
+    
+    // Speaking lessons collection (read-only for all authenticated users)
+    match /speaking_lessons/{lessonId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null; // Allow seeding
+      
+      // Speaking exercises subcollection
+      match /exercises/{exerciseId} {
+        allow read: if request.auth != null;
+        allow write: if request.auth != null; // Allow seeding
+      }
+    }
+    
+    // Daily goals collection
+    match /daily_goals/{goalId} {
+      allow read, write: if request.auth != null && request.auth.uid == goalId;
+    }
+    
+    // Module progress collection
+    match /module_progress/{progressId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}

@@ -116,18 +116,49 @@ public class SpeakingFragment extends Fragment {
      */
     private void loadSpeakingLessons() {
         showLoading(true);
+        android.util.Log.d("SpeakingFragment", "Starting to load speaking lessons...");
 
         db.collection("speaking_lessons")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    android.util.Log.d("SpeakingFragment", "Firebase query successful");
                     allLessons.clear();
 
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        android.util.Log.w("SpeakingFragment", "No documents found in speaking_lessons");
+                        Toast.makeText(getContext(), "No speaking lessons found. Please seed data from Settings.", Toast.LENGTH_LONG).show();
+                        showLoading(false);
+                        swipeRefresh.setRefreshing(false);
+                        showEmptyState();
+                        return;
+                    }
+
+                    android.util.Log.d("SpeakingFragment", "Found " + queryDocumentSnapshots.size() + " documents");
+
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        SpeakingLesson lesson = document.toObject(SpeakingLesson.class);
-                        if (lesson != null) {
-                            allLessons.add(lesson);
+                        try {
+                            android.util.Log.d("SpeakingFragment", "Processing document: " + document.getId());
+                            
+                            // Try to parse as SpeakingLesson
+                            SpeakingLesson lesson = document.toObject(SpeakingLesson.class);
+                            
+                            if (lesson != null) {
+                                // Ensure ID is set
+                                if (lesson.getId() == null || lesson.getId().isEmpty()) {
+                                    lesson.setId(document.getId());
+                                }
+                                allLessons.add(lesson);
+                                android.util.Log.d("SpeakingFragment", "Successfully added lesson: " + lesson.getTitle());
+                            } else {
+                                android.util.Log.w("SpeakingFragment", "Lesson is null for document: " + document.getId());
+                            }
+                        } catch (Exception e) {
+                            android.util.Log.e("SpeakingFragment", "Error parsing document " + document.getId(), e);
+                            // Continue with next document
                         }
                     }
+
+                    android.util.Log.d("SpeakingFragment", "Total lessons loaded: " + allLessons.size());
 
                     if (auth.getCurrentUser() != null) {
                         loadUserProgress();
@@ -139,19 +170,25 @@ public class SpeakingFragment extends Fragment {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    android.util.Log.e("SpeakingFragment", "Firebase query failed", e);
+                    String errorMsg = "Error loading lessons: " + e.getMessage();
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
                     showLoading(false);
                     swipeRefresh.setRefreshing(false);
+                    showEmptyState();
                 });
     }
 
     private void loadUserProgress() {
         String userId = auth.getCurrentUser().getUid();
+        android.util.Log.d("SpeakingFragment", "Loading user progress for: " + userId);
 
         db.collection("users").document(userId)
                 .collection("speaking_progress")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    android.util.Log.d("SpeakingFragment", "User progress loaded: " + queryDocumentSnapshots.size() + " records");
+                    
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         String lessonId = document.getString("lessonId");
                         Boolean completed = document.getBoolean("completed");
@@ -170,6 +207,14 @@ public class SpeakingFragment extends Fragment {
                         }
                     }
 
+                    updateStats();
+                    filterLessons();
+                    showLoading(false);
+                    swipeRefresh.setRefreshing(false);
+                })
+                .addOnFailureListener(e -> {
+                    android.util.Log.w("SpeakingFragment", "Failed to load user progress (this is OK): " + e.getMessage());
+                    // Continue without progress data - just show lessons
                     updateStats();
                     filterLessons();
                     showLoading(false);

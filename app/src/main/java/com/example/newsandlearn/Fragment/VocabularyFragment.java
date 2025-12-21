@@ -34,6 +34,9 @@ import com.example.newsandlearn.Utils.FirebaseDataSeeder;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -62,7 +65,10 @@ public class VocabularyFragment extends Fragment {
     private TextView wordsLearnedCount, toReviewCount, masteryPercentage;
     private ChipGroup filterChipGroup;
     private Chip chipAll, chipLearning, chipMastered, chipFavorites;
-    private MaterialButton practiceButton, addWordButton, quizButton, setsButton, btnAddSampleData;
+    private ExtendedFloatingActionButton practiceButton;
+    private FloatingActionButton addWordButton;
+    private MaterialButton quizButton, btnAddSampleData;
+    private MaterialCardView setsButton;
 
     // Data
     private List<VocabularyWithProgress> allVocabulary;
@@ -84,7 +90,7 @@ public class VocabularyFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_vocabulary, container, false);
+        View view = inflater.inflate(R.layout.fragment_vocabulary_enhanced, container, false);
 
         initializeServices();
         initializeViews(view);
@@ -118,17 +124,20 @@ public class VocabularyFragment extends Fragment {
         chipFavorites = view.findViewById(R.id.chip_favorites);
 
         // List
-        swipeRefresh = view.findViewById(R.id.swipe_refresh);
         vocabularyRecyclerView = view.findViewById(R.id.vocabulary_recycler_view);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
         emptyState = view.findViewById(R.id.empty_state);
         btnAddSampleData = view.findViewById(R.id.btn_add_sample_data);
 
-        // Buttons
-        practiceButton = view.findViewById(R.id.practice_button);
-        addWordButton = view.findViewById(R.id.add_word_button);
-        quizButton = view.findViewById(R.id.quiz_button);
-        setsButton = view.findViewById(R.id.sets_button);
+        // Buttons - Updated for enhanced layout
+        practiceButton = view.findViewById(R.id.practice_fab); // ExtendedFAB
+        addWordButton = view.findViewById(R.id.add_word_fab); // Regular FAB
+        
+        // Quick action cards
+        setsButton = view.findViewById(R.id.browse_sets_card); // MaterialCardView
+        
+        // Note: swipeRefresh removed in enhanced layout (uses NestedScrollView)
+        swipeRefresh = null;
     }
 
     private void setupRecyclerView() {
@@ -156,8 +165,10 @@ public class VocabularyFragment extends Fragment {
     }
 
     private void setupListeners() {
-        // Pull to refresh
-        swipeRefresh.setOnRefreshListener(this::loadVocabulary);
+        // Pull to refresh (only if available in layout)
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnRefreshListener(this::loadVocabulary);
+        }
 
         // Filter chips
         filterChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
@@ -194,19 +205,15 @@ public class VocabularyFragment extends Fragment {
             dialog.show(getParentFragmentManager(), "AddWordDialog");
         });
 
-        // Quiz button
-        quizButton.setOnClickListener(v -> {
-            Intent intent = new Intent(getContext(), QuizActivity.class);
-            startActivity(intent);
-        });
-
         // Sets button
-        setsButton.setOnClickListener(v -> {
-            getParentFragmentManager().beginTransaction()
-                    .replace(getId(), new VocabularySetsFragment())
-                    .addToBackStack(null)
-                    .commit();
-        });
+        if (setsButton != null) {
+            setsButton.setOnClickListener(v -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(getId(), new VocabularySetsFragment())
+                        .addToBackStack(null)
+                        .commit();
+            });
+        }
 
         // Add Sample Data Button
         if (btnAddSampleData != null) {
@@ -294,7 +301,9 @@ public class VocabularyFragment extends Fragment {
                         updateStats();
                         filterVocabulary();
                         showLoading(false);
-                        swipeRefresh.setRefreshing(false);
+                        if (swipeRefresh != null) {
+                            swipeRefresh.setRefreshing(false);
+                        }
                         return;
                     }
 
@@ -306,7 +315,9 @@ public class VocabularyFragment extends Fragment {
                     Log.e(TAG, "Error loading user vocabulary", e);
                     Toast.makeText(getContext(), "Error loading vocabulary", Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                    if (swipeRefresh != null) {
+                        swipeRefresh.setRefreshing(false);
+                    }
                 });
     }
 
@@ -345,7 +356,9 @@ public class VocabularyFragment extends Fragment {
                             updateStats();
                             filterVocabulary();
                             showLoading(false);
-                            swipeRefresh.setRefreshing(false);
+                            if (swipeRefresh != null) {
+                                swipeRefresh.setRefreshing(false);
+                            }
                         }
                     })
                     .addOnFailureListener(e -> {
@@ -356,7 +369,9 @@ public class VocabularyFragment extends Fragment {
                             updateStats();
                             filterVocabulary();
                             showLoading(false);
-                            swipeRefresh.setRefreshing(false);
+                            if (swipeRefresh != null) {
+                                swipeRefresh.setRefreshing(false);
+                            }
                         }
                     });
         }

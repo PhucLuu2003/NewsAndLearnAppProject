@@ -140,19 +140,47 @@ public class SpeakingActivity extends AppCompatActivity {
      * Load lesson from Firebase - DYNAMIC
      */
     private void loadLessonFromFirebase() {
+        android.util.Log.d("SpeakingActivity", "Loading lesson: " + lessonId);
+        
         db.collection("speaking_lessons").document(lessonId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        Toast.makeText(this, "Lesson not found in database", Toast.LENGTH_SHORT).show();
+                        finish();
+                        return;
+                    }
+
                     lesson = documentSnapshot.toObject(SpeakingLesson.class);
-                    if (lesson != null && lesson.getPrompts() != null && !lesson.getPrompts().isEmpty()) {
+                    if (lesson != null) {
+                        // Set ID if missing
+                        if (lesson.getId() == null || lesson.getId().isEmpty()) {
+                            lesson.setId(lessonId);
+                        }
+                        
+                        android.util.Log.d("SpeakingActivity", "Lesson loaded: " + lesson.getTitle());
+                        android.util.Log.d("SpeakingActivity", "Content: " + (lesson.getContent() != null ? "Yes" : "No"));
+                        android.util.Log.d("SpeakingActivity", "Prompts: " + (lesson.getPrompts() != null ? lesson.getPrompts().size() : 0));
+                        
                         displayLesson();
-                        loadPrompt(0);
+                        
+                        // Check if we have prompts or just content
+                        if (lesson.getPrompts() != null && !lesson.getPrompts().isEmpty()) {
+                            loadPrompt(0);
+                        } else if (lesson.getContent() != null) {
+                            // Show content as prompt
+                            promptText.setText(lesson.getContent());
+                            playSampleButton.setVisibility(lesson.getSampleAudioUrl() != null ? View.VISIBLE : View.GONE);
+                        } else {
+                            Toast.makeText(this, "No content available for this lesson", Toast.LENGTH_SHORT).show();
+                        }
                     } else {
-                        Toast.makeText(this, "Lesson not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error parsing lesson data", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
                 .addOnFailureListener(e -> {
+                    android.util.Log.e("SpeakingActivity", "Error loading lesson", e);
                     Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     finish();
                 });
@@ -174,11 +202,20 @@ public class SpeakingActivity extends AppCompatActivity {
     }
 
     /**
-     * Play sample audio from Firebase Storage URL
+     * Play sample audio from Firebase Storage URL or online URL
      */
     private void playSampleAudio() {
-        if (currentPrompt.getSampleAudioUrl() == null) {
-            Toast.makeText(this, "No sample audio", Toast.LENGTH_SHORT).show();
+        String audioUrl = null;
+        
+        // Try to get audio URL from current prompt first, then from lesson
+        if (currentPrompt != null && currentPrompt.getSampleAudioUrl() != null) {
+            audioUrl = currentPrompt.getSampleAudioUrl();
+        } else if (lesson != null && lesson.getSampleAudioUrl() != null) {
+            audioUrl = lesson.getSampleAudioUrl();
+        }
+        
+        if (audioUrl == null || audioUrl.isEmpty()) {
+            Toast.makeText(this, "No sample audio available", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -188,11 +225,20 @@ public class SpeakingActivity extends AppCompatActivity {
 
         samplePlayer = new MediaPlayer();
         try {
-            samplePlayer.setDataSource(this, Uri.parse(currentPrompt.getSampleAudioUrl()));
+            android.util.Log.d("SpeakingActivity", "Playing audio: " + audioUrl);
+            samplePlayer.setDataSource(audioUrl);
             samplePlayer.prepareAsync();
-            samplePlayer.setOnPreparedListener(MediaPlayer::start);
+            samplePlayer.setOnPreparedListener(mp -> {
+                mp.start();
+                Toast.makeText(this, "Playing sample...", Toast.LENGTH_SHORT).show();
+            });
+            samplePlayer.setOnErrorListener((mp, what, extra) -> {
+                Toast.makeText(this, "Error playing audio", Toast.LENGTH_SHORT).show();
+                return false;
+            });
         } catch (IOException e) {
-            Toast.makeText(this, "Error playing sample", Toast.LENGTH_SHORT).show();
+            android.util.Log.e("SpeakingActivity", "Error setting audio source", e);
+            Toast.makeText(this, "Error loading audio", Toast.LENGTH_SHORT).show();
         }
     }
 

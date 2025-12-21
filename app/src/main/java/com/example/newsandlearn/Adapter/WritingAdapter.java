@@ -58,7 +58,7 @@ public class WritingAdapter extends RecyclerView.Adapter<WritingAdapter.WritingV
 
     class WritingViewHolder extends RecyclerView.ViewHolder {
 
-        TextView promptTitle, promptText, levelText, wordRequirement, timeLimit, actionButton; // Added actionButton
+        TextView promptTitle, promptDescription, levelBadge, wordLimit, timeLimit, actionButton;
         LinearLayout scoreLayout;
         TextView scoreText;
 
@@ -66,29 +66,46 @@ public class WritingAdapter extends RecyclerView.Adapter<WritingAdapter.WritingV
             super(itemView);
 
             promptTitle = itemView.findViewById(R.id.prompt_title);
-            promptText = itemView.findViewById(R.id.prompt_text);
-            levelText = itemView.findViewById(R.id.level_text);
-            wordRequirement = itemView.findViewById(R.id.word_requirement);
+            promptDescription = itemView.findViewById(R.id.prompt_description);
+            levelBadge = itemView.findViewById(R.id.level_badge);
+            wordLimit = itemView.findViewById(R.id.word_limit);
             timeLimit = itemView.findViewById(R.id.time_limit);
             scoreLayout = itemView.findViewById(R.id.score_layout);
             scoreText = itemView.findViewById(R.id.score_text);
-            actionButton = itemView.findViewById(R.id.action_button); // Bind new view
+            actionButton = itemView.findViewById(R.id.action_button);
         }
 
         public void bind(WritingPrompt prompt) {
-            promptTitle.setText(prompt.getTitle());
-            promptText.setText(prompt.getPromptText());
-            levelText.setText(prompt.getLevel() != null ? prompt.getLevel() : "B1");
-            wordRequirement.setText(prompt.getMinWords() + "-" + prompt.getMaxWords() + " words");
-            timeLimit.setText(prompt.getTimeMinutes() + " min");
+            if (promptTitle != null) {
+                promptTitle.setText(prompt.getTitle());
+            }
+            
+            if (promptDescription != null) {
+                promptDescription.setText(prompt.getPromptText());
+            }
+            
+            if (levelBadge != null) {
+                levelBadge.setText(prompt.getLevel() != null ? prompt.getLevel() : "B1");
+            }
+            
+            if (wordLimit != null) {
+                wordLimit.setText(prompt.getMinWords() + "-" + prompt.getMaxWords() + " words");
+            }
+            
+            if (timeLimit != null) {
+                timeLimit.setText("⏱️ " + prompt.getTimeMinutes() + " min");
+            }
 
             if (prompt.isCompleted() && prompt.getOverallScore() > 0) {
-                scoreLayout.setVisibility(View.VISIBLE);
-                actionButton.setVisibility(View.GONE);
-                scoreText.setText(prompt.getOverallScore() + "%");
+                if (scoreLayout != null) scoreLayout.setVisibility(View.VISIBLE);
+                if (actionButton != null) actionButton.setVisibility(View.GONE);
+                if (scoreText != null) {
+                    scoreText.setVisibility(View.VISIBLE);
+                    scoreText.setText("Score: " + prompt.getOverallScore() + "/100");
+                }
             } else {
-                scoreLayout.setVisibility(View.GONE);
-                actionButton.setVisibility(View.VISIBLE);
+                if (scoreLayout != null) scoreLayout.setVisibility(View.GONE);
+                if (actionButton != null) actionButton.setVisibility(View.VISIBLE);
             }
 
             itemView.setOnClickListener(v -> {

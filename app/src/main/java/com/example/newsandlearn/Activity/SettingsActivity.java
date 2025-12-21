@@ -25,7 +25,7 @@ public class SettingsActivity extends AppCompatActivity {
     private TextView userName, userLevel;
     private SwitchCompat notificationsSwitch, darkModeSwitch;
     private LinearLayout editProfile, changePassword, logoutButton;
-    private Button seedDataButton, reseedVideosButton, adminPanelButton, seedLearnModulesButton;
+    private Button seedDataButton, reseedVideosButton, adminPanelButton, seedLearnModulesButton, addAudioButton;
 
     private FirebaseAuth auth;
     private ProgressDialog progressDialog;
@@ -57,6 +57,7 @@ public class SettingsActivity extends AppCompatActivity {
         reseedVideosButton = findViewById(R.id.reseed_videos_button);
         adminPanelButton = findViewById(R.id.admin_panel_button);
         seedLearnModulesButton = findViewById(R.id.seed_learn_modules_button);
+        addAudioButton = findViewById(R.id.add_audio_button);
 
         // Initialize progress dialog
         progressDialog = new ProgressDialog(this);
@@ -101,6 +102,9 @@ public class SettingsActivity extends AppCompatActivity {
         
         // Seed Learn Modules button
         seedLearnModulesButton.setOnClickListener(v -> seedLearnModules());
+        
+        // Add Audio to Speaking Lessons button
+        addAudioButton.setOnClickListener(v -> addAudioToSpeakingLessons());
     }
 
     private void loadUserData() {
@@ -256,5 +260,42 @@ public class SettingsActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+    
+    /**
+     * Add sample audio URLs to all speaking lessons
+     */
+    private void addAudioToSpeakingLessons() {
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressDialog.setTitle("Adding Audio");
+        progressDialog.setMessage("Adding sample audio to speaking lessons...");
+        progressDialog.show();
+
+        com.example.newsandlearn.Utils.SpeakingAudioUpdater.addAudioToSpeakingLessons(
+            new com.example.newsandlearn.Utils.SpeakingAudioUpdater.UpdateCallback() {
+                @Override
+                public void onSuccess(int updatedCount) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(SettingsActivity.this,
+                                "✅ Added audio to " + updatedCount + " speaking lessons!",
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    runOnUiThread(() -> {
+                        progressDialog.dismiss();
+                        Toast.makeText(SettingsActivity.this,
+                                "❌ Error: " + e.getMessage(),
+                                Toast.LENGTH_LONG).show();
+                    });
+                }
+            });
     }
 }

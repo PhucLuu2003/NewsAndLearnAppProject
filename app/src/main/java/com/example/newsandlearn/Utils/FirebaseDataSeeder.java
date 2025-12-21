@@ -66,18 +66,90 @@ public class FirebaseDataSeeder {
                     public void onSuccess(String message) {
                         callback.onProgress("Video lessons created: " + message);
 
-                        // Step 3: Seed vocabularies
-                        seedVocabularies(new SeedCallback() {
+                        // Step 3: Seed reading lessons (with comprehension questions)
+                        seedReadingLessons(new SeedCallback() {
                             @Override
                             public void onSuccess(String message) {
-                                callback.onProgress("Vocabularies created: " + message);
+                                callback.onProgress("Reading lessons created: " + message);
 
-                                // Step 4: Seed user vocabulary progress
-                                seedUserVocabulary(currentUser.getUid(), new SeedCallback() {
+                                // Step 4: Seed listening lessons
+                                seedListeningLessons(new SeedCallback() {
                                     @Override
                                     public void onSuccess(String message) {
-                                        callback.onProgress("User vocabulary created: " + message);
-                                        callback.onSuccess("All sample data created successfully!");
+                                        callback.onProgress("Listening lessons created: " + message);
+
+                                        // Step 5: Seed speaking lessons
+                                        seedSpeakingLessons(new SeedCallback() {
+                                            @Override
+                                            public void onSuccess(String message) {
+                                                callback.onProgress("Speaking lessons created: " + message);
+
+                                                // Step 6: Seed writing lessons
+                                                seedWritingLessons(new SeedCallback() {
+                                                    @Override
+                                                    public void onSuccess(String message) {
+                                                        callback.onProgress("Writing lessons created: " + message);
+
+                                                        // Step 7: Seed vocabularies
+                                                        seedVocabularies(new SeedCallback() {
+                                                            @Override
+                                                            public void onSuccess(String message) {
+                                                                callback.onProgress("Vocabularies created: " + message);
+
+                                                                // Step 8: Seed user vocabulary progress
+                                                                seedUserVocabulary(currentUser.getUid(), new SeedCallback() {
+                                                                    @Override
+                                                                    public void onSuccess(String message) {
+                                                                        callback.onProgress("User vocabulary created: " + message);
+                                                                        callback.onSuccess("All sample data created successfully!");
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onProgress(String message) {
+                                                                        callback.onProgress(message);
+                                                                    }
+
+                                                                    @Override
+                                                                    public void onFailure(String error) {
+                                                                        callback.onFailure("Error creating user vocabulary: " + error);
+                                                                    }
+                                                                });
+                                                            }
+
+                                                            @Override
+                                                            public void onProgress(String message) {
+                                                                callback.onProgress(message);
+                                                            }
+
+                                                            @Override
+                                                            public void onFailure(String error) {
+                                                                callback.onFailure("Error creating vocabularies: " + error);
+                                                            }
+                                                        });
+                                                    }
+
+                                                    @Override
+                                                    public void onProgress(String message) {
+                                                        callback.onProgress(message);
+                                                    }
+
+                                                    @Override
+                                                    public void onFailure(String error) {
+                                                        callback.onFailure("Error creating writing lessons: " + error);
+                                                    }
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onProgress(String message) {
+                                                callback.onProgress(message);
+                                            }
+
+                                            @Override
+                                            public void onFailure(String error) {
+                                                callback.onFailure("Error creating speaking lessons: " + error);
+                                            }
+                                        });
                                     }
 
                                     @Override
@@ -87,7 +159,7 @@ public class FirebaseDataSeeder {
 
                                     @Override
                                     public void onFailure(String error) {
-                                        callback.onFailure("Error creating user vocabulary: " + error);
+                                        callback.onFailure("Error creating listening lessons: " + error);
                                     }
                                 });
                             }
@@ -99,7 +171,7 @@ public class FirebaseDataSeeder {
 
                             @Override
                             public void onFailure(String error) {
-                                callback.onFailure("Error creating vocabularies: " + error);
+                                callback.onFailure("Error creating reading lessons: " + error);
                             }
                         });
                     }
@@ -210,99 +282,315 @@ public class FirebaseDataSeeder {
     private List<Vocabulary> createSampleVocabularies() {
         List<Vocabulary> vocabularies = new ArrayList<>();
 
-        // Basic Words (A1)
-        vocabularies.add(createVocab("vocab_hello", "Hello", "Xin chào", "/həˈləʊ/", "greeting", "A1",
-                Arrays.asList("Hi there!", "Hello, how are you?"),
-                Arrays.asList("Chào bạn!", "Xin chào, bạn khỏe không?")));
-
-        vocabularies.add(createVocab("vocab_goodbye", "Goodbye", "Tạm biệt", "/ˌɡʊdˈbaɪ/", "greeting", "A1",
-                Arrays.asList("Goodbye, see you later!", "It's time to say goodbye."),
-                Arrays.asList("Tạm biệt, hẹn gặp lại!", "Đã đến lúc phải nói tạm biệt.")));
-
-        vocabularies.add(createVocab("vocab_thank", "Thank you", "Cảm ơn", "/θæŋk juː/", "expression", "A1",
+        // THEME 1: DAILY LIFE (A1) - 20 words
+        vocabularies.add(createVocab("daily_01", "Hello", "Xin chào", "/həˈləʊ/", "Daily Life", "A1",
+                Arrays.asList("Hello, how are you?", "Hello everyone!"),
+                Arrays.asList("Xin chào, bạn khỏe không?", "Xin chào mọi người!")));
+        vocabularies.add(createVocab("daily_02", "Goodbye", "Tạm biệt", "/ɡʊdˈbaɪ/", "Daily Life", "A1",
+                Arrays.asList("Goodbye, see you tomorrow!", "It's time to say goodbye."),
+                Arrays.asList("Tạm biệt, hẹn gặp ngày mai!", "Đến lúc nói tạm biệt rồi.")));
+        vocabularies.add(createVocab("daily_03", "Thank you", "Cảm ơn", "/θæŋk juː/", "Daily Life", "A1",
                 Arrays.asList("Thank you very much!", "Thank you for your help."),
                 Arrays.asList("Cảm ơn rất nhiều!", "Cảm ơn bạn đã giúp đỡ.")));
-
-        vocabularies.add(createVocab("vocab_please", "Please", "Xin vui lòng", "/pliːz/", "expression", "A1",
-                Arrays.asList("Please help me.", "Could you please wait?"),
-                Arrays.asList("Xin vui lòng giúp tôi.", "Bạn có thể vui lòng đợi không?")));
-
-        vocabularies.add(createVocab("vocab_sorry", "Sorry", "Xin lỗi", "/ˈsɒri/", "expression", "A1",
+        vocabularies.add(createVocab("daily_04", "Please", "Làm ơn", "/pliːz/", "Daily Life", "A1",
+                Arrays.asList("Please help me.", "Can you please wait?"),
+                Arrays.asList("Làm ơn giúp tôi.", "Bạn có thể đợi được không?")));
+        vocabularies.add(createVocab("daily_05", "Sorry", "Xin lỗi", "/ˈsɒri/", "Daily Life", "A1",
                 Arrays.asList("I'm sorry for being late.", "Sorry, I didn't mean it."),
                 Arrays.asList("Tôi xin lỗi vì đến muộn.", "Xin lỗi, tôi không cố ý.")));
-
-        // Common Verbs (A1-A2)
-        vocabularies.add(createVocab("vocab_eat", "Eat", "Ăn", "/iːt/", "verb", "A1",
-                Arrays.asList("I eat breakfast at 7 AM.", "Let's eat dinner together."),
-                Arrays.asList("Tôi ăn sáng lúc 7 giờ sáng.", "Hãy cùng ăn tối nhé.")));
-
-        vocabularies.add(createVocab("vocab_drink", "Drink", "Uống", "/drɪŋk/", "verb", "A1",
-                Arrays.asList("I drink coffee every morning.", "Would you like to drink some water?"),
-                Arrays.asList("Tôi uống cà phê mỗi sáng.", "Bạn có muốn uống nước không?")));
-
-        vocabularies.add(createVocab("vocab_sleep", "Sleep", "Ngủ", "/sliːp/", "verb", "A1",
+        vocabularies.add(createVocab("daily_06", "Morning", "Buổi sáng", "/ˈmɔːnɪŋ/", "Daily Life", "A1",
+                Arrays.asList("Good morning!", "I wake up every morning at 7."),
+                Arrays.asList("Chào buổi sáng!", "Tôi thức dậy mỗi sáng lúc 7 giờ.")));
+        vocabularies.add(createVocab("daily_07", "Night", "Đêm", "/naɪt/", "Daily Life", "A1",
+                Arrays.asList("Good night!", "I sleep at night."),
+                Arrays.asList("Chúc ngủ ngon!", "Tôi ngủ vào ban đêm.")));
+        vocabularies.add(createVocab("daily_08", "Eat", "Ăn", "/iːt/", "Daily Life", "A1",
+                Arrays.asList("I eat breakfast at 7 AM.", "Let's eat together."),
+                Arrays.asList("Tôi ăn sáng lúc 7 giờ.", "Hãy cùng ăn nhé.")));
+        vocabularies.add(createVocab("daily_09", "Drink", "Uống", "/drɪŋk/", "Daily Life", "A1",
+                Arrays.asList("I drink coffee every morning.", "Would you like to drink water?"),
+                Arrays.asList("Tôi uống cà phê mỗi sáng.", "Bạn muốn uống nước không?")));
+        vocabularies.add(createVocab("daily_10", "Sleep", "Ngủ", "/sliːp/", "Daily Life", "A1",
                 Arrays.asList("I sleep 8 hours every night.", "The baby is sleeping."),
                 Arrays.asList("Tôi ngủ 8 tiếng mỗi đêm.", "Em bé đang ngủ.")));
+        vocabularies.add(createVocab("daily_11", "Home", "Nhà", "/həʊm/", "Daily Life", "A1",
+                Arrays.asList("I'm going home.", "Welcome to my home!"),
+                Arrays.asList("Tôi đang về nhà.", "Chào mừng đến nhà tôi!")));
+        vocabularies.add(createVocab("daily_12", "Family", "Gia đình", "/ˈfæməli/", "Daily Life", "A1",
+                Arrays.asList("My family is very important.", "I love my family."),
+                Arrays.asList("Gia đình rất quan trọng.", "Tôi yêu gia đình mình.")));
+        vocabularies.add(createVocab("daily_13", "Friend", "Bạn bè", "/frend/", "Daily Life", "A1",
+                Arrays.asList("She is my best friend.", "I have many friends."),
+                Arrays.asList("Cô ấy là bạn thân của tôi.", "Tôi có nhiều bạn bè.")));
+        vocabularies.add(createVocab("daily_14", "Work", "Làm việc", "/wɜːk/", "Daily Life", "A1",
+                Arrays.asList("I work from 9 to 5.", "Where do you work?"),
+                Arrays.asList("Tôi làm việc từ 9 đến 5.", "Bạn làm việc ở đâu?")));
+        vocabularies.add(createVocab("daily_15", "Study", "Học", "/ˈstʌdi/", "Daily Life", "A1",
+                Arrays.asList("I study English every day.", "She studies at university."),
+                Arrays.asList("Tôi học tiếng Anh mỗi ngày.", "Cô ấy học đại học.")));
+        vocabularies.add(createVocab("daily_16", "Money", "Tiền", "/ˈmʌni/", "Daily Life", "A1",
+                Arrays.asList("I need some money.", "How much money do you have?"),
+                Arrays.asList("Tôi cần một ít tiền.", "Bạn có bao nhiêu tiền?")));
+        vocabularies.add(createVocab("daily_17", "Time", "Thời gian", "/taɪm/", "Daily Life", "A1",
+                Arrays.asList("What time is it?", "I don't have time."),
+                Arrays.asList("Mấy giờ rồi?", "Tôi không có thời gian.")));
+        vocabularies.add(createVocab("daily_18", "Day", "Ngày", "/deɪ/", "Daily Life", "A1",
+                Arrays.asList("Have a nice day!", "What day is today?"),
+                Arrays.asList("Chúc bạn một ngày tốt lành!", "Hôm nay là thứ mấy?")));
+        vocabularies.add(createVocab("daily_19", "Week", "Tuần", "/wiːk/", "Daily Life", "A1",
+                Arrays.asList("See you next week.", "I go to the gym twice a week."),
+                Arrays.asList("Hẹn gặp tuần sau.", "Tôi đi tập gym hai lần một tuần.")));
+        vocabularies.add(createVocab("daily_20", "Year", "Năm", "/jɪə/", "Daily Life", "A1",
+                Arrays.asList("Happy New Year!", "I'm 25 years old."),
+                Arrays.asList("Chúc mừng năm mới!", "Tôi 25 tuổi.")));
 
-        vocabularies.add(createVocab("vocab_study", "Study", "Học", "/ˈstʌdi/", "verb", "A1",
-                Arrays.asList("I study English every day.", "She studies at the library."),
-                Arrays.asList("Tôi học tiếng Anh mỗi ngày.", "Cô ấy học ở thư viện.")));
+        // THEME 2: TRAVEL & TOURISM (A2) - 20 words
+        vocabularies.add(createVocab("travel_01", "Airport", "Sân bay", "/ˈeəpɔːt/", "Travel", "A2",
+                Arrays.asList("I'm at the airport.", "The airport is very crowded."),
+                Arrays.asList("Tôi đang ở sân bay.", "Sân bay rất đông.")));
+        vocabularies.add(createVocab("travel_02", "Hotel", "Khách sạn", "/həʊˈtel/", "Travel", "A2",
+                Arrays.asList("I booked a hotel room.", "The hotel is near the beach."),
+                Arrays.asList("Tôi đã đặt phòng khách sạn.", "Khách sạn gần bãi biển.")));
+        vocabularies.add(createVocab("travel_03", "Ticket", "Vé", "/ˈtɪkɪt/", "Travel", "A2",
+                Arrays.asList("I need to buy a ticket.", "How much is the ticket?"),
+                Arrays.asList("Tôi cần mua vé.", "Vé giá bao nhiêu?")));
+        vocabularies.add(createVocab("travel_04", "Passport", "Hộ chiếu", "/ˈpɑːspɔːt/", "Travel", "A2",
+                Arrays.asList("Don't forget your passport!", "My passport expires next year."),
+                Arrays.asList("Đừng quên hộ chiếu!", "Hộ chiếu của tôi hết hạn năm sau.")));
+        vocabularies.add(createVocab("travel_05", "Luggage", "Hành lý", "/ˈlʌɡɪdʒ/", "Travel", "A2",
+                Arrays.asList("Where is my luggage?", "I have two pieces of luggage."),
+                Arrays.asList("Hành lý của tôi đâu?", "Tôi có hai kiện hành lý.")));
+        vocabularies.add(createVocab("travel_06", "Flight", "Chuyến bay", "/flaɪt/", "Travel", "A2",
+                Arrays.asList("My flight is delayed.", "What time is your flight?"),
+                Arrays.asList("Chuyến bay của tôi bị hoãn.", "Chuyến bay của bạn mấy giờ?")));
+        vocabularies.add(createVocab("travel_07", "Destination", "Điểm đến", "/ˌdestɪˈneɪʃn/", "Travel", "A2",
+                Arrays.asList("What's your destination?", "We arrived at our destination."),
+                Arrays.asList("Điểm đến của bạn là đâu?", "Chúng tôi đã đến điểm đến.")));
+        vocabularies.add(createVocab("travel_08", "Tourist", "Du khách", "/ˈtʊərɪst/", "Travel", "A2",
+                Arrays.asList("Many tourists visit this place.", "I'm a tourist here."),
+                Arrays.asList("Nhiều du khách ghé thăm nơi này.", "Tôi là du khách ở đây.")));
+        vocabularies.add(createVocab("travel_09", "Guide", "Hướng dẫn viên", "/ɡaɪd/", "Travel", "A2",
+                Arrays.asList("Our tour guide is very helpful.", "I need a guide book."),
+                Arrays.asList("Hướng dẫn viên rất nhiệt tình.", "Tôi cần sách hướng dẫn.")));
+        vocabularies.add(createVocab("travel_10", "Map", "Bản đồ", "/mæp/", "Travel", "A2",
+                Arrays.asList("Can you show me on the map?", "I'm looking at the map."),
+                Arrays.asList("Bạn có thể chỉ trên bản đồ không?", "Tôi đang xem bản đồ.")));
+        vocabularies.add(createVocab("travel_11", "Direction", "Hướng", "/dəˈrekʃn/", "Travel", "A2",
+                Arrays.asList("Which direction should I go?", "Can you give me directions?"),
+                Arrays.asList("Tôi nên đi hướng nào?", "Bạn có thể chỉ đường không?")));
+        vocabularies.add(createVocab("travel_12", "Beach", "Bãi biển", "/biːtʃ/", "Travel", "A2",
+                Arrays.asList("Let's go to the beach!", "The beach is beautiful."),
+                Arrays.asList("Hãy đi biển nào!", "Bãi biển đẹp quá.")));
+        vocabularies.add(createVocab("travel_13", "Mountain", "Núi", "/ˈmaʊntən/", "Travel", "A2",
+                Arrays.asList("We climbed the mountain.", "The mountain is very high."),
+                Arrays.asList("Chúng tôi leo núi.", "Ngọn núi rất cao.")));
+        vocabularies.add(createVocab("travel_14", "Museum", "Bảo tàng", "/mjuːˈziːəm/", "Travel", "A2",
+                Arrays.asList("Let's visit the museum.", "The museum is closed today."),
+                Arrays.asList("Hãy đi bảo tàng nào.", "Bảo tàng đóng cửa hôm nay.")));
+        vocabularies.add(createVocab("travel_15", "Restaurant", "Nhà hàng", "/ˈrestrɒnt/", "Travel", "A2",
+                Arrays.asList("This restaurant is famous.", "Let's eat at that restaurant."),
+                Arrays.asList("Nhà hàng này nổi tiếng.", "Hãy ăn ở nhà hàng đó.")));
+        vocabularies.add(createVocab("travel_16", "Souvenir", "Quà lưu niệm", "/ˌsuːvəˈnɪə/", "Travel", "A2",
+                Arrays.asList("I bought some souvenirs.", "This is a nice souvenir."),
+                Arrays.asList("Tôi mua vài quà lưu niệm.", "Đây là quà lưu niệm đẹp.")));
+        vocabularies.add(createVocab("travel_17", "Reservation", "Đặt chỗ", "/ˌrezəˈveɪʃn/", "Travel", "A2",
+                Arrays.asList("I have a reservation.", "Did you make a reservation?"),
+                Arrays.asList("Tôi đã đặt chỗ.", "Bạn đã đặt chỗ chưa?")));
+        vocabularies.add(createVocab("travel_18", "Check-in", "Làm thủ tục", "/tʃek ɪn/", "Travel", "A2",
+                Arrays.asList("Where is the check-in counter?", "Check-in time is at 2 PM."),
+                Arrays.asList("Quầy làm thủ tục ở đâu?", "Giờ làm thủ tục là 2 giờ chiều.")));
+        vocabularies.add(createVocab("travel_19", "Departure", "Khởi hành", "/dɪˈpɑːtʃə/", "Travel", "A2",
+                Arrays.asList("The departure time is 10 AM.", "Departure gate is B12."),
+                Arrays.asList("Giờ khởi hành là 10 giờ sáng.", "Cổng khởi hành là B12.")));
+        vocabularies.add(createVocab("travel_20", "Arrival", "Đến nơi", "/əˈraɪvl/", "Travel", "A2",
+                Arrays.asList("The arrival time is 3 PM.", "Welcome to the arrival hall."),
+                Arrays.asList("Giờ đến là 3 giờ chiều.", "Chào mừng đến sảnh đón.")));
 
-        vocabularies.add(createVocab("vocab_work", "Work", "Làm việc", "/wɜːk/", "verb", "A1",
-                Arrays.asList("I work from 9 to 5.", "He works in an office."),
-                Arrays.asList("Tôi làm việc từ 9 đến 5.", "Anh ấy làm việc trong văn phòng.")));
+        // THEME 3: WORK & BUSINESS (B1) - 20 words
+        vocabularies.add(createVocab("work_01", "Office", "Văn phòng", "/ˈɒfɪs/", "Business", "B1",
+                Arrays.asList("I work in an office.", "The office is on the 5th floor."),
+                Arrays.asList("Tôi làm việc trong văn phòng.", "Văn phòng ở tầng 5.")));
+        vocabularies.add(createVocab("work_02", "Meeting", "Cuộc họp", "/ˈmiːtɪŋ/", "Business", "B1",
+                Arrays.asList("We have a meeting at 2 PM.", "The meeting was productive."),
+                Arrays.asList("Chúng ta có cuộc họp lúc 2 giờ.", "Cuộc họp rất hiệu quả.")));
+        vocabularies.add(createVocab("work_03", "Manager", "Quản lý", "/ˈmænɪdʒə/", "Business", "B1",
+                Arrays.asList("My manager is very supportive.", "She's the manager of this department."),
+                Arrays.asList("Quản lý của tôi rất hỗ trợ.", "Cô ấy là quản lý bộ phận này.")));
+        vocabularies.add(createVocab("work_04", "Employee", "Nhân viên", "/ɪmˈplɔɪiː/", "Business", "B1",
+                Arrays.asList("We have 50 employees.", "He's a new employee."),
+                Arrays.asList("Chúng tôi có 50 nhân viên.", "Anh ấy là nhân viên mới.")));
+        vocabularies.add(createVocab("work_05", "Salary", "Lương", "/ˈsæləri/", "Business", "B1",
+                Arrays.asList("What's your expected salary?", "I receive my salary monthly."),
+                Arrays.asList("Mức lương mong đợi của bạn là bao nhiêu?", "Tôi nhận lương hàng tháng.")));
+        vocabularies.add(createVocab("work_06", "Project", "Dự án", "/ˈprɒdʒekt/", "Business", "B1",
+                Arrays.asList("We're working on a new project.", "The project deadline is next month."),
+                Arrays.asList("Chúng tôi đang làm dự án mới.", "Hạn dự án là tháng sau.")));
+        vocabularies.add(createVocab("work_07", "Deadline", "Hạn chót", "/ˈdedlaɪn/", "Business", "B1",
+                Arrays.asList("The deadline is tomorrow.", "Can we extend the deadline?"),
+                Arrays.asList("Hạn chót là ngày mai.", "Chúng ta có thể gia hạn không?")));
+        vocabularies.add(createVocab("work_08", "Report", "Báo cáo", "/rɪˈpɔːt/", "Business", "B1",
+                Arrays.asList("I need to write a report.", "The report is due Friday."),
+                Arrays.asList("Tôi cần viết báo cáo.", "Báo cáo phải nộp thứ Sáu.")));
+        vocabularies.add(createVocab("work_09", "Presentation", "Thuyết trình", "/ˌpreznˈteɪʃn/", "Business", "B1",
+                Arrays.asList("I have a presentation tomorrow.", "The presentation went well."),
+                Arrays.asList("Tôi có buổi thuyết trình ngày mai.", "Buổi thuyết trình diễn ra tốt.")));
+        vocabularies.add(createVocab("work_10", "Client", "Khách hàng", "/ˈklaɪənt/", "Business", "B1",
+                Arrays.asList("We're meeting with a client.", "The client is satisfied."),
+                Arrays.asList("Chúng tôi gặp khách hàng.", "Khách hàng hài lòng.")));
+        vocabularies.add(createVocab("work_11", "Contract", "Hợp đồng", "/ˈkɒntrækt/", "Business", "B1",
+                Arrays.asList("Please sign the contract.", "The contract is valid for one year."),
+                Arrays.asList("Vui lòng ký hợp đồng.", "Hợp đồng có hiệu lực một năm.")));
+        vocabularies.add(createVocab("work_12", "Agreement", "Thỏa thuận", "/əˈɡriːmənt/", "Business", "B1",
+                Arrays.asList("We reached an agreement.", "The agreement is beneficial for both parties."),
+                Arrays.asList("Chúng tôi đạt được thỏa thuận.", "Thỏa thuận có lợi cho cả hai bên.")));
+        vocabularies.add(createVocab("work_13", "Negotiate", "Đàm phán", "/nɪˈɡəʊʃieɪt/", "Business", "B1",
+                Arrays.asList("We need to negotiate the price.", "They're negotiating the terms."),
+                Arrays.asList("Chúng ta cần đàm phán giá.", "Họ đang đàm phán điều khoản.")));
+        vocabularies.add(createVocab("work_14", "Budget", "Ngân sách", "/ˈbʌdʒɪt/", "Business", "B1",
+                Arrays.asList("What's the project budget?", "We need to stay within budget."),
+                Arrays.asList("Ngân sách dự án là bao nhiêu?", "Chúng ta cần chi đúng ngân sách.")));
+        vocabularies.add(createVocab("work_15", "Profit", "Lợi nhuận", "/ˈprɒfɪt/", "Business", "B1",
+                Arrays.asList("The company made a profit.", "Profit increased by 20%."),
+                Arrays.asList("Công ty có lợi nhuận.", "Lợi nhuận tăng 20%.")));
+        vocabularies.add(createVocab("work_16", "Revenue", "Doanh thu", "/ˈrevənjuː/", "Business", "B1",
+                Arrays.asList("Annual revenue is $1 million.", "Revenue has doubled this year."),
+                Arrays.asList("Doanh thu hàng năm là 1 triệu đô.", "Doanh thu tăng gấp đôi năm nay.")));
+        vocabularies.add(createVocab("work_17", "Strategy", "Chiến lược", "/ˈstrætədʒi/", "Business", "B1",
+                Arrays.asList("We need a new marketing strategy.", "The strategy is working well."),
+                Arrays.asList("Chúng ta cần chiến lược marketing mới.", "Chiến lược đang hiệu quả.")));
+        vocabularies.add(createVocab("work_18", "Goal", "Mục tiêu", "/ɡəʊl/", "Business", "B1",
+                Arrays.asList("What are your career goals?", "We achieved our sales goal."),
+                Arrays.asList("Mục tiêu nghề nghiệp của bạn là gì?", "Chúng tôi đạt mục tiêu bán hàng.")));
+        vocabularies.add(createVocab("work_19", "Performance", "Hiệu suất", "/pəˈfɔːməns/", "Business", "B1",
+                Arrays.asList("Your performance is excellent.", "We review performance quarterly."),
+                Arrays.asList("Hiệu suất của bạn xuất sắc.", "Chúng tôi đánh giá hiệu suất hàng quý.")));
+        vocabularies.add(createVocab("work_20", "Promotion", "Thăng chức", "/prəˈməʊʃn/", "Business", "B1",
+                Arrays.asList("She got a promotion.", "I'm hoping for a promotion."),
+                Arrays.asList("Cô ấy được thăng chức.", "Tôi hy vọng được thăng chức.")));
 
-        // Common Nouns (A1-A2)
-        vocabularies.add(createVocab("vocab_book", "Book", "Sách", "/bʊk/", "noun", "A1",
-                Arrays.asList("I'm reading a book.", "This book is very interesting."),
-                Arrays.asList("Tôi đang đọc sách.", "Cuốn sách này rất thú vị.")));
+        // THEME 4: TECHNOLOGY (B1) - 20 words  
+        vocabularies.add(createVocab("tech_01", "Computer", "Máy tính", "/kəmˈpjuːtə/", "Technology", "B1",
+                Arrays.asList("I use my computer every day.", "This computer is very fast."),
+                Arrays.asList("Tôi dùng máy tính mỗi ngày.", "Máy tính này rất nhanh.")));
+        vocabularies.add(createVocab("tech_02", "Internet", "Internet", "/ˈɪntənet/", "Technology", "B1",
+                Arrays.asList("The internet is not working.", "I found it on the internet."),
+                Arrays.asList("Internet không hoạt động.", "Tôi tìm thấy nó trên internet.")));
+        vocabularies.add(createVocab("tech_03", "Website", "Trang web", "/ˈwebsaɪt/", "Technology", "B1",
+                Arrays.asList("Visit our website for more information.", "The website is user-friendly."),
+                Arrays.asList("Truy cập trang web để biết thêm.", "Trang web dễ sử dụng.")));
+        vocabularies.add(createVocab("tech_04", "Email", "Email", "/ˈiːmeɪl/", "Technology", "B1",
+                Arrays.asList("Please send me an email.", "I check my email daily."),
+                Arrays.asList("Vui lòng gửi email cho tôi.", "Tôi kiểm tra email hàng ngày.")));
+        vocabularies.add(createVocab("tech_05", "Password", "Mật khẩu", "/ˈpɑːswɜːd/", "Technology", "B1",
+                Arrays.asList("I forgot my password.", "Use a strong password."),
+                Arrays.asList("Tôi quên mật khẩu.", "Dùng mật khẩu mạnh.")));
+        vocabularies.add(createVocab("tech_06", "Download", "Tải xuống", "/ˌdaʊnˈləʊd/", "Technology", "B1",
+                Arrays.asList("Download the app from the store.", "The download is complete."),
+                Arrays.asList("Tải ứng dụng từ cửa hàng.", "Tải xuống hoàn tất.")));
+        vocabularies.add(createVocab("tech_07", "Upload", "Tải lên", "/ˌʌpˈləʊd/", "Technology", "B1",
+                Arrays.asList("Upload your photos here.", "The upload failed."),
+                Arrays.asList("Tải ảnh của bạn lên đây.", "Tải lên thất bại.")));
+        vocabularies.add(createVocab("tech_08", "Software", "Phần mềm", "/ˈsɒftweə/", "Technology", "B1",
+                Arrays.asList("We need to update the software.", "This software is very useful."),
+                Arrays.asList("Chúng ta cần cập nhật phần mềm.", "Phần mềm này rất hữu ích.")));
+        vocabularies.add(createVocab("tech_09", "Application", "Ứng dụng", "/ˌæplɪˈkeɪʃn/", "Technology", "B1",
+                Arrays.asList("Download this application.", "The application is free."),
+                Arrays.asList("Tải ứng dụng này.", "Ứng dụng miễn phí.")));
+        vocabularies.add(createVocab("tech_10", "Database", "Cơ sở dữ liệu", "/ˈdeɪtəbeɪs/", "Technology", "B1",
+                Arrays.asList("The database contains all records.", "We need to backup the database."),
+                Arrays.asList("Cơ sở dữ liệu chứa tất cả hồ sơ.", "Chúng ta cần sao lưu dữ liệu.")));
+        vocabularies.add(createVocab("tech_11", "Network", "Mạng", "/ˈnetwɜːk/", "Technology", "B1",
+                Arrays.asList("The network is down.", "Connect to the Wi-Fi network."),
+                Arrays.asList("Mạng bị ngắt.", "Kết nối mạng Wi-Fi.")));
+        vocabularies.add(createVocab("tech_12", "Server", "Máy chủ", "/ˈsɜːvə/", "Technology", "B1",
+                Arrays.asList("The server is not responding.", "We host our website on this server."),
+                Arrays.asList("Máy chủ không phản hồi.", "Chúng tôi lưu trữ trang web trên máy chủ này.")));
+        vocabularies.add(createVocab("tech_13", "Cloud", "Đám mây", "/klaʊd/", "Technology", "B1",
+                Arrays.asList("Save your files to the cloud.", "Cloud storage is convenient."),
+                Arrays.asList("Lưu tệp lên đám mây.", "Lưu trữ đám mây tiện lợi.")));
+        vocabularies.add(createVocab("tech_14", "Backup", "Sao lưu", "/ˈbækʌp/", "Technology", "B1",
+                Arrays.asList("Always backup your data.", "The backup was successful."),
+                Arrays.asList("Luôn sao lưu dữ liệu.", "Sao lưu thành công.")));
+        vocabularies.add(createVocab("tech_15", "Security", "Bảo mật", "/sɪˈkjʊərəti/", "Technology", "B1",
+                Arrays.asList("Security is very important.", "Enable two-factor security."),
+                Arrays.asList("Bảo mật rất quan trọng.", "Bật bảo mật hai lớp.")));
+        vocabularies.add(createVocab("tech_16", "Virus", "Vi-rút", "/ˈvaɪrəs/", "Technology", "B1",
+                Arrays.asList("My computer has a virus.", "Install antivirus software."),
+                Arrays.asList("Máy tính tôi bị vi-rút.", "Cài phần mềm diệt vi-rút.")));
+        vocabularies.add(createVocab("tech_17", "Update", "Cập nhật", "/ʌpˈdeɪt/", "Technology", "B1",
+                Arrays.asList("Please update your app.", "The update is available now."),
+                Arrays.asList("Vui lòng cập nhật ứng dụng.", "Bản cập nhật đã có.")));
+        vocabularies.add(createVocab("tech_18", "Install", "Cài đặt", "/ɪnˈstɔːl/", "Technology", "B1",
+                Arrays.asList("Install the latest version.", "Installation is complete."),
+                Arrays.asList("Cài phiên bản mới nhất.", "Cài đặt hoàn tất.")));
+        vocabularies.add(createVocab("tech_19", "Delete", "Xóa", "/dɪˈliːt/", "Technology", "B1",
+                Arrays.asList("Delete the old files.", "Are you sure you want to delete?"),
+                Arrays.asList("Xóa các tệp cũ.", "Bạn chắc chắn muốn xóa?")));
+        vocabularies.add(createVocab("tech_20", "Refresh", "Làm mới", "/rɪˈfreʃ/", "Technology", "B1",
+                Arrays.asList("Refresh the page.", "The data will refresh automatically."),
+                Arrays.asList("Làm mới trang.", "Dữ liệu sẽ tự động làm mới.")));
 
-        vocabularies.add(createVocab("vocab_water", "Water", "Nước", "/ˈwɔːtə/", "noun", "A1",
-                Arrays.asList("I drink a lot of water.", "The water is cold."),
-                Arrays.asList("Tôi uống nhiều nước.", "Nước lạnh quá.")));
-
-        vocabularies.add(createVocab("vocab_food", "Food", "Thức ăn", "/fuːd/", "noun", "A1",
-                Arrays.asList("This food is delicious.", "I love Vietnamese food."),
-                Arrays.asList("Thức ăn này ngon quá.", "Tôi yêu món ăn Việt Nam.")));
-
-        vocabularies.add(createVocab("vocab_house", "House", "Nhà", "/haʊs/", "noun", "A1",
-                Arrays.asList("I live in a big house.", "Their house is beautiful."),
-                Arrays.asList("Tôi sống trong một ngôi nhà lớn.", "Nhà của họ đẹp quá.")));
-
-        vocabularies.add(createVocab("vocab_family", "Family", "Gia đình", "/ˈfæməli/", "noun", "A1",
-                Arrays.asList("My family is very important to me.", "I love my family."),
-                Arrays.asList("Gia đình rất quan trọng với tôi.", "Tôi yêu gia đình mình.")));
-
-        // Intermediate Words (B1-B2)
-        vocabularies.add(createVocab("vocab_achieve", "Achieve", "Đạt được", "/əˈtʃiːv/", "verb", "B1",
-                Arrays.asList("She achieved her goals.", "You can achieve anything with hard work."),
-                Arrays.asList("Cô ấy đã đạt được mục tiêu.", "Bạn có thể đạt được bất cứ điều gì với sự chăm chỉ.")));
-
-        vocabularies.add(createVocab("vocab_challenge", "Challenge", "Thách thức", "/ˈtʃælɪndʒ/", "noun", "B1",
-                Arrays.asList("This is a big challenge.", "I love a good challenge."),
-                Arrays.asList("Đây là một thách thức lớn.", "Tôi thích thách thức.")));
-
-        vocabularies.add(createVocab("vocab_opportunity", "Opportunity", "Cơ hội", "/ˌɒpəˈtjuːnəti/", "noun", "B1",
-                Arrays.asList("This is a great opportunity.", "Don't miss this opportunity."),
-                Arrays.asList("Đây là một cơ hội tuyệt vời.", "Đừng bỏ lỡ cơ hội này.")));
-
-        vocabularies.add(createVocab("vocab_experience", "Experience", "Kinh nghiệm", "/ɪkˈspɪəriəns/", "noun", "B1",
-                Arrays.asList("I have 5 years of experience.", "It was a wonderful experience."),
-                Arrays.asList("Tôi có 5 năm kinh nghiệm.", "Đó là một trải nghiệm tuyệt vời.")));
-
-        vocabularies.add(createVocab("vocab_develop", "Develop", "Phát triển", "/dɪˈveləp/", "verb", "B1",
-                Arrays.asList("We need to develop new skills.", "The company is developing rapidly."),
-                Arrays.asList("Chúng ta cần phát triển kỹ năng mới.", "Công ty đang phát triển nhanh chóng.")));
-
-        // Advanced Words (C1-C2)
-        vocabularies.add(
-                createVocab("vocab_comprehensive", "Comprehensive", "Toàn diện", "/ˌkɒmprɪˈhensɪv/", "adjective", "C1",
-                        Arrays.asList("This is a comprehensive guide.", "We need a comprehensive solution."),
-                        Arrays.asList("Đây là một hướng dẫn toàn diện.", "Chúng ta cần một giải pháp toàn diện.")));
-
-        vocabularies.add(createVocab("vocab_substantial", "Substantial", "Đáng kể", "/səbˈstænʃl/", "adjective", "C1",
-                Arrays.asList("There's been substantial progress.", "We need substantial evidence."),
-                Arrays.asList("Đã có tiến bộ đáng kể.", "Chúng ta cần bằng chứng đáng kể.")));
+        // THEME 5: HEALTH & FITNESS (B1) - 20 words
+        vocabularies.add(createVocab("health_01", "Exercise", "Tập thể dục", "/ˈeksəsaɪz/", "Health", "B1",
+                Arrays.asList("I exercise every morning.", "Regular exercise is important."),
+                Arrays.asList("Tôi tập thể dục mỗi sáng.", "Tập thể dục đều đặn rất quan trọng.")));
+        vocabularies.add(createVocab("health_02", "Healthy", "Khỏe mạnh", "/ˈhelθi/", "Health", "B1",
+                Arrays.asList("Eat healthy food.", "I want to live a healthy lifestyle."),
+                Arrays.asList("Ăn thức ăn lành mạnh.", "Tôi muốn sống lành mạnh.")));
+        vocabularies.add(createVocab("health_03", "Diet", "Chế độ ăn", "/ˈdaɪət/", "Health", "B1",
+                Arrays.asList("I'm on a diet.", "A balanced diet is essential."),
+                Arrays.asList("Tôi đang ăn kiêng.", "Chế độ ăn cân bằng rất cần thiết.")));
+        vocabularies.add(createVocab("health_04", "Nutrition", "Dinh dưỡng", "/njuːˈtrɪʃn/", "Health", "B1",
+                Arrays.asList("Good nutrition is vital.", "Study nutrition facts."),
+                Arrays.asList("Dinh dưỡng tốt rất quan trọng.", "Nghiên cứu thành phần dinh dưỡng.")));
+        vocabularies.add(createVocab("health_05", "Vitamin", "Vitamin", "/ˈvɪtəmɪn/", "Health", "B1",
+                Arrays.asList("Take your vitamins daily.", "This fruit is rich in vitamins."),
+                Arrays.asList("Uống vitamin hàng ngày.", "Trái cây này giàu vitamin.")));
+        vocabularies.add(createVocab("health_06", "Medicine", "Thuốc", "/ˈmedsn/", "Health", "B1",
+                Arrays.asList("Take this medicine twice a day.", "Did you take your medicine?"),
+                Arrays.asList("Uống thuốc này hai lần một ngày.", "Bạn đã uống thuốc chưa?")));
+        vocabularies.add(createVocab("health_07", "Doctor", "Bác sĩ", "/ˈdɒktə/", "Health", "B1",
+                Arrays.asList("I need to see a doctor.", "The doctor is very experienced."),
+                Arrays.asList("Tôi cần gặp bác sĩ.", "Bác sĩ rất giàu kinh nghiệm.")));
+        vocabularies.add(createVocab("health_08", "Hospital", "Bệnh viện", "/ˈhɒspɪtl/", "Health", "B1",
+                Arrays.asList("He's in the hospital.", "The hospital is nearby."),
+                Arrays.asList("Anh ấy đang ở bệnh viện.", "Bệnh viện ở gần đây.")));
+        vocabularies.add(createVocab("health_09", "Pain", "Đau", "/peɪn/", "Health", "B1",
+                Arrays.asList("I have a pain in my back.", "The pain is getting worse."),
+                Arrays.asList("Tôi bị đau lưng.", "Cơn đau đang tệ hơn.")));
+        vocabularies.add(createVocab("health_10", "Symptom", "Triệu chứng", "/ˈsɪmptəm/", "Health", "B1",
+                Arrays.asList("What are your symptoms?", "These are common symptoms."),
+                Arrays.asList("Triệu chứng của bạn là gì?", "Đây là triệu chứng phổ biến.")));
+        vocabularies.add(createVocab("health_11", "Treatment", "Điều trị", "/ˈtriːtmənt/", "Health", "B1",
+                Arrays.asList("The treatment is effective.", "What treatment do you recommend?"),
+                Arrays.asList("Phương pháp điều trị hiệu quả.", "Bạn đề xuất điều trị gì?")));
+        vocabularies.add(createVocab("health_12", "Recovery", "Hồi phục", "/rɪˈkʌvəri/", "Health", "B1",
+                Arrays.asList("I wish you a speedy recovery.", "Recovery takes time."),
+                Arrays.asList("Chúc bạn mau bình phục.", "Hồi phục cần thời gian.")));
+        vocabularies.add(createVocab("health_13", "Fitness", "Thể lực", "/ˈfɪtnəs/", "Health", "B1",
+                Arrays.asList("I go to the fitness center.", "Improve your fitness level."),
+                Arrays.asList("Tôi đi phòng tập.", "Cải thiện thể lực.")));
+        vocabularies.add(createVocab("health_14", "Gym", "Phòng tập", "/dʒɪm/", "Health", "B1",
+                Arrays.asList("I go to the gym three times a week.", "The gym is well-equipped."),
+                Arrays.asList("Tôi đi phòng tập ba lần một tuần.", "Phòng tập trang bị tốt.")));
+        vocabularies.add(createVocab("health_15", "Yoga", "Yoga", "/ˈjəʊɡə/", "Health", "B1",
+                Arrays.asList("I practice yoga every morning.", "Yoga helps reduce stress."),
+                Arrays.asList("Tôi tập yoga mỗi sáng.", "Yoga giúp giảm căng thẳng.")));
+        vocabularies.add(createVocab("health_16", "Stress", "Căng thẳng", "/stres/", "Health", "B1",
+                Arrays.asList("I'm under a lot of stress.", "Reduce your stress levels."),
+                Arrays.asList("Tôi đang rất căng thẳng.", "Giảm mức độ căng thẳng.")));
+        vocabularies.add(createVocab("health_17", "Relax", "Thư giãn", "/rɪˈlæks/", "Health", "B1",
+                Arrays.asList("Try to relax.", "I need to relax after work."),
+                Arrays.asList("Cố gắng thư giãn.", "Tôi cần thư giãn sau giờ làm.")));
+        vocabularies.add(createVocab("health_18", "Energy", "Năng lượng", "/ˈenədʒi/", "Health", "B1",
+                Arrays.asList("I have no energy today.", "This drink gives you energy."),
+                Arrays.asList("Hôm nay tôi không có năng lượng.", "Đồ uống này cho bạn năng lượng.")));
+        vocabularies.add(createVocab("health_19", "Strength", "Sức mạnh", "/streŋθ/", "Health", "B1",
+                Arrays.asList("Build your strength.", "I don't have the strength."),
+                Arrays.asList("Xây dựng sức mạnh.", "Tôi không có sức.")));
+        vocabularies.add(createVocab("health_20", "Wellness", "Sức khỏe tổng thể", "/ˈwelnəs/", "Health", "B1",
+                Arrays.asList("Focus on your wellness.", "Wellness programs are beneficial."),
+                Arrays.asList("Tập trung vào sức khỏe.", "Chương trình chăm sóc sức khỏe có lợi.")));
 
         return vocabularies;
     }

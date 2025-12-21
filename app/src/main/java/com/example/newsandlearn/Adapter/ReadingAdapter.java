@@ -74,33 +74,49 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.ReadingV
         }
 
         public void bind(ReadingArticle article) {
-            articleTitle.setText(article.getTitle());
-            articleSummary.setText(article.getSummary());
+            if (articleTitle != null) {
+                articleTitle.setText(article.getTitle());
+            }
+            
+            if (articleSummary != null) {
+                articleSummary.setText(article.getSummary());
+            }
             
             // Format level text with category if available
-            String levelStr = article.getLevel() != null ? article.getLevel() : "B1";
-            if (article.getCategory() != null && !article.getCategory().isEmpty()) {
-                levelStr += " • " + article.getCategory();
+            if (levelText != null) {
+                String levelStr = article.getLevel() != null ? article.getLevel() : "B1";
+                if (article.getCategory() != null && !article.getCategory().isEmpty()) {
+                    levelStr += " • " + article.getCategory();
+                }
+                levelText.setText(levelStr);
             }
-            levelText.setText(levelStr);
             
-            wordCount.setText(article.getWordCount() + " words");
-            readTime.setText(article.getEstimatedMinutes() + " min read");
+            if (wordCount != null) {
+                wordCount.setText(article.getWordCount() + " words");
+            }
+            
+            if (readTime != null) {
+                readTime.setText(article.getEstimatedMinutes() + " min read");
+            }
 
             // TODO: Load image from Firebase Storage URL
-            // Glide.with(context).load(article.getImageUrl()).into(articleImage);
+            // if (articleImage != null) {
+            //     Glide.with(context).load(article.getImageUrl()).into(articleImage);
+            // }
 
             itemView.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, itemView); // Add click animation
+                com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, itemView);
                 if (listener != null) {
                     listener.onArticleClick(article);
                 }
             });
             
-            bookmarkButton.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
-                android.widget.Toast.makeText(context, "Bookmark coming soon!", android.widget.Toast.LENGTH_SHORT).show();
-            });
+            if (bookmarkButton != null) {
+                bookmarkButton.setOnClickListener(v -> {
+                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
+                    android.widget.Toast.makeText(context, "Bookmark coming soon!", android.widget.Toast.LENGTH_SHORT).show();
+                });
+            }
         }
     }
 

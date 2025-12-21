@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.NewsAndLearn" parent="Base.Theme.NewsAndLearn" />
+
+    <!-- Text Appearance for Collapsing Toolbar -->
+    <style name="TextAppearance.App.CollapsingToolbar.Expanded" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

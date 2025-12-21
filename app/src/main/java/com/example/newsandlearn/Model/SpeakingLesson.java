@@ -6,6 +6,7 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SpeakingLesson - Model for speaking practice lessons
@@ -29,7 +30,9 @@ public class SpeakingLesson implements Parcelable {
     private String category;
     
     // Content
+    private String content;            // Main lesson content/instructions from Firebase
     private List<SpeakingPrompt> prompts;
+    private List<Map<String, Object>> exercises; // Exercises from Firebase
     private String sampleAudioUrl;     // Example pronunciation from Firebase Storage
     private String instructionsText;
     private String targetPhrase;       // What user should say
@@ -70,9 +73,15 @@ public class SpeakingLesson implements Parcelable {
         id = in.readString();
         title = in.readString();
         description = in.readString();
-        type = LessonType.valueOf(in.readString());
+        String typeString = in.readString();
+        try {
+            type = typeString != null ? LessonType.valueOf(typeString) : null;
+        } catch (IllegalArgumentException e) {
+            type = null;
+        }
         level = in.readString();
         category = in.readString();
+        content = in.readString();
         prompts = in.createTypedArrayList(SpeakingPrompt.CREATOR);
         sampleAudioUrl = in.readString();
         instructionsText = in.readString();
@@ -98,9 +107,10 @@ public class SpeakingLesson implements Parcelable {
         dest.writeString(id);
         dest.writeString(title);
         dest.writeString(description);
-        dest.writeString(type.name());
+        dest.writeString(type != null ? type.name() : null);
         dest.writeString(level);
         dest.writeString(category);
+        dest.writeString(content);
         dest.writeTypedList(prompts);
         dest.writeString(sampleAudioUrl);
         dest.writeString(instructionsText);
@@ -161,6 +171,12 @@ public class SpeakingLesson implements Parcelable {
     }
 
     // Getters and Setters
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public List<Map<String, Object>> getExercises() { return exercises; }
+    public void setExercises(List<Map<String, Object>> exercises) { this.exercises = exercises; }
+
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
 
