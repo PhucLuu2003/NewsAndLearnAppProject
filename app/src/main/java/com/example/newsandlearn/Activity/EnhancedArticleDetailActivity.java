@@ -50,6 +50,12 @@ import com.example.newsandlearn.Utils.TranslationAPI;
 import com.example.newsandlearn.Utils.VocabularyHelper;
 import com.example.newsandlearn.Utils.VocabularyMapGenerator;
 import com.example.newsandlearn.Utils.VoiceFeedbackManager;
+// ✨ NEW ADVANCED FEATURES
+import com.example.newsandlearn.Utils.ComprehensionCheckpointManager;
+import com.example.newsandlearn.Utils.SceneVisualizationManager;
+import com.example.newsandlearn.Utils.PreloadingDefinitionsManager;
+import com.example.newsandlearn.Utils.SmartPauseDetectionManager;
+import com.example.newsandlearn.Utils.VocabularyPreTeachManager;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
@@ -63,6 +69,7 @@ import java.util.List;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+
 
 public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
@@ -110,6 +117,13 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private InteractiveQuizManager quizManager;
     private boolean isBionicEnabled = false;
     private String fullArticleContent = "";
+    
+    // ✨ NEW ADVANCED FEATURES
+    private ComprehensionCheckpointManager checkpointManager;
+    private SceneVisualizationManager sceneVisualizationManager;
+    private PreloadingDefinitionsManager preloadingManager;
+    private SmartPauseDetectionManager pauseDetectionManager;
+    private VocabularyPreTeachManager preTeachManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,6 +170,13 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 // Silent fail
             }
         });
+        
+        // ✨ Initialize NEW ADVANCED FEATURES
+        checkpointManager = ComprehensionCheckpointManager.getInstance();
+        sceneVisualizationManager = SceneVisualizationManager.getInstance();
+        preloadingManager = PreloadingDefinitionsManager.getInstance();
+        pauseDetectionManager = SmartPauseDetectionManager.getInstance();
+        preTeachManager = VocabularyPreTeachManager.getInstance();
 
         // Track start time
         startTime = System.currentTimeMillis();
@@ -250,7 +271,29 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             if (maxScroll > 0) {
                 int progress = (int) ((scrollY / (float) maxScroll) * 100);
                 updateProgress(progress);
+                
+                // ✨ FEATURE 2: COMPREHENSION CHECKPOINTS
+                // Check if we should show a checkpoint
+                if (checkpointManager.shouldShowCheckpoint(fullArticleContent, scrollY, maxScroll)) {
+                    int checkpointIndex = checkpointManager.getCurrentCheckpointIndex();
+                    checkpointManager.showCheckpoint(this, checkpointIndex, 
+                        new ComprehensionCheckpointManager.CheckpointResultCallback() {
+                            @Override
+                            public void onCheckpointCompleted(boolean isCorrect) {
+                                checkpointManager.incrementCheckpointIndex();
+                                if (isCorrect) {
+                                    Toast.makeText(EnhancedArticleDetailActivity.this, 
+                                        "🎉 +5 XP for comprehension!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    );
+                }
             }
+            
+            // ✨ FEATURE 3: SMART PAUSE DETECTION
+            // Update scroll position for pause detection
+            pauseDetectionManager.updateScrollPosition(scrollY, maxScroll);
             
             // Content parallax/fade effect
             float alpha = 1.0f - (scrollY / 1000f);
@@ -896,6 +939,48 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                         if (content != null) {
                             articleContent.setText(content);
                             fullArticleContent = content; // Save for advanced features
+                            
+                            // ✨ FEATURE 1: VOCABULARY PRE-TEACH
+                            // Show important vocabulary BEFORE reading
+                            preTeachManager.analyzeAndSelectWords(
+                                content, 
+                                title != null ? title : "Article", 
+                                level != null ? level : "B1",
+                                new VocabularyPreTeachManager.PreTeachCallback() {
+                                    @Override
+                                    public void onSuccess(List<VocabularyPreTeachManager.PreTeachWord> words, String articleSummary) {
+                                        runOnUiThread(() -> {
+                                            preTeachManager.showPreTeachDialog(
+                                                EnhancedArticleDetailActivity.this,
+                                                articleSummary,
+                                                new VocabularyPreTeachManager.PreTeachResultCallback() {
+                                                    @Override
+                                                    public void onCompleted(int learnedCount, int totalCount) {
+                                                        Toast.makeText(EnhancedArticleDetailActivity.this, 
+                                                            "✅ " + learnedCount + "/" + totalCount + " words learned! Ready to read.", 
+                                                            Toast.LENGTH_SHORT).show();
+                                                        
+                                                        // Start other features after pre-teach
+                                                        initializeAdvancedFeatures(content, level);
+                                                    }
+
+                                                    @Override
+                                                    public void onSkipped() {
+                                                        // Still initialize features
+                                                        initializeAdvancedFeatures(content, level);
+                                                    }
+                                                }
+                                            );
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onError(String error) {
+                                        // Silent fail, continue with other features
+                                        initializeAdvancedFeatures(content, level);
+                                    }
+                                }
+                            );
                         }
                         if (category != null) categoryBadge.setText(category);
                         if (level != null) levelBadge.setText(level);
@@ -1246,6 +1331,9 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             stopTTS();
         }
         
+        // ✨ Stop pause detection
+        pauseDetectionManager.stopTracking();
+        
         // Track reading time
         long endTime = System.currentTimeMillis();
         int minutes = (int) ((endTime - startTime) / 60000);
@@ -1277,5 +1365,96 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         if (quizManager != null) {
             quizManager.dismissCurrentQuiz();
         }
+        
+        // ✨ Cleanup advanced features
+        if (pauseDetectionManager != null) {
+            pauseDetectionManager.stopTracking();
+        }
+        if (checkpointManager != null) {
+            checkpointManager.reset();
+        }
+        if (preloadingManager != null) {
+            preloadingManager.clearCache();
+        }
+        if (preTeachManager != null) {
+            preTeachManager.reset();
+        }
+    }
+    
+    // ✨ ==================== NEW ADVANCED FEATURES METHODS ====================
+    
+    /**
+     * Initialize all advanced reading features
+     */
+    private void initializeAdvancedFeatures(String content, String level) {
+        // FEATURE 2: Generate comprehension checkpoints
+        checkpointManager.generateCheckpoints(content, new ComprehensionCheckpointManager.CheckpointCallback() {
+            @Override
+            public void onSuccess(List<ComprehensionCheckpointManager.Checkpoint> checkpoints) {
+                runOnUiThread(() -> {
+                    Toast.makeText(EnhancedArticleDetailActivity.this, 
+                        "📍 " + checkpoints.size() + " checkpoints ready", 
+                        Toast.LENGTH_SHORT).show();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                // Silent fail
+            }
+        });
+        
+        // FEATURE 3: Pre-load definitions for difficult words
+        preloadingManager.preloadArticleDefinitions(this, content, level != null ? level : "B1", 
+            new PreloadingDefinitionsManager.PreloadCallback() {
+                @Override
+                public void onSuccess(int wordsPreloaded) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(EnhancedArticleDetailActivity.this, 
+                            "📚 " + wordsPreloaded + " definitions pre-loaded", 
+                            Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Silent fail
+                }
+            }
+        );
+        
+        // FEATURE 4: Start smart pause detection
+        pauseDetectionManager.startTracking(this, content, new SmartPauseDetectionManager.PauseDetectionCallback() {
+            @Override
+            public void onPauseDetected(int position, SmartPauseDetectionManager.PauseAnalysis analysis) {
+                // Dialog will be shown automatically
+            }
+
+            @Override
+            public void onHelpRequested(SmartPauseDetectionManager.PauseAnalysis analysis) {
+                // Show AI coach with the problematic section
+                showAICoach();
+            }
+
+            @Override
+            public void onContinueReading() {
+                // User chose to continue
+            }
+        });
+        
+        // FEATURE 5: Find visualizable scenes (optional - can be triggered manually)
+        sceneVisualizationManager.findVisualizableScenes(content, 
+            new SceneVisualizationManager.SceneAnalysisCallback() {
+                @Override
+                public void onSuccess(String analysisJson) {
+                    // Scenes identified, can be visualized on demand
+                }
+
+                @Override
+                public void onError(String error) {
+                    // Silent fail
+                }
+            }
+        );
     }
 }

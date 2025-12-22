@@ -86,4 +86,6 @@ dependencies {
     // Retrofit for REST API (optional, for future use)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    
+    // Note: Speech Recognition uses Android's built-in SpeechRecognizer - no external library needed
 }

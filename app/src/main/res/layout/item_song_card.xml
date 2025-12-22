@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/song_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎵 Song Title"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/song_category"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/song_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⏱️ 2:30 | 🎯 20 words"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/high_score"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🏆 High Score: 8,520"
+            android:textSize="14sp"
+            android:textColor="@color/primary"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:visibility="gone" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/difficulty_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⭐⭐⭐"
+                android:textColor="@android:color/white"
+                app:chipBackgroundColor="@color/orange"
+                android:layout_marginEnd="8dp" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/status_chip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="▶ Play"
+                android:textColor="@android:color/white"
+                app:chipBackgroundColor="@color/green" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

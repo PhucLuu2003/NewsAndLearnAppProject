@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="24dp"
+    app:cardElevation="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:background="@drawable/bg_glass_card">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/tv_checkpoint_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📍 Checkpoint 1/5"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Question -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Comprehension Check:"
+            android:textSize="14sp"
+            android:textColor="@color/text_secondary"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/tv_checkpoint_question"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="What is the main idea of this section?"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Options -->
+        <RadioGroup
+            android:id="@+id/radio_group_options"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+            <!-- Radio buttons will be added dynamically -->
+        </RadioGroup>
+
+        <!-- Explanation (hidden initially) -->
+        <LinearLayout
+            android:id="@+id/explanation_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#F0F8FF"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_explanation"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Explanation will appear here"
+                android:textSize="14sp"/>
+        </LinearLayout>
+
+        <!-- Submit Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_submit_answer"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Submit Answer"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"/>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

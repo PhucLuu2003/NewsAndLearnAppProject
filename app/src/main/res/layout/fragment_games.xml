@@ -84,6 +84,61 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Pronunciation Beat Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_pronunciation_beat"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:background="@drawable/gradient_header_bg"
+                android:padding="20dp"
+                android:gravity="center">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎤"
+                    android:textSize="48sp"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Pronunciation Beat"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:layout_marginBottom="4dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Speak words in rhythm like Guitar Hero!"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white"
+                    android:alpha="0.9"
+                    android:gravity="center" />
+
+                <com.google.android.material.chip.Chip
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🎵 NEW!"
+                    android:textColor="@android:color/white"
+                    app:chipBackgroundColor="#FF6B6B"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Grammar Quiz Card (Coming Soon) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_grammar_quiz"

@@ -55,8 +55,8 @@ public class AIReadingCoach {
     private void initializeModel() {
         try {
             GenerativeModel gm = new GenerativeModel(
-                "gemini-1.5-flash",
-                "AIzaSyBOqeAzN7nTE7i0o9VGvHLKCUHPXu0Kkpk"
+                "gemini-2.5-flash",
+                "AIzaSyAXGYeWoZ9y3aerzHUatkdcAXhXWd5EzA8"
             );
             model = GenerativeModelFutures.from(gm);
             Log.d(TAG, "AI Reading Coach initialized");

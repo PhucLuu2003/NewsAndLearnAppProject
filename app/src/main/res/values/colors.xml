@@ -208,4 +208,7 @@
     
     <!-- Chip Background -->
     <color name="chip_background">#F1F5F9</color>  <!-- Slate 100 -->
+    
+    <!-- Game Colors -->
+    <color name="orange">#F59E0B</color>  <!-- Amber 500 for game UI -->
 </resources>

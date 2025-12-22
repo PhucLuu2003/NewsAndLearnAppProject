@@ -41,6 +41,13 @@ public class GamesFragment extends Fragment {
             startActivity(intent);
         });
 
+        // Pronunciation Beat Card
+        MaterialCardView pronunciationBeatCard = view.findViewById(R.id.card_pronunciation_beat);
+        pronunciationBeatCard.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.PronunciationBeatActivity.class);
+            startActivity(intent);
+        });
+
         // TODO: Thêm các game khác ở đây
         // MaterialCardView grammarQuizCard = view.findViewById(R.id.card_grammar_quiz);
         // MaterialCardView listeningGameCard = view.findViewById(R.id.card_listening_game);

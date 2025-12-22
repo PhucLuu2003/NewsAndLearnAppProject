@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:background="@drawable/bg_glass_card">
+
+            <!-- Header -->
+            <TextView
+                android:id="@+id/tv_preteach_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📚 Key Vocabulary Preview"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="@color/primary"
+                android:gravity="center"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Article Summary -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="12dp"
+                app:cardBackgroundColor="#FFF3E0">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="📖 What you'll read:"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/text_primary"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:id="@+id/tv_article_summary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="This article is about..."
+                        android:textSize="14sp"
+                        android:textColor="@color/text_secondary"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Instruction -->
+            <TextView
+                android:id="@+id/tv_instruction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Learn these 5 important words first:"
+                android:textSize="16sp"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Progress -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <ProgressBar
+                    android:id="@+id/progress_learning"
+                    android:layout_width="0dp"
+                    android:layout_height="8dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="12dp"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+                    android:max="100"
+                    android:progress="0"/>
+
+                <TextView
+                    android:id="@+id/tv_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/5 learned"
+                    android:textSize="12sp"
+                    android:textColor="@color/text_secondary"/>
+
+            </LinearLayout>
+
+            <!-- Words Container (cards will be added dynamically) -->
+            <LinearLayout
+                android:id="@+id/words_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginBottom="16dp">
+                <!-- Word cards added dynamically -->
+            </LinearLayout>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_skip"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Skip for Now"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    app:cornerRadius="16dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_start_reading"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Start Reading"
+                    android:enabled="false"
+                    app:cornerRadius="16dp"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</ScrollView>

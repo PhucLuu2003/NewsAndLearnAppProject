@@ -44,6 +44,7 @@ public class LearnFragment extends Fragment {
     // Views
     private CardView vocabularyCard, grammarCard, listeningCard;
     private CardView speakingCard, readingCard, writingCard;
+    private CardView memoryPalaceCard; // NEW
     private CardView dailyGoalCard;
     private ProgressBar dailyGoalProgress;
     private TextView goalProgressText;
@@ -82,6 +83,7 @@ public class LearnFragment extends Fragment {
         speakingCard = view.findViewById(R.id.speaking_card);
         readingCard = view.findViewById(R.id.reading_card);
         writingCard = view.findViewById(R.id.writing_card);
+        memoryPalaceCard = view.findViewById(R.id.memory_palace_card); // NEW
         dailyGoalCard = view.findViewById(R.id.daily_goal_card);
         
         // Hide Speaking and Writing modules
@@ -104,6 +106,28 @@ public class LearnFragment extends Fragment {
         // setupCardListener(speakingCard, new SpeakingFragment(), "Speaking");
         setupCardListener(readingCard, new ReadingFragment(), "Reading");
         // setupCardListener(writingCard, new WritingFragment(), "Writing");
+        
+        // NEW: Memory Palace - opens Activity instead of Fragment
+        if (memoryPalaceCard != null) {
+            memoryPalaceCard.setOnClickListener(v -> {
+                v.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        v.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .withEndAction(() -> {
+                                trackModuleAccess("Memory Palace");
+                                openMemoryPalace();
+                            })
+                            .start();
+                    })
+                    .start();
+            });
+        }
     }
 
     private void setupCardListener(CardView card, Fragment fragment, String moduleName) {
@@ -329,6 +353,20 @@ public class LearnFragment extends Fragment {
             .alpha(1f)
             .setDuration(400)
             .start();
+    }
+
+    private void openMemoryPalace() {
+        if (getActivity() == null) return;
+        
+        android.content.Intent intent = new android.content.Intent(
+            getActivity(), 
+            com.example.newsandlearn.Activity.MemoryPalaceActivity.class
+        );
+        startActivity(intent);
+        getActivity().overridePendingTransition(
+            R.anim.slide_in_right, 
+            R.anim.slide_out_left
+        );
     }
 
     private void openFragment(Fragment fragment) {

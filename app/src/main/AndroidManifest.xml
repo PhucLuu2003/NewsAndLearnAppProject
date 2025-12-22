@@ -162,6 +162,47 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         
+        <!-- Pronunciation Beat Activity -->
+        <activity
+            android:name=".Activity.PronunciationBeatActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- Pronunciation Game Activity -->
+        <activity
+            android:name=".Activity.PronunciationGameActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- Game Result Activity -->
+        <activity
+            android:name=".Activity.GameResultActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- Memory Palace Activities -->
+        <activity
+            android:name=".Activity.MemoryPalaceActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <activity
+            android:name=".Activity.PalaceRoomsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <activity
+            android:name=".Activity.WordPlacementActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <activity
+            android:name=".Activity.MemoryWalkActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
     </application>
 
 </manifest>

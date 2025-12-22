@@ -452,6 +452,65 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
+            <!-- NEW: Memory Palace Module (Full Width) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/memory_palace_card"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/gradient_blue">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:gravity="center">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🏰"
+                            android:textSize="56sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:text="Memory Palace"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="#FFFFFF" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Learn vocabulary with crazy stories"
+                            android:textSize="12sp"
+                            android:textColor="#FFFFFF"
+                            android:alpha="0.95"
+                            android:textAlignment="center" />
+
+                        <View
+                            android:layout_width="50dp"
+                            android:layout_height="3dp"
+                            android:layout_marginTop="10dp"
+                            android:background="#FFFFFF"
+                            android:alpha="0.6" />
+
+                    </LinearLayout>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
 
     </LinearLayout>
