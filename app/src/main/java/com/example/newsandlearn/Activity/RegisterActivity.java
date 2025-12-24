@@ -233,8 +233,11 @@ public class RegisterActivity extends AppCompatActivity {
         user.put("username", username);
         user.put("level", "A1");
         user.put("streak", 0);
+        user.put("currentStreak", 0);  // For HomeFragment
+        user.put("totalXP", 0);         // For HomeFragment leaderboard
         user.put("totalDays", 0);
         user.put("createdAt", System.currentTimeMillis());
+        user.put("lastLoginDate", System.currentTimeMillis());
 
         db.collection("users").document(userId)
                 .set(user)

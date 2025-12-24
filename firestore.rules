@@ -1,145 +1,249 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Users collection
+
+    // =========================
+    // HELPER FUNCTIONS
+    // =========================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.admin == true;
+    }
+
+    // =========================
+    // USERS
+    // =========================
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      
-      // User vocabulary subcollection
-      match /user_vocabulary/{vocabId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User reading progress
-      match /reading_progress/{progressId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User writing submissions
-      match /writing_submissions/{submissionId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User listening progress
-      match /listening_progress/{progressId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User speaking recordings
-      match /speaking_recordings/{recordingId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User grammar progress
-      match /grammar_progress/{progressId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-      
-      // User reading analytics
-      match /reading_analytics/{analyticsId} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId);
+      allow delete: if isOwner(userId) || isAdmin();
+
+      match /{sub=**} {
+        allow read, write: if isOwner(userId);
       }
     }
-    
-    // Public vocabularies collection (read-only for all authenticated users)
-    match /vocabularies/{vocabId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
+
+    // =========================
+    // USER DATA NGOAI USERS
+    // =========================
+    match /daily_goals/{userId} {
+      allow read, write: if isOwner(userId);
     }
-    
-    // Articles collection (read-only for all authenticated users)
-    match /articles/{articleId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-    }
-    
-    // Video lessons collection (read-only for all authenticated users)
-    match /video_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-    }
-    
-    // Reading lessons collection (read-only for all authenticated users)
-    match /reading_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-      
-      // Reading lesson exercises subcollection
-      match /exercises/{exerciseId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null;
-      }
-      
-      // Reading lesson passages subcollection
-      match /passages/{passageId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null;
-      }
-    }
-    
-    // Writing lessons collection (read-only for all authenticated users)
-    match /writing_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-      
-      // Writing prompts subcollection
-      match /prompts/{promptId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.token.admin == true;
-      }
-      
-      // Writing templates subcollection
-      match /templates/{templateId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null && request.auth.token.admin == true;
-      }
-    }
-    
-    // Grammar lessons collection (read-only for all authenticated users)
-    match /grammar_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-      
-      // Grammar exercises subcollection
-      match /exercises/{exerciseId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null; // Allow seeding
-      }
-    }
-    
-    // Listening lessons collection (read-only for all authenticated users)
-    match /listening_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-      
-      // Listening exercises subcollection
-      match /exercises/{exerciseId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null; // Allow seeding
-      }
-    }
-    
-    // Speaking lessons collection (read-only for all authenticated users)
-    match /speaking_lessons/{lessonId} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null; // Allow seeding
-      
-      // Speaking exercises subcollection
-      match /exercises/{exerciseId} {
-        allow read: if request.auth != null;
-        allow write: if request.auth != null; // Allow seeding
-      }
-    }
-    
-    // Daily goals collection
-    match /daily_goals/{goalId} {
-      allow read, write: if request.auth != null && request.auth.uid == goalId;
-    }
-    
-    // Module progress collection
+
     match /module_progress/{progressId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAuthenticated();
+    }
+
+    // =========================
+    // ARTICLES (CO SEED 1 LAN)
+    // =========================
+    match /articles/{articleId} {
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to create articles (for seeding)
+      // In production, you might want to restrict this to admin only
+      allow create: if isAuthenticated();
+
+      // Chi admin duoc sua / xoa
+      allow update, delete: if isAdmin();
+    }
+
+    // =========================
+    // VOCABULARY
+    // =========================
+    match /vocabularies/{vocabId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /vocabulary_sets/{setId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /words/{wordId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // READING
+    // =========================
+    match /reading_articles/{articleId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /reading_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /{sub=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // WRITING
+    // =========================
+    match /writing_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /{sub=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // LISTENING
+    // =========================
+    match /listening_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /{sub=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // SPEAKING
+    // =========================
+    match /speaking_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /{sub=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // GRAMMAR
+    // =========================
+    match /grammar_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /{sub=**} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // VIDEO
+    // =========================
+    match /video_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================
+    // FLASHCARD / QUIZ
+    // =========================
+    match /flashcard_decks/{deckId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /cards/{cardId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    match /quiz_templates/{quizId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+
+      match /questions/{questionId} {
+        allow read: if isAuthenticated();
+        allow write: if isAdmin();
+      }
+    }
+
+    // =========================
+    // RPG
+    // =========================
+    match /rpg_characters/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /rpg_enemies/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /rpg_items/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /rpg_battles/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================
+    // SYSTEM
+    // =========================
+    match /app_config/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    match /announcements/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================
+    // ANALYTICS
+    // =========================
+    match /analytics/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /activity_logs/{logId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin();
+    }
+
+    // =========================
+    // COMMENTS
+    // =========================
+    match /comments/{commentId} {
+      allow read, create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() &&
+        resource.data.userId == request.auth.uid;
+    }
+
+    // =========================
+    // LEADERBOARD
+    // =========================
+    match /leaderboards/{id} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // =========================
+    // DEFAULT DENY
+    // =========================
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

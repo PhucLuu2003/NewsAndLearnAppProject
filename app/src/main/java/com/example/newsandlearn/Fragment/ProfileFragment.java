@@ -112,7 +112,7 @@ public class ProfileFragment extends Fragment {
         
         // Cards
         xpCard = view.findViewById(R.id.xp_card);
-        statsCard = view.findViewById(R.id.stats_card);
+        // statsCard = view.findViewById(R.id.stats_card); // Not in fragment_profile layout
         actionsCard = view.findViewById(R.id.actions_card);
         settingsCard = view.findViewById(R.id.settings_card);
         

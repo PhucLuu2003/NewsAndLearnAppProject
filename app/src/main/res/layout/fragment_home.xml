@@ -5,12 +5,13 @@
     android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="#F5F7FA">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:fillViewport="true"
+        android:scrollbars="none">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -41,248 +42,439 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
 
-            <!-- Header Container with Gradient Background -->
+            <!-- Animated Gradient Header Background -->
+            <View
+                android:id="@+id/header_background"
+                android:layout_width="match_parent"
+                android:layout_height="365dp"
+                android:background="@drawable/gradient_header_bg"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Header Container -->
             <LinearLayout
                 android:id="@+id/header_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="@drawable/gradient_header_bg"
-                android:paddingTop="48dp"
-                android:paddingBottom="24dp"
                 android:paddingStart="20dp"
+                android:paddingTop="48dp"
                 android:paddingEnd="20dp"
+                android:paddingBottom="24dp"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <!-- Top Bar -->
+                <!-- Top Bar with Profile -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-                    <!-- Profile Avatar -->
+                    <!-- Profile Avatar with Glow Effect -->
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        app:cardCornerRadius="26dp"
-                        app:cardElevation="4dp"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="#FFFFFF">
+                        android:id="@+id/profile_card"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        app:cardCornerRadius="28dp"
+                        app:cardElevation="8dp"
+                        app:strokeColor="#FFFFFF"
+                        app:strokeWidth="3dp">
 
-                        <ImageView
+                        <!-- Animated Lottie Avatar -->
+                        <com.airbnb.lottie.LottieAnimationView
                             android:id="@+id/profile_avatar"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:src="@drawable/ic_profile_placeholder"
-                            android:scaleType="centerCrop" />
+                            android:scaleType="centerCrop"
+                            app:lottie_rawRes="@raw/profile_avatar_boy"
+                            app:lottie_autoPlay="true"
+                            app:lottie_loop="true" />
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Username -->
+                    <!-- User Info -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
                         android:layout_weight="1"
-                        android:layout_marginStart="12dp"
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/greeting_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Good Morning, 👋"
-                            android:textSize="14sp"
+                            android:alpha="0.95"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="Good Morning 👋"
                             android:textColor="#FFFFFF"
-                            android:alpha="0.9" />
+                            android:textSize="13sp" />
 
                         <TextView
                             android:id="@+id/username"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="trinhkhoinguyen16"
-                            android:textSize="20sp"
+                            android:layout_marginTop="2dp"
+                            android:text="Loading..."
                             android:textColor="#FFFFFF"
-                            android:textStyle="bold"
-                            android:layout_marginTop="2dp" />
+                            android:textSize="18sp"
+                            android:textStyle="bold" />
                     </LinearLayout>
 
-                    <!-- Notification Button -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/notification_btn"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        app:cardCornerRadius="22dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#40FFFFFF"
+                    <!-- Notification Button with Badge -->
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp">
 
-                        <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:src="@drawable/ic_notification"
-                            android:layout_gravity="center"
-                            app:tint="#FFFFFF" />
-                    </com.google.android.material.card.MaterialCardView>
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/notification_btn"
+                            android:layout_width="46dp"
+                            android:layout_height="46dp"
+                            app:cardBackgroundColor="#40FFFFFF"
+                            app:cardCornerRadius="23dp"
+                            app:cardElevation="4dp">
+
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_notification"
+                                app:tint="#FFFFFF" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Notification Badge -->
+                        <View
+                            android:id="@+id/notification_badge"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/notification_badge_bg"
+                            android:visibility="gone" />
+                    </FrameLayout>
 
                     <!-- Settings Button -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/settings_btn"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
-                        app:cardCornerRadius="22dp"
-                        app:cardElevation="2dp"
-                        app:cardBackgroundColor="#40FFFFFF">
+                        android:layout_width="46dp"
+                        android:layout_height="46dp"
+                        app:cardBackgroundColor="#40FFFFFF"
+                        app:cardCornerRadius="23dp"
+                        app:cardElevation="4dp">
 
                         <ImageView
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_settings"
                             android:layout_gravity="center"
+                            android:src="@drawable/ic_settings"
                             app:tint="#FFFFFF" />
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
 
-                <!-- Search Bar -->
-                <LinearLayout
-                    android:id="@+id/search_bar_home"
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:layout_marginTop="20dp"
-                    android:background="@drawable/search_bar_bg"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:elevation="4dp">
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_search"
-                        app:tint="#9E9E9E" />
+                <!-- Enhanced Search Bar with Dropdown -->
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="12dp"
-                        android:text="Search lessons, articles..."
-                        android:textSize="15sp"
-                        android:textColor="#9E9E9E" />
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@drawable/ic_voice"
-                        app:tint="#6C63FF" />
-                </LinearLayout>
-
-                <!-- Stats Cards Row -->
-                <LinearLayout
-                    android:id="@+id/stats_card"
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="20dp"
-                    android:orientation="horizontal"
-                    android:weightSum="2">
+                    android:layout_marginTop="24dp">
 
-                    <!-- Streak Card -->
+                    <!-- Search Bar Card -->
                     <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="90dp"
-                        android:layout_weight="1"
-                        android:layout_marginEnd="8dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#FFFFFF">
+                        android:id="@+id/search_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="30dp"
+                        app:cardElevation="8dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:padding="12dp">
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingStart="20dp"
+                            android:paddingEnd="20dp">
 
-                            <LinearLayout
+                            <ImageView
+                                android:layout_width="24dp"
+                                android:layout_height="24dp"
+                                android:src="@drawable/ic_search"
+                                app:tint="#6C63FF" />
+
+                            <EditText
+                                android:id="@+id/search_input_home"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="14dp"
+                                android:layout_weight="1"
+                                android:background="@null"
+                                android:hint="Search articles, lessons..."
+                                android:imeOptions="actionSearch"
+                                android:inputType="text"
+                                android:maxLines="1"
+                                android:textColor="#333333"
+                                android:textColorHint="#9E9E9E"
+                                android:textSize="15sp" />
+
+                            <ImageView
+                                android:id="@+id/clear_search_btn"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:padding="4dp"
+                                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                                android:visibility="gone"
+                                app:tint="#999999" />
+
+                            <ImageView
+                                android:id="@+id/voice_search_btn"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:padding="2dp"
+                                android:src="@drawable/ic_voice"
+                                app:tint="#6C63FF" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <!-- Search Suggestions Dropdown -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/search_suggestions_card"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="68dp"
+                        android:visibility="gone"
+                        app:cardBackgroundColor="#FFFFFF"
+                        app:cardCornerRadius="16dp"
+                        app:cardElevation="12dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="8dp">
+
+                            <!-- Suggestions Header -->
+                            <TextView
+                                android:id="@+id/suggestions_header"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
+                                android:paddingStart="12dp"
+                                android:paddingTop="8dp"
+                                android:paddingEnd="12dp"
+                                android:paddingBottom="8dp"
+                                android:text="Suggestions"
+                                android:textColor="#666666"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                            <!-- Suggestions RecyclerView -->
+                            <androidx.recyclerview.widget.RecyclerView
+                                android:id="@+id/search_suggestions_recycler"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:maxHeight="400dp"
+                                android:nestedScrollingEnabled="false"
+                                android:overScrollMode="never" />
+
+                            <!-- Loading Indicator -->
+                            <ProgressBar
+                                android:id="@+id/search_loading"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_margin="16dp"
+                                android:visibility="gone" />
+
+                            <!-- No Results -->
+                            <TextView
+                                android:id="@+id/no_results_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:padding="24dp"
+                                android:text="😔 No results found"
+                                android:textColor="#999999"
+                                android:textSize="14sp"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </FrameLayout>
+
+                <!-- Stats Cards Row with Animations -->
+                <LinearLayout
+                    android:id="@+id/stats_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:weightSum="3">
+
+                    <!-- Streak Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/streak_card"
+                        android:layout_width="0dp"
+                        android:layout_height="110dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="12dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/streak_card_bg">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:padding="12dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="🔥"
-                                    android:textSize="28sp" />
+                                    android:textSize="32sp" />
 
                                 <TextView
                                     android:id="@+id/streak_count"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
                                     android:text="0"
-                                    android:textSize="28sp"
                                     android:textColor="#FF6B6B"
-                                    android:textStyle="bold"
-                                    android:layout_marginStart="8dp" />
-                            </LinearLayout>
+                                    android:textSize="26sp"
+                                    android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Streak"
-                                android:textSize="13sp"
-                                android:textColor="#757575"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Day Streak"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- XP Card -->
+                    <!-- Score Card -->
                     <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/score_card"
                         android:layout_width="0dp"
-                        android:layout_height="90dp"
+                        android:layout_height="110dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="6dp"
-                        app:cardBackgroundColor="#FFFFFF">
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="12dp">
 
-                        <LinearLayout
+                        <FrameLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:gravity="center"
-                            android:padding="12dp">
+                            android:background="@drawable/xp_card_bg">
 
                             <LinearLayout
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:orientation="horizontal"
-                                android:gravity="center_vertical">
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:padding="12dp">
 
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="⚡"
-                                    android:textSize="28sp" />
+                                    android:textSize="32sp" />
 
                                 <TextView
                                     android:id="@+id/user_level"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="0 / 100 XP"
-                                    android:textSize="15sp"
+                                    android:layout_marginTop="4dp"
+                                    android:maxLines="1"
+                                    android:text="0/100"
                                     android:textColor="#6C63FF"
-                                    android:textStyle="bold"
-                                    android:layout_marginStart="8dp" />
-                            </LinearLayout>
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
 
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Total XP"
-                                android:textSize="13sp"
-                                android:textColor="#757575"
-                                android:layout_marginTop="4dp" />
-                        </LinearLayout>
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="2dp"
+                                    android:text="XP"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp" />
+
+                                <!-- XP Progress Bar -->
+                                <ProgressBar
+                                    android:id="@+id/xp_progress_bar"
+                                    style="?android:attr/progressBarStyleHorizontal"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="8dp"
+                                    android:layout_marginStart="12dp"
+                                    android:layout_marginTop="6dp"
+                                    android:layout_marginEnd="12dp"
+                                    android:max="100"
+                                    android:progress="0"
+                                    android:progressBackgroundTint="#E0E0E0"
+                                    android:progressTint="#6C63FF" />
+                            </LinearLayout>
+                        </FrameLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+
+                    <!-- Rank Card -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/rank_card"
+                        android:layout_width="0dp"
+                        android:layout_height="110dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="12dp">
+
+                        <FrameLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/rank_card_bg">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:padding="12dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="🏆"
+                                    android:textSize="32sp" />
+
+                                <TextView
+                                    android:id="@+id/user_rank"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="#0"
+                                    android:textColor="#FFB800"
+                                    android:textSize="22sp"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:text="Your Rank"
+                                    android:textColor="#666666"
+                                    android:textSize="11sp" />
+                            </LinearLayout>
+                        </FrameLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </LinearLayout>
@@ -297,12 +489,29 @@
                 android:paddingBottom="80dp"
                 app:layout_constraintTop_toBottomOf="@id/header_container">
 
-                <!-- Level Filter Chips -->
+                <!-- Enhanced Filter Chips -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="24dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📚 Browse by Level"
+                        android:textSize="18sp"
+                        android:textColor="#212121"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
                 <HorizontalScrollView
                     android:id="@+id/level_chips_scroll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="12dp"
                     android:scrollbars="none">
 
                     <com.google.android.material.chip.ChipGroup
@@ -317,10 +526,12 @@
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="All Levels"
+                            android:text="✨ All Levels"
                             android:checked="true"
+                            android:textSize="14sp"
                             app:chipBackgroundColor="@color/chip_bg_selector"
-                            app:chipStrokeWidth="0dp" />
+                            app:chipStrokeWidth="0dp"
+                            app:chipCornerRadius="20dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_easy"
@@ -328,8 +539,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🟢 Easy"
+                            android:textSize="14sp"
                             app:chipBackgroundColor="@color/chip_bg_selector"
-                            app:chipStrokeWidth="0dp" />
+                            app:chipStrokeWidth="0dp"
+                            app:chipCornerRadius="20dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_medium"
@@ -337,8 +550,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🟡 Medium"
+                            android:textSize="14sp"
                             app:chipBackgroundColor="@color/chip_bg_selector"
-                            app:chipStrokeWidth="0dp" />
+                            app:chipStrokeWidth="0dp"
+                            app:chipCornerRadius="20dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_hard"
@@ -346,8 +561,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="🔴 Hard"
+                            android:textSize="14sp"
                             app:chipBackgroundColor="@color/chip_bg_selector"
-                            app:chipStrokeWidth="0dp" />
+                            app:chipStrokeWidth="0dp"
+                            app:chipCornerRadius="20dp" />
                     </com.google.android.material.chip.ChipGroup>
                 </HorizontalScrollView>
 
@@ -355,20 +572,20 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Featured Today"
+                    android:text="⭐ Featured Today"
                     android:textSize="22sp"
                     android:textColor="#212121"
                     android:textStyle="bold"
                     android:layout_marginTop="24dp" />
 
-                <!-- Hero Featured Card -->
+                <!-- Hero Featured Card with Enhanced Design -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/hero_card"
                     android:layout_width="match_parent"
-                    android:layout_height="200dp"
+                    android:layout_height="220dp"
                     android:layout_marginTop="12dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="8dp">
+                    app:cardCornerRadius="24dp"
+                    app:cardElevation="12dp">
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
@@ -381,7 +598,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_margin="16dp"
-                            app:cardCornerRadius="8dp"
+                            app:cardCornerRadius="10dp"
                             app:cardElevation="0dp"
                             app:cardBackgroundColor="#80000000"
                             app:layout_constraintTop_toTopOf="parent"
@@ -390,14 +607,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="DAILY PICK"
+                                android:text="✨ DAILY PICK"
                                 android:textSize="11sp"
                                 android:textColor="#FFFFFF"
                                 android:textStyle="bold"
-                                android:paddingStart="12dp"
-                                android:paddingEnd="12dp"
-                                android:paddingTop="6dp"
-                                android:paddingBottom="6dp"
+                                android:paddingStart="14dp"
+                                android:paddingEnd="14dp"
+                                android:paddingTop="7dp"
+                                android:paddingBottom="7dp"
                                 android:letterSpacing="0.1" />
                         </com.google.android.material.card.MaterialCardView>
 
@@ -416,17 +633,21 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:text="10 Phương pháp học tiếng Anh hiệu quả nhất 2024"
-                                android:textSize="18sp"
+                                android:textSize="19sp"
                                 android:textColor="#FFFFFF"
                                 android:textStyle="bold"
                                 android:maxLines="2"
-                                android:ellipsize="end" />
+                                android:ellipsize="end"
+                                android:shadowColor="#40000000"
+                                android:shadowDx="0"
+                                android:shadowDy="2"
+                                android:shadowRadius="4" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:orientation="horizontal"
-                                android:layout_marginTop="8dp">
+                                android:layout_marginTop="10dp">
 
                                 <TextView
                                     android:id="@+id/featured_source"
@@ -435,7 +656,7 @@
                                     android:text="BBC Learning English"
                                     android:textSize="13sp"
                                     android:textColor="#FFFFFF"
-                                    android:alpha="0.9" />
+                                    android:alpha="0.95" />
 
                                 <TextView
                                     android:layout_width="wrap_content"
@@ -452,7 +673,7 @@
                                     android:text="⏱ 5 phút đọc"
                                     android:textSize="13sp"
                                     android:textColor="#FFFFFF"
-                                    android:alpha="0.9" />
+                                    android:alpha="0.95" />
                             </LinearLayout>
                         </LinearLayout>
                     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -470,7 +691,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Video Lessons"
+                        android:text="🎥 Video Lessons"
                         android:textSize="22sp"
                         android:textColor="#212121"
                         android:textStyle="bold" />
@@ -496,6 +717,46 @@
                     android:clipToPadding="false"
                     android:paddingStart="0dp"
                     android:paddingEnd="0dp" />
+
+                <!-- News & Articles Section -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginTop="28dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📰 News &amp; Articles"
+                        android:textSize="22sp"
+                        android:textColor="#212121"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/view_all_articles_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="View All"
+                        android:textSize="14sp"
+                        android:textColor="#6C63FF"
+                        android:textStyle="bold"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:background="?attr/selectableItemBackground" />
+                </LinearLayout>
+
+                <!-- Articles RecyclerView -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/articles_recycler"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:nestedScrollingEnabled="false" />
 
             </LinearLayout>
 

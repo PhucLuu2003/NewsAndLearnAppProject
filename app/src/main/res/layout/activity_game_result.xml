@@ -21,6 +21,16 @@
             android:textColor="@android:color/white"
             android:layout_marginTop="32dp" />
 
+        <!-- Success Animation -->
+        <com.airbnb.lottie.LottieAnimationView
+            android:id="@+id/success_animation"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_marginTop="16dp"
+            app:lottie_rawRes="@raw/success_animation"
+            app:lottie_autoPlay="true"
+            app:lottie_loop="false" />
+
         <!-- Rank -->
         <TextView
             android:id="@+id/rank_text"

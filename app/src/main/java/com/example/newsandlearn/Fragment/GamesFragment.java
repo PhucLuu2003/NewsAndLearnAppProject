@@ -48,6 +48,13 @@ public class GamesFragment extends Fragment {
             startActivity(intent);
         });
 
+        // Story-Based Learning Card
+        MaterialCardView storyLearningCard = view.findViewById(R.id.card_story_learning);
+        storyLearningCard.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.StoryGameActivity.class);
+            startActivity(intent);
+        });
+
         // TODO: Thêm các game khác ở đây
         // MaterialCardView grammarQuizCard = view.findViewById(R.id.card_grammar_quiz);
         // MaterialCardView listeningGameCard = view.findViewById(R.id.card_listening_game);

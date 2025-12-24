@@ -3,14 +3,10 @@ package com.example.newsandlearn.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,8 +22,6 @@ import com.example.newsandlearn.Activity.EnhancedArticleDetailActivity;
 import com.example.newsandlearn.Adapter.DynamicArticleAdapter;
 import com.example.newsandlearn.Model.Article;
 import com.example.newsandlearn.R;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -50,14 +44,8 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
     private FirebaseAuth auth;
     
     // UI Components
-    private EditText searchEditText;
-    private ImageView searchIcon;
-    private ChipGroup filterChipGroup;
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
-    
-    private String currentFilter = "All";
-    private String currentSearchQuery = "";
 
     @Nullable
     @Override
@@ -73,8 +61,6 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
         initializeViews(view);
         setupRecyclerView();
         setupSwipeRefresh();
-        setupSearch();
-        setupFilters();
 
         // Load articles with animation
         new Handler().postDelayed(this::loadArticles, 300);
@@ -85,9 +71,6 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
     private void initializeViews(View view) {
         recyclerView = view.findViewById(R.id.recycler_articles);
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
-        searchEditText = view.findViewById(R.id.search_edit_text);
-        searchIcon = view.findViewById(R.id.search_icon);
-        filterChipGroup = view.findViewById(R.id.chip_group_filter);
         emptyStateLayout = view.findViewById(R.id.empty_state_layout);
         emptyStateText = view.findViewById(R.id.empty_state_text);
         
@@ -101,16 +84,7 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
         recyclerView.setAdapter(adapter);
         
         // Add scroll listener for dynamic effects
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                // Hide search when scrolling down
-                if (dy > 0 && searchEditText != null) {
-                    searchEditText.clearFocus();
-                }
-            }
-        });
+        // Scroll listener removed since search is no longer present
     }
 
     private void setupSwipeRefresh() {
@@ -123,40 +97,7 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
         swipeRefresh.setProgressBackgroundColorSchemeResource(R.color.white);
     }
 
-    private void setupSearch() {
-        if (searchEditText == null) return;
-        
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                currentSearchQuery = s.toString().toLowerCase().trim();
-                filterArticles();
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-
-    private void setupFilters() {
-        if (filterChipGroup == null) return;
-        
-        filterChipGroup.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            if (checkedIds.isEmpty()) {
-                currentFilter = "All";
-            } else {
-                int checkedId = checkedIds.get(0);
-                Chip chip = group.findViewById(checkedId);
-                if (chip != null) {
-                    currentFilter = chip.getText().toString();
-                }
-            }
-            filterArticles();
-        });
-    }
+    // Search and filter methods removed - showing all articles
 
     private void loadArticles() {
         swipeRefresh.setRefreshing(true);
@@ -174,7 +115,7 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
                         allArticles.add(article);
                     }
                     
-                    filterArticles();
+                    adapter.setArticles(allArticles);
                     swipeRefresh.setRefreshing(false);
 
                     if (allArticles.isEmpty()) {
@@ -191,32 +132,7 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
                 });
     }
 
-    private void filterArticles() {
-        filteredArticles.clear();
 
-        for (Article article : allArticles) {
-            boolean matchesSearch = currentSearchQuery.isEmpty() ||
-                    article.getTitle().toLowerCase().contains(currentSearchQuery) ||
-                    (article.getCategory() != null && article.getCategory().toLowerCase().contains(currentSearchQuery)) ||
-                    (article.getSource() != null && article.getSource().toLowerCase().contains(currentSearchQuery));
-
-            boolean matchesFilter = currentFilter.equals("All") ||
-                    (article.getLevel() != null && article.getLevel().equalsIgnoreCase(currentFilter));
-
-            if (matchesSearch && matchesFilter) {
-                filteredArticles.add(article);
-            }
-        }
-
-        adapter.setArticles(filteredArticles);
-        
-        if (filteredArticles.isEmpty() && !allArticles.isEmpty()) {
-            showEmptyState(true);
-            emptyStateText.setText("🔍 No articles match your search.\nTry different keywords.");
-        } else {
-            showEmptyState(false);
-        }
-    }
 
     private void showEmptyState(boolean show) {
         if (emptyStateLayout != null) {
@@ -283,7 +199,7 @@ public class ArticleFragment extends Fragment implements DynamicArticleAdapter.O
         super.onResume();
         // Refresh articles when returning to fragment
         if (adapter != null && !allArticles.isEmpty()) {
-            filterArticles();
+            adapter.setArticles(allArticles);
         }
     }
 }
