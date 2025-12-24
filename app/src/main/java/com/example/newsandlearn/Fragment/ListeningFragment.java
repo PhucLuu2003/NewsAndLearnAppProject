@@ -148,6 +148,7 @@ public class ListeningFragment extends Fragment {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ListeningLesson lesson = document.toObject(ListeningLesson.class);
                         if (lesson != null) {
+                            lesson.setId(document.getId()); // <-- THE FIX: Set the actual document ID
                             allLessons.add(lesson);
                         }
                     }
