@@ -1,48 +1,47 @@
 package com.example.newsandlearn.Activity;
 
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.media3.common.MediaItem;
+import androidx.media3.exoplayer.ExoPlayer;
 
-import com.example.newsandlearn.Adapter.ListeningQuestionAdapter;
 import com.example.newsandlearn.Model.ListeningLesson;
+import com.example.newsandlearn.Model.ListeningQuestion;
 import com.example.newsandlearn.Model.UserProgress;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressManager;
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
-/**
- * ListeningActivity - Audio player with comprehension questions
- * Audio loaded from Firebase Storage URL, NO hard-coded audio
- */
 public class ListeningActivity extends AppCompatActivity {
 
-    private ImageView backButton, playPauseButton, speedButton, transcriptButton;
-    private SeekBar audioSeekbar;
-    private TextView currentTime, totalTime, lessonTitle;
-    private RecyclerView questionsRecyclerView;
-    private MaterialButton submitButton;
+    private FlexboxLayout answerArea, wordPoolArea;
+    private MaterialButton checkButton;
+    private TextView instructionText, lessonTitle;
+    private ImageView playAudioButton;
 
     private ListeningLesson lesson;
+    private ListeningQuestion currentQuestion;
     private String lessonId;
-    private MediaPlayer mediaPlayer;
-    private Handler handler;
-    private float playbackSpeed = 1.0f;
-    private boolean isPlaying = false;
-    private ListeningQuestionAdapter questionsAdapter;
+    private ExoPlayer exoPlayer;
+
+    private List<String> answerWords = new ArrayList<>();
+    private List<String> poolWords = new ArrayList<>();
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -70,64 +69,46 @@ public class ListeningActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         progressManager = ProgressManager.getInstance();
-        handler = new Handler();
+        exoPlayer = new ExoPlayer.Builder(this).build();
     }
 
     private void initializeViews() {
-        backButton = findViewById(R.id.back_button);
-        playPauseButton = findViewById(R.id.play_pause_button);
-        speedButton = findViewById(R.id.speed_button);
-        transcriptButton = findViewById(R.id.transcript_button);
-        audioSeekbar = findViewById(R.id.audio_seekbar);
-        currentTime = findViewById(R.id.current_time);
-        totalTime = findViewById(R.id.total_time);
+        answerArea = findViewById(R.id.answer_area);
+        wordPoolArea = findViewById(R.id.word_pool_area);
+        checkButton = findViewById(R.id.check_button);
+        instructionText = findViewById(R.id.instruction_text);
         lessonTitle = findViewById(R.id.lesson_title);
-        questionsRecyclerView = findViewById(R.id.questions_recycler_view);
-        submitButton = findViewById(R.id.submit_button);
-
-        questionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        playAudioButton = findViewById(R.id.play_audio_button);
     }
 
     private void setupListeners() {
-        backButton.setOnClickListener(v -> onBackPressed());
-
-        playPauseButton.setOnClickListener(v -> togglePlayPause());
-
-        speedButton.setOnClickListener(v -> changeSpeed());
-
-        transcriptButton.setOnClickListener(v -> showTranscript());
-
-        audioSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if (fromUser && mediaPlayer != null) {
-                    mediaPlayer.seekTo(progress);
-                }
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        submitButton.setOnClickListener(v -> submitAnswers());
+        checkButton.setOnClickListener(v -> checkAnswer());
+        findViewById(R.id.back_button).setOnClickListener(v -> onBackPressed());
+        playAudioButton.setOnClickListener(v -> playAudio());
     }
 
-    /**
-     * Load lesson from Firebase - DYNAMIC
-     */
     private void loadLessonFromFirebase() {
         db.collection("listening_lessons").document(lessonId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     lesson = documentSnapshot.toObject(ListeningLesson.class);
-                    if (lesson != null) {
-                        displayLesson();
-                        initializeAudioPlayer();
+                    if (lesson != null && lesson.getQuestions() != null && !lesson.getQuestions().isEmpty()) {
+                        for (ListeningQuestion question : lesson.getQuestions()) {
+                            if (question.getType() == ListeningQuestion.QuestionType.SENTENCE_BUILDING) {
+                                currentQuestion = question;
+                                break;
+                            }
+                        }
+                        if (currentQuestion != null) {
+                            displayLesson();
+                            setupNewQuestion();
+                            playAudio(); // Autoplay when loaded
+                        } else {
+                            Toast.makeText(this, "No sentence building questions found", Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
                     } else {
-                        Toast.makeText(this, "Lesson not found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Lesson or questions not found", Toast.LENGTH_SHORT).show();
                         finish();
                     }
                 })
@@ -139,132 +120,102 @@ public class ListeningActivity extends AppCompatActivity {
 
     private void displayLesson() {
         lessonTitle.setText(lesson.getTitle());
-        totalTime.setText(lesson.getFormattedDuration());
+        instructionText.setText(currentQuestion.getQuestionText());
+    }
 
-        // Setup questions adapter
-        if (lesson.getQuestions() != null && !lesson.getQuestions().isEmpty()) {
-            questionsAdapter = new ListeningQuestionAdapter(this, lesson.getQuestions());
-            questionsRecyclerView.setAdapter(questionsAdapter);
+    private void setupNewQuestion() {
+        answerWords.clear();
+        poolWords.clear();
+
+        String[] words = currentQuestion.getCorrectAnswer().split("\\s+");
+        poolWords.addAll(Arrays.asList(words));
+        poolWords.addAll(currentQuestion.getOptions());
+        Collections.shuffle(poolWords);
+
+        updateWordViews();
+    }
+
+    private void updateWordViews() {
+        answerArea.removeAllViews();
+        wordPoolArea.removeAllViews();
+
+        for (String word : answerWords) {
+            Chip chip = createWordChip(word, true);
+            answerArea.addView(chip);
+        }
+
+        for (String word : poolWords) {
+            Chip chip = createWordChip(word, false);
+            wordPoolArea.addView(chip);
         }
     }
 
-    /**
-     * Initialize audio player with Firebase Storage URL
-     */
-    private void initializeAudioPlayer() {
-        if (lesson.getAudioUrl() == null) {
-            Toast.makeText(this, "No audio available", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private Chip createWordChip(String word, boolean isAnswerChip) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        Chip chip = (Chip) inflater.inflate(R.layout.chip_word, null, false);
+        chip.setText(word);
 
-        mediaPlayer = new MediaPlayer();
-        try {
-            // Load audio from Firebase Storage URL
-            mediaPlayer.setDataSource(this, Uri.parse(lesson.getAudioUrl()));
-            mediaPlayer.prepareAsync();
+        FlexboxLayout.LayoutParams params = new FlexboxLayout.LayoutParams(
+                FlexboxLayout.LayoutParams.WRAP_CONTENT,
+                FlexboxLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.setMargins(8, 8, 8, 8);
+        chip.setLayoutParams(params);
 
-            mediaPlayer.setOnPreparedListener(mp -> {
-                audioSeekbar.setMax(mp.getDuration());
-                updateSeekbar();
-            });
-
-            mediaPlayer.setOnCompletionListener(mp -> {
-                isPlaying = false;
-                playPauseButton.setImageResource(R.drawable.ic_play);
-                lesson.incrementListenCount();
-                saveProgress();
-            });
-
-        } catch (IOException e) {
-            Toast.makeText(this, "Error loading audio", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void togglePlayPause() {
-        if (mediaPlayer == null) return;
-
-        if (isPlaying) {
-            mediaPlayer.pause();
-            playPauseButton.setImageResource(R.drawable.ic_play);
-        } else {
-            mediaPlayer.start();
-            playPauseButton.setImageResource(android.R.drawable.ic_media_pause);
-        }
-        isPlaying = !isPlaying;
-    }
-
-    private void changeSpeed() {
-        if (mediaPlayer == null) return;
-
-        playbackSpeed = playbackSpeed == 1.0f ? 0.5f : (playbackSpeed == 0.5f ? 1.5f : 1.0f);
-        mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(playbackSpeed));
-        Toast.makeText(this, "Speed: " + playbackSpeed + "x", Toast.LENGTH_SHORT).show();
-    }
-
-    private void showTranscript() {
-        // TODO: Show transcript dialog
-        Toast.makeText(this, "Transcript feature coming soon", Toast.LENGTH_SHORT).show();
-    }
-
-    private void submitAnswers() {
-        // Calculate score from questions adapter
-        int score = 0;
-        if (questionsAdapter != null) {
-            score = questionsAdapter.calculateScore();
-        }
-
-        lesson.setCompleted(true);
-        lesson.setUserScore(score);
-        saveProgress();
-
-        // Award XP
-        final int finalScore = score;
-        progressManager.addXP(50, new ProgressManager.ProgressCallback() {
-            @Override
-            public void onSuccess(UserProgress progress) {
-                Toast.makeText(ListeningActivity.this, "Great! Score: " + finalScore + "% (+50 XP)", Toast.LENGTH_SHORT).show();
-                finish();
+        chip.setOnClickListener(v -> {
+            if (isAnswerChip) {
+                answerWords.remove(word);
+                poolWords.add(word);
+            } else {
+                poolWords.remove(word);
+                answerWords.add(word);
             }
-            
-            @Override
-            public void onFailure(Exception e) {}
+            Collections.shuffle(poolWords);
+            updateWordViews();
         });
+
+        return chip;
     }
 
-    private void updateSeekbar() {
-        if (mediaPlayer != null && isPlaying) {
-            audioSeekbar.setProgress(mediaPlayer.getCurrentPosition());
-            currentTime.setText(formatTime(mediaPlayer.getCurrentPosition()));
-            handler.postDelayed(this::updateSeekbar, 100);
+    private void playAudio() {
+        if (lesson != null && lesson.getAudioUrl() != null && !lesson.getAudioUrl().isEmpty()) {
+            try {
+                MediaItem mediaItem = MediaItem.fromUri(Uri.parse(lesson.getAudioUrl()));
+                exoPlayer.setMediaItem(mediaItem);
+                exoPlayer.prepare();
+                exoPlayer.play();
+            } catch (Exception e) {
+                Toast.makeText(this, "Error playing audio", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
-    private String formatTime(int millis) {
-        int seconds = millis / 1000;
-        int minutes = seconds / 60;
-        seconds = seconds % 60;
-        return String.format("%d:%02d", minutes, seconds);
-    }
+    private void checkAnswer() {
+        String userAnswer = String.join(" ", answerWords);
+        if (currentQuestion.checkAnswer(userAnswer)) {
+            Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
+            progressManager.addXP(20, new ProgressManager.ProgressCallback() {
+                @Override
+                public void onSuccess(UserProgress progress) {
+                    Toast.makeText(ListeningActivity.this, "+20 XP", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
 
-    /**
-     * Save progress to Firebase
-     */
-    private void saveProgress() {
-        if (auth.getCurrentUser() == null) return;
-
-        String userId = auth.getCurrentUser().getUid();
-        db.collection("users").document(userId)
-                .collection("listening_progress").document(lessonId)
-                .set(lesson);
+                @Override
+                public void onFailure(Exception e) {
+                    finish();
+                }
+            });
+        } else {
+            Toast.makeText(this, "Incorrect. Try again!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-            mediaPlayer = null;
+        if (exoPlayer != null) {
+            exoPlayer.release();
         }
-        handler.removeCallbacksAndMessages(null);
     }
 }

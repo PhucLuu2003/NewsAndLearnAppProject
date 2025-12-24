@@ -16,14 +16,15 @@ public class ListeningQuestion implements Parcelable {
         MULTIPLE_CHOICE,
         TRUE_FALSE,
         FILL_IN_BLANK,
-        ORDERING
+        ORDERING,
+        SENTENCE_BUILDING
     }
 
     private String id;
     private String questionText;
     private QuestionType type;
-    private List<String> options;      // For multiple choice
-    private String correctAnswer;
+    private List<String> options;      // For multiple choice, or distractors for SENTENCE_BUILDING
+    private String correctAnswer;      // Correct choice for MC, or the full sentence for SENTENCE_BUILDING
     private String explanation;        // Why this is the correct answer
     private int timestampSeconds;      // When in audio this question relates to
 
@@ -42,7 +43,15 @@ public class ListeningQuestion implements Parcelable {
     protected ListeningQuestion(Parcel in) {
         id = in.readString();
         questionText = in.readString();
-        type = QuestionType.valueOf(in.readString());
+        try {
+            String typeName = in.readString();
+            if (typeName != null) {
+                type = QuestionType.valueOf(typeName);
+            }
+        } catch (IllegalArgumentException e) {
+            // Handle case where enum name is not found, maybe default or log
+            type = QuestionType.MULTIPLE_CHOICE;
+        }
         options = in.createStringArrayList();
         correctAnswer = in.readString();
         explanation = in.readString();
@@ -53,7 +62,7 @@ public class ListeningQuestion implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(id);
         dest.writeString(questionText);
-        dest.writeString(type.name());
+        dest.writeString(type != null ? type.name() : "");
         dest.writeStringList(options);
         dest.writeString(correctAnswer);
         dest.writeString(explanation);
