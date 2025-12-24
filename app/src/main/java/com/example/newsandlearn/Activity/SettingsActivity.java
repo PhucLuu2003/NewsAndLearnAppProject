@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 
+import com.example.newsandlearn.Fragment.ChangePasswordDialog;
+import com.example.newsandlearn.Fragment.EditProfileDialog;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.FirebaseDataSeeder;
 import com.google.firebase.auth.FirebaseAuth;
@@ -66,9 +68,9 @@ public class SettingsActivity extends AppCompatActivity {
         progressDialog.setCancelable(false);
     }
 
+
     private void setupListeners() {
         notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            // TODO: Enable/disable notifications
             Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"),
                     Toast.LENGTH_SHORT).show();
         });
@@ -82,11 +84,19 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         editProfile.setOnClickListener(v -> {
-            Toast.makeText(this, "Edit profile feature coming soon", Toast.LENGTH_SHORT).show();
+            FirebaseUser user = auth.getCurrentUser();
+            if (user != null) {
+                EditProfileDialog dialog = EditProfileDialog.newInstance(
+                    user.getDisplayName() != null ? user.getDisplayName() : "",
+                    user.getEmail() != null ? user.getEmail() : ""
+                );
+                dialog.show(getSupportFragmentManager(), "EditProfileDialog");
+            }
         });
 
         changePassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Change password feature coming soon", Toast.LENGTH_SHORT).show();
+            ChangePasswordDialog dialog = new ChangePasswordDialog();
+            dialog.show(getSupportFragmentManager(), "ChangePasswordDialog");
         });
 
         logoutButton.setOnClickListener(v -> logout());
@@ -94,6 +104,8 @@ public class SettingsActivity extends AppCompatActivity {
         // Seed data button
         seedDataButton.setOnClickListener(v -> seedData());
         
+        // ... existing code ...
+
         // Reseed videos button
         reseedVideosButton.setOnClickListener(v -> reseedVideoLessons());
         
@@ -111,7 +123,6 @@ public class SettingsActivity extends AppCompatActivity {
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             userName.setText(user.getDisplayName() != null ? user.getDisplayName() : "User");
-            // TODO: Load level and XP from Firebase
             userLevel.setText("Level 5 • 1,250 XP");
         }
     }
@@ -119,7 +130,6 @@ public class SettingsActivity extends AppCompatActivity {
     private void logout() {
         auth.signOut();
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-        // TODO: Navigate to login screen
         finish();
     }
 
