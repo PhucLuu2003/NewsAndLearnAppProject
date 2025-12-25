@@ -15,6 +15,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -82,13 +83,14 @@ public class HomeFragment extends Fragment {
     
     // UI Components - Content
     private CardView heroCard;
+    private ImageView featuredImage;
     private TextView featuredTitle, featuredReadTime, featuredSource;
     private TextView seeAllVideosBtn;
     private TextView viewAllArticlesBtn;
     private SwipeRefreshLayout swipeRefresh;
     private RecyclerView videoLessonsRecycler;
     private RecyclerView articlesRecycler;
-    private ProgressBar loadingIndicator;
+    private LottieAnimationView loadingIndicator;
     private ChipGroup levelChipGroup;
     
     // Search Dropdown
@@ -96,7 +98,7 @@ public class HomeFragment extends Fragment {
     private ImageView clearSearchBtn;
     private MaterialCardView searchSuggestionsCard;
     private RecyclerView searchSuggestionsRecycler;
-    private ProgressBar searchLoading;
+    private LottieAnimationView searchLoading;
     private TextView noResultsText;
     private TextView suggestionsHeader;
     private SearchSuggestionAdapter searchSuggestionAdapter;
@@ -160,15 +162,15 @@ public class HomeFragment extends Fragment {
 
         // Header
         profileAvatar = view.findViewById(R.id.profile_avatar);
-        profileCard = view.findViewById(R.id.profile_card);
+        // profileCard = view.findViewById(R.id.profile_card); // Removed in new layout
         usernameText = view.findViewById(R.id.username);
         greetingText = view.findViewById(R.id.greeting_text);
         notificationBtn = view.findViewById(R.id.notification_btn);
-        notificationBadge = view.findViewById(R.id.notification_badge);
+        // notificationBadge = view.findViewById(R.id.notification_badge); // Removed in new layout
         settingsBtn = view.findViewById(R.id.settings_btn);
 
         // Voice Search (part of search dropdown now)
-        voiceSearchBtn = view.findViewById(R.id.voice_search_btn);
+        // voiceSearchBtn = view.findViewById(R.id.voice_search_btn); // Removed in new layout
 
         // Stats Cards
         streakCard = view.findViewById(R.id.streak_card);
@@ -181,6 +183,7 @@ public class HomeFragment extends Fragment {
 
         // Hero Section
         heroCard = view.findViewById(R.id.hero_card);
+        featuredImage = view.findViewById(R.id.featured_image);
         featuredTitle = view.findViewById(R.id.featured_title);
         featuredReadTime = view.findViewById(R.id.featured_read_time);
         featuredSource = view.findViewById(R.id.featured_source);
@@ -251,6 +254,8 @@ public class HomeFragment extends Fragment {
     }
     
     private void setupVideoLessonsRecyclerView() {
+        if (videoLessonsRecycler == null) return;
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
         videoLessonsRecycler.setLayoutManager(layoutManager);
@@ -260,6 +265,8 @@ public class HomeFragment extends Fragment {
     }
     
     private void setupArticlesRecyclerView() {
+        if (articlesRecycler == null) return;
+        
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         articlesRecycler.setLayoutManager(layoutManager);
         articlesRecycler.setNestedScrollingEnabled(false);
@@ -365,7 +372,7 @@ public class HomeFragment extends Fragment {
         swipeRefresh.setOnRefreshListener(() -> {
             loadArticles();
             loadUserInfo();
-            loadVideoLessons();
+            // loadVideoLessons(); // Commented out - videos removed
         });
 
         // Search Bar - Now using dropdown (see setupSearchDropdown())
@@ -439,35 +446,25 @@ public class HomeFragment extends Fragment {
             });
         }
 
-        // Hero Card - Navigate to Articles tab
-        heroCard.setOnClickListener(v -> {
-            animateCardPress(v);
-            v.postDelayed(() -> {
-                // Navigate to Articles tab (index 1 in bottom navigation)
-                if (getActivity() instanceof com.example.newsandlearn.Activity.MainActivity) {
-                    ((com.example.newsandlearn.Activity.MainActivity) getActivity()).navigateToTab(1);
-                }
-            }, 150);
-        });
-
         // See All Videos
-        seeAllVideosBtn.setOnClickListener(v -> {
-            animatePulse(v);
-            v.postDelayed(() -> {
-                Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.AllVideosActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }, 150);
-        });
+        if (seeAllVideosBtn != null) {
+            seeAllVideosBtn.setOnClickListener(v -> {
+                animatePulse(v);
+                v.postDelayed(() -> {
+                    Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.AllVideosActivity.class);
+                    startActivity(intent);
+                    requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                }, 150);
+            });
+        }
         
         // View All Articles Button
         if (viewAllArticlesBtn != null) {
             viewAllArticlesBtn.setOnClickListener(v -> {
                 animatePulse(v);
                 // Navigate to Articles tab
-                if (getActivity() != null) {
-                    // You can navigate to ArticleFragment or show all articles
-                    Toast.makeText(getContext(), "📰 Navigating to all articles...", Toast.LENGTH_SHORT).show();
+                if (getActivity() instanceof com.example.newsandlearn.Activity.MainActivity) {
+                    ((com.example.newsandlearn.Activity.MainActivity) getActivity()).navigateToTab(1);
                 }
             });
         }
@@ -656,17 +653,39 @@ public class HomeFragment extends Fragment {
 
     private void updateHeroSection(Article article) {
         if (article != null) {
-            featuredTitle.setText(article.getTitle());
-            featuredReadTime.setText("⏱ " + article.getReadingTime() + " phút đọc");
-            featuredSource.setText(article.getSource());
+            if (featuredTitle != null) {
+                featuredTitle.setText(article.getTitle());
+            }
+            if (featuredReadTime != null) {
+                featuredReadTime.setText("⏱ " + article.getReadingTime() + " phút đọc");
+            }
+            if (featuredSource != null) {
+                featuredSource.setText(article.getSource());
+            }
+            // Load image with Glide
+            if (featuredImage != null) {
+                if (article.getImageUrl() != null && !article.getImageUrl().isEmpty()) {
+                    com.bumptech.glide.Glide.with(this)
+                        .load(article.getImageUrl())
+                        .placeholder(R.drawable.placeholder_article)
+                        .error(R.drawable.placeholder_article)
+                        .centerCrop()
+                        .into(featuredImage);
+                } else {
+                    // No image URL, show placeholder
+                    featuredImage.setImageResource(R.drawable.placeholder_article);
+                }
+            }
         }
     }
 
     private void showLoading(boolean show) {
-        if (show) {
-            loadingIndicator.setVisibility(View.VISIBLE);
-        } else {
-            loadingIndicator.setVisibility(View.GONE);
+        if (loadingIndicator != null) {
+            if (show) {
+                loadingIndicator.setVisibility(View.VISIBLE);
+            } else {
+                loadingIndicator.setVisibility(View.GONE);
+            }
         }
     }
 

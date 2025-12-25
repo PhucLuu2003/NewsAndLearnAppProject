@@ -43,7 +43,29 @@ public class HomeArticleAdapter extends RecyclerView.Adapter<HomeArticleAdapter.
         holder.title.setText(article.getTitle());
         holder.source.setText(article.getSource());
         holder.readTime.setText(article.getReadTime() + " min");
-        holder.level.setText(article.getLevel());
+        
+        // Set level with colored badge
+        String level = article.getLevel();
+        holder.level.setText(level != null ? level : "easy");
+        
+        // Set badge color based on level
+        int badgeDrawable;
+        if (level != null) {
+            switch (level.toLowerCase()) {
+                case "medium":
+                    badgeDrawable = R.drawable.badge_level_medium;
+                    break;
+                case "hard":
+                    badgeDrawable = R.drawable.badge_level_hard;
+                    break;
+                default:
+                    badgeDrawable = R.drawable.badge_level_easy;
+                    break;
+            }
+        } else {
+            badgeDrawable = R.drawable.badge_level_easy;
+        }
+        holder.level.setBackgroundResource(badgeDrawable);
 
         // Load image with Glide
         if (article.getImageUrl() != null && !article.getImageUrl().isEmpty()) {
@@ -53,6 +75,8 @@ public class HomeArticleAdapter extends RecyclerView.Adapter<HomeArticleAdapter.
                     .error(R.drawable.ic_article_placeholder)
                     .centerCrop()
                     .into(holder.thumbnail);
+        } else {
+            holder.thumbnail.setImageResource(R.drawable.ic_article_placeholder);
         }
 
         // Bookmark icon

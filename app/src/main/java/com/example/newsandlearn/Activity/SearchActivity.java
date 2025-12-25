@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,7 +31,7 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
     private EditText searchInput;
     private ImageButton backButton, clearButton;
     private RecyclerView searchResultsRecyclerView;
-    private ProgressBar loadingIndicator;
+    private LottieAnimationView loadingIndicator;
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
     

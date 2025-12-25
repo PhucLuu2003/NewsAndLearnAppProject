@@ -5,24 +5,28 @@
     android:id="@+id/swipe_refresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA">
+    android:background="#F8FAFC">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true"
-        android:scrollbars="none">
+        android:scrollbars="none"
+        android:overScrollMode="never">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <!-- Loading Indicator -->
-            <ProgressBar
+            <!-- Loading Indicator with Lottie Animation -->
+            <com.airbnb.lottie.LottieAnimationView
                 android:id="@+id/loading_indicator"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
                 android:visibility="gone"
+                app:lottie_rawRes="@raw/loading"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -41,6 +45,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent" />
+
+            <!-- Celebration Confetti Animation (Level Up, Achievements) -->
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/confetti_animation"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:elevation="100dp"
+                app:lottie_rawRes="@raw/confetti"
+                app:lottie_autoPlay="false"
+                app:lottie_loop="false"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+
 
             <!-- Animated Gradient Header Background -->
             <View
@@ -69,26 +89,43 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <!-- Profile Avatar with Glow Effect -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/profile_card"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        app:cardCornerRadius="28dp"
-                        app:cardElevation="8dp"
-                        app:strokeColor="#FFFFFF"
-                        app:strokeWidth="3dp">
+                    <!-- Profile Avatar with Animated Frame -->
+                    <FrameLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
 
-                        <!-- Animated Lottie Avatar -->
+                        <!-- Animated Frame (Behind) -->
                         <com.airbnb.lottie.LottieAnimationView
-                            android:id="@+id/profile_avatar"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:scaleType="centerCrop"
-                            app:lottie_rawRes="@raw/profile_avatar_boy"
+                            android:id="@+id/avatar_frame_animation"
+                            android:layout_width="84dp"
+                            android:layout_height="84dp"
+                            android:layout_gravity="center"
+                            app:lottie_rawRes="@raw/avatar_frame"
                             app:lottie_autoPlay="true"
                             app:lottie_loop="true" />
-                    </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Avatar Card (On Top) -->
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/profile_card"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_gravity="center"
+                            app:cardCornerRadius="28dp"
+                            app:cardElevation="8dp"
+                            app:strokeColor="#FFFFFF"
+                            app:strokeWidth="3dp">
+
+                            <!-- Animated Lottie Avatar -->
+                            <com.airbnb.lottie.LottieAnimationView
+                                android:id="@+id/profile_avatar"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:scaleType="centerCrop"
+                                app:lottie_rawRes="@raw/profile_avatar_boy"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true" />
+                        </com.google.android.material.card.MaterialCardView>
+                    </FrameLayout>
 
                     <!-- User Info -->
                     <LinearLayout
@@ -184,56 +221,58 @@
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/search_card"
                         android:layout_width="match_parent"
-                        android:layout_height="60dp"
+                        android:layout_height="56dp"
                         app:cardBackgroundColor="#FFFFFF"
-                        app:cardCornerRadius="30dp"
-                        app:cardElevation="8dp">
+                        app:cardCornerRadius="28dp"
+                        app:cardElevation="12dp"
+                        app:strokeWidth="0dp">
 
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:gravity="center_vertical"
                             android:orientation="horizontal"
-                            android:paddingStart="20dp"
-                            android:paddingEnd="20dp">
+                            android:paddingStart="18dp"
+                            android:paddingEnd="18dp">
 
                             <ImageView
-                                android:layout_width="24dp"
-                                android:layout_height="24dp"
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
                                 android:src="@drawable/ic_search"
-                                app:tint="#6C63FF" />
+                                app:tint="#764ba2" />
 
                             <EditText
                                 android:id="@+id/search_input_home"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:layout_marginStart="14dp"
+                                android:layout_marginStart="12dp"
                                 android:layout_weight="1"
                                 android:background="@null"
                                 android:hint="Search articles, lessons..."
                                 android:imeOptions="actionSearch"
                                 android:inputType="text"
                                 android:maxLines="1"
-                                android:textColor="#333333"
+                                android:textColor="#1A1A2E"
                                 android:textColorHint="#9E9E9E"
-                                android:textSize="15sp" />
+                                android:textSize="14sp"
+                                android:fontFamily="sans-serif-medium" />
 
                             <ImageView
                                 android:id="@+id/clear_search_btn"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
+                                android:layout_width="26dp"
+                                android:layout_height="26dp"
                                 android:padding="4dp"
                                 android:src="@android:drawable/ic_menu_close_clear_cancel"
                                 android:visibility="gone"
-                                app:tint="#999999" />
+                                app:tint="#BDBDBD" />
 
                             <ImageView
                                 android:id="@+id/voice_search_btn"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
+                                android:layout_width="26dp"
+                                android:layout_height="26dp"
                                 android:padding="2dp"
                                 android:src="@drawable/ic_voice"
-                                app:tint="#6C63FF" />
+                                app:tint="#764ba2" />
                         </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
@@ -278,13 +317,16 @@
                                 android:overScrollMode="never" />
 
                             <!-- Loading Indicator -->
-                            <ProgressBar
+                            <com.airbnb.lottie.LottieAnimationView
                                 android:id="@+id/search_loading"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_width="80dp"
+                                android:layout_height="80dp"
                                 android:layout_gravity="center"
                                 android:layout_margin="16dp"
-                                android:visibility="gone" />
+                                android:visibility="gone"
+                                app:lottie_rawRes="@raw/loading"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true" />
 
                             <!-- No Results -->
                             <TextView
@@ -301,7 +343,7 @@
                     </com.google.android.material.card.MaterialCardView>
                 </FrameLayout>
 
-                <!-- Stats Cards Row with Animations -->
+                <!-- 📊 Stats Cards - Clean Modern Design -->
                 <LinearLayout
                     android:id="@+id/stats_container"
                     android:layout_width="match_parent"
@@ -310,171 +352,173 @@
                     android:orientation="horizontal"
                     android:weightSum="3">
 
-                    <!-- Streak Card -->
+                    <!-- 🔥 Streak Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/streak_card"
                         android:layout_width="0dp"
-                        android:layout_height="110dp"
+                        android:layout_height="120dp"
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="20dp"
-                        app:cardElevation="12dp">
+                        app:cardElevation="4dp"
+                        app:strokeColor="#FFEBE6"
+                        app:strokeWidth="1dp">
 
-                        <FrameLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/streak_card_bg">
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
+                            <!-- Fire Animation -->
+                            <com.airbnb.lottie.LottieAnimationView
+                                android:id="@+id/fire_animation"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                app:lottie_rawRes="@raw/fire_icon"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true"
+                                app:lottie_speed="0.8" />
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="🔥"
-                                    android:textSize="32sp" />
+                            <!-- Streak Count -->
+                            <TextView
+                                android:id="@+id/streak_count"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="0"
+                                android:textColor="#FF5722"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
 
-                                <TextView
-                                    android:id="@+id/streak_count"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="0"
-                                    android:textColor="#FF6B6B"
-                                    android:textSize="26sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="Day Streak"
-                                    android:textColor="#666666"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                        </FrameLayout>
+                            <!-- Label -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Day Streak"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-                    <!-- Score Card -->
+                    <!-- ⚡ XP Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/score_card"
                         android:layout_width="0dp"
-                        android:layout_height="110dp"
+                        android:layout_height="120dp"
                         android:layout_marginStart="6dp"
                         android:layout_marginEnd="6dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="20dp"
-                        app:cardElevation="12dp">
+                        app:cardElevation="4dp"
+                        app:strokeColor="#EDE7F6"
+                        app:strokeWidth="1dp">
 
-                        <FrameLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/xp_card_bg">
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
 
-                            <LinearLayout
+                            <!-- Lightning Icon -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="⚡"
+                                android:textSize="32sp" />
+
+                            <!-- XP Text -->
+                            <TextView
+                                android:id="@+id/user_level"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:maxLines="1"
+                                android:text="0/100"
+                                android:textColor="#7C4DFF"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
+
+                            <!-- Label -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="XP Points"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <!-- XP Progress Bar -->
+                            <ProgressBar
+                                android:id="@+id/xp_progress_bar"
+                                style="?android:attr/progressBarStyleHorizontal"
                                 android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="⚡"
-                                    android:textSize="32sp" />
-
-                                <TextView
-                                    android:id="@+id/user_level"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:maxLines="1"
-                                    android:text="0/100"
-                                    android:textColor="#6C63FF"
-                                    android:textSize="14sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="2dp"
-                                    android:text="XP"
-                                    android:textColor="#666666"
-                                    android:textSize="11sp" />
-
-                                <!-- XP Progress Bar -->
-                                <ProgressBar
-                                    android:id="@+id/xp_progress_bar"
-                                    style="?android:attr/progressBarStyleHorizontal"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="8dp"
-                                    android:layout_marginStart="12dp"
-                                    android:layout_marginTop="6dp"
-                                    android:layout_marginEnd="12dp"
-                                    android:max="100"
-                                    android:progress="0"
-                                    android:progressBackgroundTint="#E0E0E0"
-                                    android:progressTint="#6C63FF" />
-                            </LinearLayout>
-                        </FrameLayout>
+                                android:layout_height="4dp"
+                                android:layout_marginTop="6dp"
+                                android:max="100"
+                                android:progress="0"
+                                android:progressBackgroundTint="#E0E0E0"
+                                android:progressTint="#7C4DFF" />
+                        </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
 
-
-                    <!-- Rank Card -->
+                    <!-- 🏆 Rank Card -->
                     <com.google.android.material.card.MaterialCardView
                         android:id="@+id/rank_card"
                         android:layout_width="0dp"
-                        android:layout_height="110dp"
+                        android:layout_height="120dp"
                         android:layout_marginStart="6dp"
                         android:layout_weight="1"
-                        app:cardBackgroundColor="@android:color/transparent"
+                        app:cardBackgroundColor="#FFFFFF"
                         app:cardCornerRadius="20dp"
-                        app:cardElevation="12dp">
+                        app:cardElevation="4dp"
+                        app:strokeColor="#FFF3E0"
+                        app:strokeWidth="1dp">
 
-                        <FrameLayout
+                        <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:background="@drawable/rank_card_bg">
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:padding="12dp">
 
-                            <LinearLayout
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:gravity="center"
-                                android:orientation="vertical"
-                                android:padding="12dp">
+                            <!-- Trophy Animation -->
+                            <com.airbnb.lottie.LottieAnimationView
+                                android:id="@+id/trophy_animation"
+                                android:layout_width="40dp"
+                                android:layout_height="40dp"
+                                app:lottie_rawRes="@raw/trophy_animation"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true" />
 
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:text="🏆"
-                                    android:textSize="32sp" />
+                            <!-- Rank Number -->
+                            <TextView
+                                android:id="@+id/user_rank"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="#0"
+                                android:textColor="#FF9800"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                android:fontFamily="sans-serif-black" />
 
-                                <TextView
-                                    android:id="@+id/user_rank"
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="#0"
-                                    android:textColor="#FFB800"
-                                    android:textSize="22sp"
-                                    android:textStyle="bold" />
-
-                                <TextView
-                                    android:layout_width="wrap_content"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginTop="4dp"
-                                    android:text="Your Rank"
-                                    android:textColor="#666666"
-                                    android:textSize="11sp" />
-                            </LinearLayout>
-                        </FrameLayout>
+                            <!-- Label -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Your Rank"
+                                android:textColor="#9E9E9E"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
                     </com.google.android.material.card.MaterialCardView>
                 </LinearLayout>
             </LinearLayout>
@@ -495,7 +539,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="24dp">
+                    android:layout_marginTop="28dp">
 
                     <TextView
                         android:layout_width="0dp"
@@ -503,68 +547,82 @@
                         android:layout_weight="1"
                         android:text="📚 Browse by Level"
                         android:textSize="18sp"
-                        android:textColor="#212121"
-                        android:textStyle="bold" />
+                        android:textColor="#1A1A2E"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="-0.01" />
                 </LinearLayout>
 
                 <HorizontalScrollView
                     android:id="@+id/level_chips_scroll"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:scrollbars="none">
+                    android:layout_marginTop="14dp"
+                    android:scrollbars="none"
+                    android:fadingEdge="horizontal"
+                    android:requiresFadingEdge="horizontal"
+                    android:fadingEdgeLength="24dp">
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/level_chip_group"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         app:singleSelection="true"
-                        app:selectionRequired="true">
+                        app:selectionRequired="true"
+                        app:chipSpacingHorizontal="8dp">
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_all"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="44dp"
                             android:text="✨ All Levels"
                             android:checked="true"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
                             app:chipBackgroundColor="@color/chip_bg_selector"
                             app:chipStrokeWidth="0dp"
-                            app:chipCornerRadius="20dp" />
+                            app:chipCornerRadius="22dp"
+                            app:chipMinHeight="44dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_easy"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="44dp"
                             android:text="🟢 Easy"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
                             app:chipBackgroundColor="@color/chip_bg_selector"
                             app:chipStrokeWidth="0dp"
-                            app:chipCornerRadius="20dp" />
+                            app:chipCornerRadius="22dp"
+                            app:chipMinHeight="44dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_medium"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="44dp"
                             android:text="🟡 Medium"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
                             app:chipBackgroundColor="@color/chip_bg_selector"
                             app:chipStrokeWidth="0dp"
-                            app:chipCornerRadius="20dp" />
+                            app:chipCornerRadius="22dp"
+                            app:chipMinHeight="44dp" />
 
                         <com.google.android.material.chip.Chip
                             android:id="@+id/chip_hard"
                             style="@style/Widget.Material3.Chip.Filter"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
+                            android:layout_height="44dp"
                             android:text="🔴 Hard"
-                            android:textSize="14sp"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
                             app:chipBackgroundColor="@color/chip_bg_selector"
                             app:chipStrokeWidth="0dp"
-                            app:chipCornerRadius="20dp" />
+                            app:chipCornerRadius="22dp"
+                            app:chipMinHeight="44dp" />
                     </com.google.android.material.chip.ChipGroup>
                 </HorizontalScrollView>
 
@@ -589,8 +647,29 @@
 
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/hero_card_gradient">
+                        android:layout_height="match_parent">
+
+                        <!-- Background Image -->
+                        <ImageView
+                            android:id="@+id/featured_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/placeholder_article"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                        <!-- Scrim Gradient Overlay -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/hero_card_gradient"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
 
                         <!-- Badge -->
                         <com.google.android.material.card.MaterialCardView
@@ -685,27 +764,33 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="28dp">
+                    android:layout_marginTop="32dp">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="🎥 Video Lessons"
-                        android:textSize="22sp"
-                        android:textColor="#212121"
-                        android:textStyle="bold" />
+                        android:textSize="20sp"
+                        android:textColor="#1A1A2E"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="-0.01" />
 
                     <TextView
                         android:id="@+id/see_all_videos_btn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="View All"
-                        android:textSize="14sp"
-                        android:textColor="#6C63FF"
+                        android:text="View All →"
+                        android:textSize="13sp"
+                        android:textColor="#764ba2"
                         android:textStyle="bold"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp" />
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:background="?attr/selectableItemBackgroundBorderless" />
                 </LinearLayout>
 
                 <!-- Video Lessons RecyclerView -->
@@ -724,30 +809,35 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginTop="28dp">
+                    android:layout_marginTop="32dp">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="📰 News &amp; Articles"
-                        android:textSize="22sp"
-                        android:textColor="#212121"
-                        android:textStyle="bold" />
+                        android:textSize="20sp"
+                        android:textColor="#1A1A2E"
+                        android:textStyle="bold"
+                        android:fontFamily="sans-serif-black"
+                        android:letterSpacing="-0.01" />
 
                     <TextView
                         android:id="@+id/view_all_articles_btn"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="View All"
-                        android:textSize="14sp"
-                        android:textColor="#6C63FF"
+                        android:text="View All →"
+                        android:textSize="13sp"
+                        android:textColor="#764ba2"
                         android:textStyle="bold"
-                        android:paddingStart="8dp"
-                        android:paddingEnd="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="4dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="?attr/selectableItemBackground" />
+                        android:background="?attr/selectableItemBackgroundBorderless" />
                 </LinearLayout>
 
                 <!-- Articles RecyclerView -->

@@ -8,7 +8,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,7 +32,7 @@ public class RegisterActivity extends AppCompatActivity {
     private MaterialButton registerButton;
     private TextView loginLink;
     private ImageView backButton, passwordToggle;
-    private ProgressBar progressBar;
+    private LottieAnimationView progressBar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private CardView logoCard; // register_card wraps all

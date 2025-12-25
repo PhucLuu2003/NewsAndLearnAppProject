@@ -41,10 +41,14 @@ public class LearnFragment extends Fragment {
     private FirebaseFirestore db;
     private FirebaseUser currentUser;
 
-    // Views
+    // Views - Core Modules
     private CardView vocabularyCard, grammarCard, listeningCard;
     private CardView speakingCard, readingCard, writingCard;
-    private CardView memoryPalaceCard; // NEW
+    
+    // Views - Learning Resources
+    private CardView kidsLearningCard, storiesCard, gamesCard, videoLessonsCard;
+    
+    // Views - Daily Goal
     private CardView dailyGoalCard;
     private ProgressBar dailyGoalProgress;
     private TextView goalProgressText;
@@ -76,29 +80,28 @@ public class LearnFragment extends Fragment {
     }
 
     private void initializeViews(View view) {
-        // Cards
+        // Core Module Cards
         vocabularyCard = view.findViewById(R.id.vocabulary_card);
         grammarCard = view.findViewById(R.id.grammar_card);
         listeningCard = view.findViewById(R.id.listening_card);
-        speakingCard = view.findViewById(R.id.speaking_card);
         readingCard = view.findViewById(R.id.reading_card);
-        writingCard = view.findViewById(R.id.writing_card);
-        memoryPalaceCard = view.findViewById(R.id.memory_palace_card); // NEW
-        dailyGoalCard = view.findViewById(R.id.daily_goal_card);
         
-        // Hide Speaking and Writing modules
-        if (speakingCard != null) speakingCard.setVisibility(View.GONE);
-        if (writingCard != null) writingCard.setVisibility(View.GONE);
+        // Learning Resource Cards
+        kidsLearningCard = view.findViewById(R.id.kids_learning_card);
+        storiesCard = view.findViewById(R.id.stories_card);
+        gamesCard = view.findViewById(R.id.games_card);
+        videoLessonsCard = view.findViewById(R.id.video_lessons_card);
+        
+        dailyGoalCard = view.findViewById(R.id.daily_goal_card);
         
         // Progress
         dailyGoalProgress = view.findViewById(R.id.daily_goal_progress);
         goalProgressText = view.findViewById(R.id.goal_progress_text);
         
-
     }
 
     private void setupListeners() {
-        // Add press/release animations to cards
+        // Add press/release animations to core module cards
         setupCardListener(vocabularyCard, new VocabularyFragment(), "Vocabulary");
         setupCardListener(grammarCard, new GrammarFragment(), "Grammar");
         setupCardListener(listeningCard, new ListeningFragment(), "Listening");
@@ -107,27 +110,11 @@ public class LearnFragment extends Fragment {
         setupCardListener(readingCard, new ReadingFragment(), "Reading");
         // setupCardListener(writingCard, new WritingFragment(), "Writing");
         
-        // NEW: Memory Palace - opens Activity instead of Fragment
-        if (memoryPalaceCard != null) {
-            memoryPalaceCard.setOnClickListener(v -> {
-                v.animate()
-                    .scaleX(0.95f)
-                    .scaleY(0.95f)
-                    .setDuration(100)
-                    .withEndAction(() -> {
-                        v.animate()
-                            .scaleX(1f)
-                            .scaleY(1f)
-                            .setDuration(100)
-                            .withEndAction(() -> {
-                                trackModuleAccess("Memory Palace");
-                                openMemoryPalace();
-                            })
-                            .start();
-                    })
-                    .start();
-            });
-        }
+        // Learning Resource Cards - Show coming soon messages
+        setupResourceCardListener(kidsLearningCard, "Kids Learning");
+        setupResourceCardListener(storiesCard, "Beginner Stories");
+        setupResourceCardListener(gamesCard, "Games");
+        setupResourceCardListener(videoLessonsCard, "Video Lessons");
     }
 
     private void setupCardListener(CardView card, Fragment fragment, String moduleName) {
@@ -168,17 +155,67 @@ public class LearnFragment extends Fragment {
         });
     }
 
+    private void setupResourceCardListener(CardView card, String resourceName) {
+        if (card == null) return;
+        
+        card.setOnClickListener(v -> {
+            // Button press animation
+            v.animate()
+                .scaleX(0.95f)
+                .scaleY(0.95f)
+                .setDuration(100)
+                .withEndAction(() -> {
+                    v.animate()
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(100)
+                        .start();
+                    
+                    // Track module access
+                    trackModuleAccess(resourceName);
+                    
+                    // Show coming soon message
+                    Toast.makeText(getContext(), 
+                        "🎉 " + resourceName + " coming soon! Stay tuned!", 
+                        Toast.LENGTH_SHORT).show();
+                })
+                .start();
+        });
+        
+        // Add scale effect on touch
+        card.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).start();
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                    break;
+            }
+            return false;
+        });
+    }
+
+
+
     private void animateCardsOnLoad() {
         if (getContext() == null) return;
         
-        // Staggered fade-in animation for cards (Speaking and Writing hidden)
+        // Staggered fade-in animation for cards
         animateCardEntrance(dailyGoalCard, 0);
+        
+        // Core modules
         animateCardEntrance(vocabularyCard, 100);
         animateCardEntrance(grammarCard, 150);
         animateCardEntrance(listeningCard, 200);
-        // animateCardEntrance(speakingCard, 250);
-        animateCardEntrance(readingCard, 250); // Moved up
-        // animateCardEntrance(writingCard, 350);
+        animateCardEntrance(readingCard, 250);
+        
+        // Learning resources
+        animateCardEntrance(kidsLearningCard, 300);
+        animateCardEntrance(storiesCard, 350);
+        animateCardEntrance(gamesCard, 400);
+        animateCardEntrance(videoLessonsCard, 450);
     }
     
     private void animateCardEntrance(View view, long delay) {
@@ -355,19 +392,6 @@ public class LearnFragment extends Fragment {
             .start();
     }
 
-    private void openMemoryPalace() {
-        if (getActivity() == null) return;
-        
-        android.content.Intent intent = new android.content.Intent(
-            getActivity(), 
-            com.example.newsandlearn.Activity.MemoryPalaceActivity.class
-        );
-        startActivity(intent);
-        getActivity().overridePendingTransition(
-            R.anim.slide_in_right, 
-            R.anim.slide_out_left
-        );
-    }
 
     private void openFragment(Fragment fragment) {
         if (getActivity() == null) return;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 🎨 Modern Learn English Screen - Premium Design -->
+<!-- 🎨 Modern Learn English Screen - Premium Design with Lottie Animations -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -42,7 +42,7 @@
                 android:textColor="#6B7280" />
         </LinearLayout>
 
-        <!-- Daily Goal Card -->
+        <!-- Daily Goal Card with Lottie Animation -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/daily_goal_card"
             android:layout_width="match_parent"
@@ -56,61 +56,90 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:orientation="horizontal"
+                android:padding="20dp"
+                android:gravity="center_vertical">
+
+                <!-- Lottie Trophy Animation -->
+                <com.airbnb.lottie.LottieAnimationView
+                    android:id="@+id/trophy_animation"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginEnd="16dp"
+                    app:lottie_rawRes="@raw/trophy_animation"
+                    app:lottie_autoPlay="true"
+                    app:lottie_loop="true" />
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="🎯 Daily Goal"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="#1F2937" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/goal_progress_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="2/5 completed"
-                        android:textSize="14sp"
-                        android:textColor="#6366F1"
-                        android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Daily Goal"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:textColor="#1F2937" />
+
+                        <TextView
+                            android:id="@+id/goal_progress_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2/5 completed"
+                            android:textSize="14sp"
+                            android:textColor="#6366F1"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Progress Bar -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="8dp"
+                        android:layout_marginTop="14dp">
+
+                        <!-- Background -->
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:background="@drawable/progress_background" />
+
+                        <!-- Progress -->
+                        <ProgressBar
+                            android:id="@+id/daily_goal_progress"
+                            style="?android:attr/progressBarStyleHorizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="8dp"
+                            android:max="100"
+                            android:progress="40"
+                            android:progressDrawable="@drawable/progress_gradient"
+                            android:indeterminate="false" />
+                    </FrameLayout>
                 </LinearLayout>
-
-                <!-- Progress Bar -->
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="8dp"
-                    android:layout_marginTop="14dp">
-
-                    <!-- Background -->
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="8dp"
-                        android:background="@drawable/progress_background" />
-
-                    <!-- Progress -->
-                    <ProgressBar
-                        android:id="@+id/daily_goal_progress"
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="match_parent"
-                        android:layout_height="8dp"
-                        android:max="100"
-                        android:progress="40"
-                        android:progressDrawable="@drawable/progress_gradient"
-                        android:indeterminate="false" />
-                </FrameLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Learning Modules Grid (LinearLayout Rows) -->
+        <!-- Section Title: Core Modules -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📚 Core Modules"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#1F2937"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Learning Modules Grid (2 columns) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -228,7 +257,7 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- Row 2: Listening & Speaking -->
+            <!-- Row 2: Listening & Reading -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -287,73 +316,13 @@
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Speaking Module -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/speaking_card"
-                    android:layout_width="0dp"
-                    android:layout_height="150dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/module_speaking_bg">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🎤"
-                                android:textSize="40sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Speaking"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Practice fluency"
-                                android:textSize="10sp"
-                                android:textColor="#FFFFFF"
-                                android:alpha="0.9" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- Row 3: Reading & Writing -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
                 <!-- Reading Module -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/reading_card"
                     android:layout_width="0dp"
                     android:layout_height="150dp"
                     android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
+                    android:layout_marginStart="8dp"
                     android:layout_marginBottom="16dp"
                     app:cardBackgroundColor="@android:color/transparent"
                     app:cardCornerRadius="20dp"
@@ -398,10 +367,89 @@
                         </LinearLayout>
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
-                <!-- Writing Module -->
+        </LinearLayout>
+
+        <!-- Section Title: Learning Resources -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌟 Learning Resources"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#1F2937"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Learning Resources Grid (2 columns) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Row 1: Kids Learning & Beginner Stories -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+
+                <!-- Kids Learning Module -->
                 <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/writing_card"
+                    android:id="@+id/kids_learning_card"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_pink_yellow">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🧒"
+                                android:textSize="40sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Kids Learning"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Fun for children"
+                                android:textSize="10sp"
+                                android:textColor="#FFFFFF"
+                                android:alpha="0.9" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Beginner Stories Module -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/stories_card"
                     android:layout_width="0dp"
                     android:layout_height="150dp"
                     android:layout_weight="1"
@@ -415,7 +463,7 @@
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/module_writing_bg">
+                        android:background="@drawable/gradient_orange_purple">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -427,14 +475,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="✍️"
+                                android:text="📖"
                                 android:textSize="40sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="Writing"
+                                android:text="Stories"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="#FFFFFF" />
@@ -443,7 +491,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Practice essays"
+                                android:text="Beginner tales"
                                 android:textSize="10sp"
                                 android:textColor="#FFFFFF"
                                 android:alpha="0.9" />
@@ -452,64 +500,117 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- NEW: Memory Palace Module (Full Width) -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/memory_palace_card"
+            <!-- Row 2: Games & Video Lessons -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
-                android:layout_marginBottom="16dp"
-                app:cardBackgroundColor="@android:color/transparent"
-                app:cardCornerRadius="20dp"
-                app:cardElevation="4dp"
-                app:strokeWidth="0dp">
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
-                <FrameLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/gradient_blue">
+                <!-- Games Module -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/games_card"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp">
 
-                    <LinearLayout
+                    <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:orientation="vertical"
-                        android:padding="20dp"
-                        android:gravity="center">
+                        android:background="@drawable/gradient_green_blue">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🏰"
-                            android:textSize="56sp" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="10dp"
-                            android:text="Memory Palace"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="#FFFFFF" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🎮"
+                                android:textSize="40sp" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Learn vocabulary with crazy stories"
-                            android:textSize="12sp"
-                            android:textColor="#FFFFFF"
-                            android:alpha="0.95"
-                            android:textAlignment="center" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Games"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF" />
 
-                        <View
-                            android:layout_width="50dp"
-                            android:layout_height="3dp"
-                            android:layout_marginTop="10dp"
-                            android:background="#FFFFFF"
-                            android:alpha="0.6" />
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Play &amp; learn"
+                                android:textSize="10sp"
+                                android:textColor="#FFFFFF"
+                                android:alpha="0.9" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
 
-                    </LinearLayout>
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
+                <!-- Video Lessons Module -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/video_lessons_card"
+                    android:layout_width="0dp"
+                    android:layout_height="150dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginBottom="16dp"
+                    app:cardBackgroundColor="@android:color/transparent"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="3dp"
+                    app:strokeWidth="0dp">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/gradient_red_orange">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:padding="16dp"
+                            android:gravity="center">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="🎬"
+                                android:textSize="40sp" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="Video Lessons"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFFFFF" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:text="Watch &amp; learn"
+                                android:textSize="10sp"
+                                android:textColor="#FFFFFF"
+                                android:alpha="0.9" />
+                        </LinearLayout>
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
 
         </LinearLayout>
 

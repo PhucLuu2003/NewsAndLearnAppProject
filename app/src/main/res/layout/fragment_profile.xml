@@ -383,17 +383,21 @@
                         android:gravity="center"
                         android:padding="20dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🔥"
-                            android:textSize="36sp" />
+                        <!-- Animated Fire Icon -->
+                        <com.airbnb.lottie.LottieAnimationView
+                            android:id="@+id/fire_animation_profile"
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            app:lottie_rawRes="@raw/fire_icon"
+                            app:lottie_autoPlay="true"
+                            app:lottie_loop="true"
+                            app:lottie_speed="1.0" />
 
                         <TextView
                             android:id="@+id/current_streak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
+                            android:layout_marginTop="8dp"
                             android:text="0"
                             android:textColor="#EF4444"
                             android:textSize="32sp"

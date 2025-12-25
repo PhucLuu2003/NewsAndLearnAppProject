@@ -1,114 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Premium Article Card with Modern Design -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/article_card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="4dp"
+    android:layout_marginBottom="16dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
+    app:strokeWidth="0dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:padding="14dp">
 
-        <!-- Thumbnail -->
+        <!-- Thumbnail with Gradient Overlay -->
         <com.google.android.material.card.MaterialCardView
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="0dp">
+            android:id="@+id/thumbnail_container"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <ImageView
-                android:id="@+id/article_thumbnail"
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_article_placeholder" />
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/article_thumbnail"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_article_placeholder" />
+
+                <!-- Subtle gradient overlay -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/gradient_overlay_subtle"
+                    android:alpha="0.3" />
+            </FrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Content -->
+        <!-- Content Container -->
         <LinearLayout
+            android:id="@+id/content_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginEnd="8dp"
             android:orientation="vertical"
-            android:layout_gravity="center_vertical">
+            app:layout_constraintStart_toEndOf="@id/thumbnail_container"
+            app:layout_constraintEnd_toStartOf="@id/bookmark_icon"
+            app:layout_constraintTop_toTopOf="@id/thumbnail_container"
+            app:layout_constraintBottom_toBottomOf="@id/thumbnail_container">
+
+            <!-- Level Badge -->
+            <TextView
+                android:id="@+id/article_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="easy"
+                android:textSize="10sp"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textAllCaps="true"
+                android:letterSpacing="0.05"
+                android:background="@drawable/badge_level_easy"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
 
             <!-- Title -->
             <TextView
                 android:id="@+id/article_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="Article Title Here"
                 android:textSize="15sp"
-                android:textColor="#212121"
+                android:textColor="#1A1A2E"
                 android:textStyle="bold"
+                android:fontFamily="sans-serif-medium"
                 android:maxLines="2"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:lineSpacingExtra="2dp" />
 
-            <!-- Meta Info -->
+            <!-- Meta Info Row -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="6dp">
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical">
+
+                <!-- Source with icon -->
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_source"
+                    app:tint="#9E9E9E" />
 
                 <TextView
                     android:id="@+id/article_source"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
                     android:text="BBC"
-                    android:textSize="12sp"
-                    android:textColor="#757575" />
+                    android:textSize="11sp"
+                    android:textColor="#757575"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:maxWidth="100dp" />
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" • "
-                    android:textSize="12sp"
-                    android:textColor="#757575" />
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/dot_separator" />
+
+                <!-- Read time with icon -->
+                <ImageView
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:src="@drawable/ic_time"
+                    app:tint="#9E9E9E" />
 
                 <TextView
                     android:id="@+id/article_read_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
                     android:text="5 min"
-                    android:textSize="12sp"
+                    android:textSize="11sp"
                     android:textColor="#757575" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" • "
-                    android:textSize="12sp"
-                    android:textColor="#757575" />
-
-                <TextView
-                    android:id="@+id/article_level"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="A2"
-                    android:textSize="12sp"
-                    android:textColor="#6C63FF"
-                    android:textStyle="bold" />
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Bookmark Icon -->
-        <ImageView
-            android:id="@+id/bookmark_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_bookmark_border"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="8dp"
-            android:tint="#9E9E9E" />
-    </LinearLayout>
+        <!-- Bookmark Icon with ripple -->
+        <FrameLayout
+            android:id="@+id/bookmark_container"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <ImageView
+                android:id="@+id/bookmark_icon"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_bookmark_border"
+                app:tint="#BDBDBD" />
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>
