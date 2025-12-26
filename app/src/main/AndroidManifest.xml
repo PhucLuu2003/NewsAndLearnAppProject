@@ -221,6 +221,27 @@
             android:exported="false"
             android:screenOrientation="portrait" />
         
+        <!-- 🗣️ Phonics Activity - NEW -->
+        <activity
+            android:name=".Activity.PhonicsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <!-- 💬 Survival Vocabulary Activity - NEW -->
+        <activity
+            android:name=".Activity.SurvivalVocabularyActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <!-- 📚 Category Words Activity - NEW -->
+        <activity
+            android:name=".Activity.CategoryWordsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
     </application>
 
 </manifest>

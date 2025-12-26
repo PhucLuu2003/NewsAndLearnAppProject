@@ -5,25 +5,20 @@ service cloud.firestore {
     // =========================
     // HELPER FUNCTIONS
     // =========================
-    function isAuthenticated() {
+    function isAuth() {
       return request.auth != null;
     }
 
     function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return isAuthenticated() && request.auth.token.admin == true;
+      return isAuth() && request.auth.uid == userId;
     }
 
     // =========================
-    // USERS
+    // USERS - CHO PHÉP ĐỌC TẤT CẢ ĐỂ XEM LEADERBOARD
     // =========================
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create, update: if isOwner(userId);
-      allow delete: if isOwner(userId) || isAdmin();
+      allow read: if isAuth();
+      allow write: if isOwner(userId);
 
       match /{sub=**} {
         allow read, write: if isOwner(userId);
@@ -38,56 +33,61 @@ service cloud.firestore {
     }
 
     match /module_progress/{progressId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuth();
     }
 
     // =========================
-    // ARTICLES (CO SEED 1 LAN)
+    // ARTICLES
     // =========================
     match /articles/{articleId} {
-      allow read: if isAuthenticated();
-      
-      // Allow authenticated users to create articles (for seeding)
-      // In production, you might want to restrict this to admin only
-      allow create: if isAuthenticated();
-
-      // Chi admin duoc sua / xoa
-      allow update, delete: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     // =========================
     // VOCABULARY
     // =========================
     match /vocabularies/{vocabId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /vocabulary_sets/{setId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /words/{wordId} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
+    }
+
+    // =========================
+    // SURVIVAL VOCABULARY (New Feature)
+    // =========================
+    match /vocabulary_categories/{categoryId} {
+      allow read, write: if isAuth();
+    }
+
+    match /survival_words/{wordId} {
+      allow read, write: if isAuth();
+    }
+
+    // =========================
+    // PHONICS FOUNDATION (New Feature)
+    // =========================
+    match /phonics_lessons/{lessonId} {
+      allow read, write: if isAuth();
     }
 
     // =========================
     // READING
     // =========================
     match /reading_articles/{articleId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /reading_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /{sub=**} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -95,12 +95,10 @@ service cloud.firestore {
     // WRITING
     // =========================
     match /writing_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /{sub=**} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -108,12 +106,10 @@ service cloud.firestore {
     // LISTENING
     // =========================
     match /listening_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /{sub=**} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -121,12 +117,10 @@ service cloud.firestore {
     // SPEAKING
     // =========================
     match /speaking_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /{sub=**} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -134,12 +128,10 @@ service cloud.firestore {
     // GRAMMAR
     // =========================
     match /grammar_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /{sub=**} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -147,30 +139,25 @@ service cloud.firestore {
     // VIDEO
     // =========================
     match /video_lessons/{lessonId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     // =========================
     // FLASHCARD / QUIZ
     // =========================
     match /flashcard_decks/{deckId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /cards/{cardId} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
     match /quiz_templates/{quizId} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
 
       match /questions/{questionId} {
-        allow read: if isAuthenticated();
-        allow write: if isAdmin();
+        allow read, write: if isAuth();
       }
     }
 
@@ -178,72 +165,59 @@ service cloud.firestore {
     // RPG
     // =========================
     match /rpg_characters/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /rpg_enemies/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /rpg_items/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /rpg_battles/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     // =========================
     // SYSTEM
     // =========================
     match /app_config/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /announcements/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
+      allow read, write: if isAuth();
+    }
+
+    match /test/{id} {
+      allow read, write: if isAuth();
     }
 
     // =========================
     // ANALYTICS
     // =========================
     match /analytics/{id} {
-      allow read, write: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     match /activity_logs/{logId} {
-      allow create: if isAuthenticated();
-      allow read: if isAdmin();
+      allow read, write: if isAuth();
     }
 
     // =========================
     // COMMENTS
     // =========================
     match /comments/{commentId} {
-      allow read, create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() &&
-        resource.data.userId == request.auth.uid;
+      allow read, write: if isAuth();
     }
 
     // =========================
     // LEADERBOARD
     // =========================
     match /leaderboards/{id} {
-      allow read: if isAuthenticated();
-      allow write: if isAdmin();
-    }
-
-    // =========================
-    // DEFAULT DENY
-    // =========================
-    match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if isAuth();
     }
   }
 }

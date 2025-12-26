@@ -150,6 +150,7 @@ public class ProfileViewModel extends ViewModel {
         user.setName(snapshot.getString("name"));
         user.setEmail(snapshot.getString("email"));
         user.setAvatarUrl(snapshot.getString("avatarUrl"));
+        user.setRole(snapshot.getString("role") != null ? snapshot.getString("role") : "user");
         user.setLevel(snapshot.getString("level"));
 
         Long xp = snapshot.getLong("xp");

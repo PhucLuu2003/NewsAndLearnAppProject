@@ -9,6 +9,7 @@ public class User {
     private String name;
     private String email;
     private String avatarUrl;
+    private String role; // "admin" or "user"
     private String level; // Beginner, Intermediate, Advanced
     private int xp;
     private int dailyGoal; // in minutes
@@ -27,6 +28,7 @@ public class User {
         this.userId = userId;
         this.name = name;
         this.email = email;
+        this.role = "user"; // Default role
         this.level = "Beginner";
         this.xp = 0;
         this.dailyGoal = 30;
@@ -69,6 +71,14 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getLevel() {
@@ -176,6 +186,7 @@ public class User {
         map.put("name", name);
         map.put("email", email);
         map.put("avatarUrl", avatarUrl);
+        map.put("role", role);
         map.put("level", level);
         map.put("xp", xp);
         map.put("dailyGoal", dailyGoal);

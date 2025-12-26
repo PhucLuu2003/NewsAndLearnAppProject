@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 🎴 Survival Word Flashcard - Premium Flip Card Design -->
+<FrameLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_word"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="6dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Top Section with Gradient -->
+            <FrameLayout
+                android:id="@+id/container_top"
+                android:layout_width="match_parent"
+                android:layout_height="160dp"
+                android:background="@drawable/gradient_blue_purple">
+
+                <!-- Decorative Circles with glassmorphism effect -->
+                <View
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="top|end"
+                    android:layout_marginTop="-50dp"
+                    android:layout_marginEnd="-50dp"
+                    android:background="@drawable/circle_white_10"
+                    android:alpha="0.2" />
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_gravity="bottom|start"
+                    android:layout_marginBottom="-20dp"
+                    android:layout_marginStart="-20dp"
+                    android:background="@drawable/circle_white_10"
+                    android:alpha="0.15" />
+
+                <!-- Word Image (if available) -->
+                <ImageView
+                    android:id="@+id/img_word"
+                    android:layout_width="90dp"
+                    android:layout_height="90dp"
+                    android:layout_gravity="center"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone" />
+
+                <!-- Emoji Display -->
+                <TextView
+                    android:id="@+id/tv_emoji"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="👋"
+                    android:textSize="64sp" />
+
+                <!-- SRS Level Badge -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|start"
+                    android:layout_margin="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="#FFFFFF"
+                    app:cardElevation="0dp">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="6dp">
+
+                        <View
+                            android:id="@+id/dot_level"
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/circle_green" />
+
+                        <TextView
+                            android:id="@+id/tv_srs_level"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:text="New"
+                            android:textSize="11sp"
+                            android:textColor="#10B981"
+                            android:fontFamily="sans-serif-medium" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Sound Button -->
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/fab_sound"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="12dp"
+                    android:src="@drawable/ic_volume_up"
+                    app:fabSize="mini"
+                    app:backgroundTint="@android:color/white"
+                    app:tint="@color/primary"
+                    app:elevation="0dp" />
+
+                <!-- Category Tag -->
+                <TextView
+                    android:id="@+id/tv_category_tag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom|start"
+                    android:layout_margin="12dp"
+                    android:text="Greetings"
+                    android:textSize="10sp"
+                    android:textColor="@android:color/white"
+                    android:background="@drawable/bg_tag_transparent"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp" />
+            </FrameLayout>
+
+            <!-- Bottom Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:background="@android:color/white">
+
+                <!-- Word -->
+                <TextView
+                    android:id="@+id/tv_word"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hello"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="#1F2937" />
+
+                <!-- Pronunciation with modern pill style -->
+                <TextView
+                    android:id="@+id/tv_pronunciation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="/həˈloʊ/"
+                    android:textSize="14sp"
+                    android:textColor="#764BA2"
+                    android:background="@drawable/bg_pronunciation"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="4dp"
+                    android:fontFamily="sans-serif-medium" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginVertical="16dp"
+                    android:background="#E5E7EB" />
+
+                <!-- Vietnamese Meaning -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🇻🇳"
+                        android:textSize="16sp" />
+
+                    <TextView
+                        android:id="@+id/tv_meaning_vi"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:text="Xin chào"
+                        android:textSize="16sp"
+                        android:textColor="#374151" />
+                </LinearLayout>
+
+                <!-- Example Sentence (if available) -->
+                <LinearLayout
+                    android:id="@+id/container_example"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💡 Example"
+                        android:textSize="12sp"
+                        android:textColor="#9CA3AF" />
+
+                    <TextView
+                        android:id="@+id/tv_example"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Hello, how are you today?"
+                        android:textSize="14sp"
+                        android:textColor="#4B5563"
+                        android:fontStyle="italic" />
+                </LinearLayout>
+
+                <!-- Action Buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:orientation="horizontal"
+                    android:gravity="center">
+
+                    <!-- Know Button - Gradient outline style -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_know"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="0dp"
+                        android:layout_height="52dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="✓ Know it"
+                        android:textSize="13sp"
+                        android:textColor="#38EF7D"
+                        app:strokeColor="#38EF7D"
+                        app:strokeWidth="2dp"
+                        app:cornerRadius="16dp" />
+
+                    <!-- Learn Button - Gradient fill style -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_learn"
+                        android:layout_width="0dp"
+                        android:layout_height="52dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="📖 Learn"
+                        android:textSize="13sp"
+                        android:textColor="@android:color/white"
+                        app:backgroundTint="#764BA2"
+                        app:cornerRadius="16dp" />
+                </LinearLayout>
+
+                <!-- Review Info -->
+                <LinearLayout
+                    android:id="@+id/container_review_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/tv_review_info"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅 Next review: Tomorrow"
+                        android:textSize="11sp"
+                        android:textColor="#9CA3AF" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

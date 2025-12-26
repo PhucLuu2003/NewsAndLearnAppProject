@@ -571,6 +571,12 @@ public class HomeFragment extends Fragment {
                 .limit(20)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    // Check if fragment is still attached
+                    if (!isAdded() || getContext() == null) {
+                        isLoading = false;
+                        return;
+                    }
+                    
                     allArticles.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
@@ -589,16 +595,22 @@ public class HomeFragment extends Fragment {
                     }
 
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                     isLoading = false;
                 })
                 .addOnFailureListener(e -> {
+                    // Check if fragment is still attached
+                    if (!isAdded() || getContext() == null) {
+                        isLoading = false;
+                        return;
+                    }
+                    
                     allArticles.clear();
                     Toast.makeText(getContext(),
                             "Lỗi tải bài viết: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
                     isLoading = false;
                 });
     }
@@ -652,6 +664,11 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateHeroSection(Article article) {
+        // Check if fragment is attached before updating UI
+        if (!isAdded() || getActivity() == null) {
+            return;
+        }
+        
         if (article != null) {
             if (featuredTitle != null) {
                 featuredTitle.setText(article.getTitle());
@@ -663,9 +680,9 @@ public class HomeFragment extends Fragment {
                 featuredSource.setText(article.getSource());
             }
             // Load image with Glide
-            if (featuredImage != null) {
+            if (featuredImage != null && isAdded()) {
                 if (article.getImageUrl() != null && !article.getImageUrl().isEmpty()) {
-                    com.bumptech.glide.Glide.with(this)
+                    com.bumptech.glide.Glide.with(requireActivity())
                         .load(article.getImageUrl())
                         .placeholder(R.drawable.placeholder_article)
                         .error(R.drawable.placeholder_article)

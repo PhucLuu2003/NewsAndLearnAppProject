@@ -382,20 +382,20 @@
             android:layout_marginBottom="12dp"
             android:layout_marginTop="8dp" />
 
-        <!-- Learning Resources Grid (2 columns) -->
+        <!-- Learning Resources Grid (2 columns) - Updated: Phonics & Survival Vocabulary -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Row 1: Kids Learning & Beginner Stories -->
+            <!-- Row 1: Phonics & Survival Vocabulary (NEW!) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:baselineAligned="false">
 
-                <!-- Kids Learning Module -->
+                <!-- 🗣️ Phonics Module (Replaces Kids Learning) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/kids_learning_card"
                     android:layout_width="0dp"
@@ -411,7 +411,17 @@
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/gradient_pink_yellow">
+                        android:background="@drawable/gradient_purple_pink">
+
+                        <!-- Decorative circle -->
+                        <View
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="-25dp"
+                            android:layout_marginEnd="-25dp"
+                            android:background="@drawable/circle_white_10"
+                            android:alpha="0.15" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -423,14 +433,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="🧒"
+                                android:text="🗣️"
                                 android:textSize="40sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="Kids Learning"
+                                android:text="Phonics"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="#FFFFFF" />
@@ -439,15 +449,28 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Fun for children"
+                                android:text="A-Z Pronunciation"
                                 android:textSize="10sp"
                                 android:textColor="#FFFFFF"
                                 android:alpha="0.9" />
+
+                            <!-- NEW badge -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="✨ NEW"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFD700"
+                                android:background="@drawable/bg_tag_transparent"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp" />
                         </LinearLayout>
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- Beginner Stories Module -->
+                <!-- 💬 Survival Vocabulary Module (Replaces Stories) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/stories_card"
                     android:layout_width="0dp"
@@ -463,7 +486,17 @@
                     <FrameLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/gradient_orange_purple">
+                        android:background="@drawable/gradient_green_teal">
+
+                        <!-- Decorative circle -->
+                        <View
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:layout_gravity="top|end"
+                            android:layout_marginTop="-25dp"
+                            android:layout_marginEnd="-25dp"
+                            android:background="@drawable/circle_white_10"
+                            android:alpha="0.15" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -475,14 +508,14 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="📖"
+                                android:text="💬"
                                 android:textSize="40sp" />
 
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="8dp"
-                                android:text="Stories"
+                                android:text="Survival Words"
                                 android:textSize="14sp"
                                 android:textStyle="bold"
                                 android:textColor="#FFFFFF" />
@@ -491,10 +524,23 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="2dp"
-                                android:text="Beginner tales"
+                                android:text="200+ essential words"
                                 android:textSize="10sp"
                                 android:textColor="#FFFFFF"
                                 android:alpha="0.9" />
+
+                            <!-- NEW badge -->
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                android:text="✨ NEW"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:textColor="#FFD700"
+                                android:background="@drawable/bg_tag_transparent"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp" />
                         </LinearLayout>
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>

@@ -2,6 +2,7 @@ package com.example.newsandlearn.Utils;
 
 import android.util.Log;
 
+import com.example.newsandlearn.BuildConfig;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
 import com.google.ai.client.generativeai.type.Content;
@@ -19,19 +20,21 @@ import java.util.concurrent.Executors;
  */
 public class GeminiReadingAssistant {
     private static final String TAG = "GeminiAssistant";
-    
-    // TODO: Replace with your actual Gemini API key
-    // Get it from: https://makersuite.google.com/app/apikey
-    private static final String API_KEY = "AIzaSyBcZJhT8vKqP7Y9X3mN2wR5tL4pQ6sK8vU"; // PLACEHOLDER - REPLACE THIS
-    
+
+    private static final String API_KEY = BuildConfig.GEMINI_API_KEY;
+
     private static GeminiReadingAssistant instance;
     private GenerativeModelFutures model;
     private Executor executor;
-    
+
     private String currentArticleContent = "";
     private String currentArticleTitle = "";
 
     private GeminiReadingAssistant() {
+        if (API_KEY == null || API_KEY.isEmpty()) {
+            throw new IllegalStateException(
+                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        }
         // Initialize Gemini model
         GenerativeModel gm = new GenerativeModel("gemini-pro", API_KEY);
         model = GenerativeModelFutures.from(gm);
@@ -48,11 +51,13 @@ public class GeminiReadingAssistant {
     // Callback interfaces
     public interface AICallback {
         void onSuccess(String response);
+
         void onFailure(Exception e);
     }
 
     public interface QuestionCallback {
         void onSuccess(java.util.List<Question> questions);
+
         void onFailure(Exception e);
     }
 
@@ -96,14 +101,13 @@ public class GeminiReadingAssistant {
      */
     public void explainText(String selectedText, AICallback callback) {
         String prompt = String.format(
-            "In the context of this article titled '%s', explain the meaning of: \"%s\"\n\n" +
-            "Article excerpt: %s\n\n" +
-            "Provide a clear, concise explanation in Vietnamese suitable for English learners.",
-            currentArticleTitle,
-            selectedText,
-            getRelevantExcerpt(selectedText)
-        );
-        
+                "In the context of this article titled '%s', explain the meaning of: \"%s\"\n\n" +
+                        "Article excerpt: %s\n\n" +
+                        "Provide a clear, concise explanation in Vietnamese suitable for English learners.",
+                currentArticleTitle,
+                selectedText,
+                getRelevantExcerpt(selectedText));
+
         generateResponse(prompt, callback);
     }
 
@@ -117,14 +121,13 @@ public class GeminiReadingAssistant {
         }
 
         String prompt = String.format(
-            "Summarize this English article in Vietnamese. Make it concise but comprehensive:\n\n" +
-            "Title: %s\n\n" +
-            "Content: %s\n\n" +
-            "Provide a 3-4 sentence summary in Vietnamese.",
-            currentArticleTitle,
-            currentArticleContent
-        );
-        
+                "Summarize this English article in Vietnamese. Make it concise but comprehensive:\n\n" +
+                        "Title: %s\n\n" +
+                        "Content: %s\n\n" +
+                        "Provide a 3-4 sentence summary in Vietnamese.",
+                currentArticleTitle,
+                currentArticleContent);
+
         generateResponse(prompt, callback);
     }
 
@@ -138,27 +141,26 @@ public class GeminiReadingAssistant {
         }
 
         String prompt = String.format(
-            "Generate %d multiple-choice comprehension questions for this article:\n\n" +
-            "Title: %s\n\n" +
-            "Content: %s\n\n" +
-            "For each question, provide:\n" +
-            "1. The question\n" +
-            "2. Four options (A, B, C, D)\n" +
-            "3. The correct answer (A, B, C, or D)\n" +
-            "4. A brief explanation\n\n" +
-            "Format each question as:\n" +
-            "Q: [question]\n" +
-            "A) [option A]\n" +
-            "B) [option B]\n" +
-            "C) [option C]\n" +
-            "D) [option D]\n" +
-            "Answer: [correct letter]\n" +
-            "Explanation: [explanation]\n" +
-            "---",
-            numQuestions,
-            currentArticleTitle,
-            currentArticleContent
-        );
+                "Generate %d multiple-choice comprehension questions for this article:\n\n" +
+                        "Title: %s\n\n" +
+                        "Content: %s\n\n" +
+                        "For each question, provide:\n" +
+                        "1. The question\n" +
+                        "2. Four options (A, B, C, D)\n" +
+                        "3. The correct answer (A, B, C, or D)\n" +
+                        "4. A brief explanation\n\n" +
+                        "Format each question as:\n" +
+                        "Q: [question]\n" +
+                        "A) [option A]\n" +
+                        "B) [option B]\n" +
+                        "C) [option C]\n" +
+                        "D) [option D]\n" +
+                        "Answer: [correct letter]\n" +
+                        "Explanation: [explanation]\n" +
+                        "---",
+                numQuestions,
+                currentArticleTitle,
+                currentArticleContent);
 
         generateResponse(prompt, new AICallback() {
             @Override
@@ -188,20 +190,19 @@ public class GeminiReadingAssistant {
         }
 
         String prompt = String.format(
-            "Analyze the difficulty level of this English article:\n\n" +
-            "Title: %s\n\n" +
-            "Content: %s\n\n" +
-            "Provide:\n" +
-            "1. CEFR level (A1, A2, B1, B2, C1, C2)\n" +
-            "2. Estimated reading time for intermediate learner\n" +
-            "3. Key vocabulary complexity\n" +
-            "4. Grammar complexity\n" +
-            "5. Brief recommendation for learners\n\n" +
-            "Respond in Vietnamese.",
-            currentArticleTitle,
-            currentArticleContent
-        );
-        
+                "Analyze the difficulty level of this English article:\n\n" +
+                        "Title: %s\n\n" +
+                        "Content: %s\n\n" +
+                        "Provide:\n" +
+                        "1. CEFR level (A1, A2, B1, B2, C1, C2)\n" +
+                        "2. Estimated reading time for intermediate learner\n" +
+                        "3. Key vocabulary complexity\n" +
+                        "4. Grammar complexity\n" +
+                        "5. Brief recommendation for learners\n\n" +
+                        "Respond in Vietnamese.",
+                currentArticleTitle,
+                currentArticleContent);
+
         generateResponse(prompt, callback);
     }
 
@@ -215,17 +216,16 @@ public class GeminiReadingAssistant {
         }
 
         String prompt = String.format(
-            "Extract 10 important vocabulary words from this article that are suitable for %s level learners:\n\n" +
-            "Content: %s\n\n" +
-            "For each word, provide:\n" +
-            "- The word\n" +
-            "- Vietnamese translation\n" +
-            "- Example sentence from the article\n\n" +
-            "Format as a numbered list.",
-            level,
-            currentArticleContent
-        );
-        
+                "Extract 10 important vocabulary words from this article that are suitable for %s level learners:\n\n" +
+                        "Content: %s\n\n" +
+                        "For each word, provide:\n" +
+                        "- The word\n" +
+                        "- Vietnamese translation\n" +
+                        "- Example sentence from the article\n\n" +
+                        "Format as a numbered list.",
+                level,
+                currentArticleContent);
+
         generateResponse(prompt, callback);
     }
 
@@ -239,14 +239,13 @@ public class GeminiReadingAssistant {
         }
 
         String prompt = String.format(
-            "Based on this article titled '%s', suggest 5 related topics or article ideas " +
-            "that would help learners expand their knowledge in this area.\n\n" +
-            "Brief article summary: %s\n\n" +
-            "Provide topic suggestions in Vietnamese with brief explanations.",
-            currentArticleTitle,
-            currentArticleContent.substring(0, Math.min(500, currentArticleContent.length()))
-        );
-        
+                "Based on this article titled '%s', suggest 5 related topics or article ideas " +
+                        "that would help learners expand their knowledge in this area.\n\n" +
+                        "Brief article summary: %s\n\n" +
+                        "Provide topic suggestions in Vietnamese with brief explanations.",
+                currentArticleTitle,
+                currentArticleContent.substring(0, Math.min(500, currentArticleContent.length())));
+
         generateResponse(prompt, callback);
     }
 
@@ -255,15 +254,14 @@ public class GeminiReadingAssistant {
      */
     private String buildChatPrompt(String userQuestion) {
         return String.format(
-            "You are an English learning assistant. A student is reading this article:\n\n" +
-            "Title: %s\n\n" +
-            "Content: %s\n\n" +
-            "Student's question: %s\n\n" +
-            "Provide a helpful, clear answer in Vietnamese. Be encouraging and educational.",
-            currentArticleTitle,
-            currentArticleContent,
-            userQuestion
-        );
+                "You are an English learning assistant. A student is reading this article:\n\n" +
+                        "Title: %s\n\n" +
+                        "Content: %s\n\n" +
+                        "Student's question: %s\n\n" +
+                        "Provide a helpful, clear answer in Vietnamese. Be encouraging and educational.",
+                currentArticleTitle,
+                currentArticleContent,
+                userQuestion);
     }
 
     /**
@@ -274,10 +272,10 @@ public class GeminiReadingAssistant {
         if (index == -1) {
             return currentArticleContent.substring(0, Math.min(200, currentArticleContent.length()));
         }
-        
+
         int start = Math.max(0, index - 100);
         int end = Math.min(currentArticleContent.length(), index + selectedText.length() + 100);
-        
+
         return "..." + currentArticleContent.substring(start, end) + "...";
     }
 
@@ -286,8 +284,8 @@ public class GeminiReadingAssistant {
      */
     private void generateResponse(String prompt, AICallback callback) {
         Content content = new Content.Builder()
-            .addText(prompt)
-            .build();
+                .addText(prompt)
+                .build();
 
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
 
@@ -311,60 +309,67 @@ public class GeminiReadingAssistant {
      */
     private java.util.List<Question> parseQuestions(String response) {
         java.util.List<Question> questions = new java.util.ArrayList<>();
-        
+
         // Split by question separator
         String[] questionBlocks = response.split("---");
-        
+
         for (String block : questionBlocks) {
             block = block.trim();
-            if (block.isEmpty()) continue;
-            
+            if (block.isEmpty())
+                continue;
+
             try {
                 // Parse question
                 String questionText = extractBetween(block, "Q:", "\nA)");
-                
+
                 // Parse options
                 String[] options = new String[4];
                 options[0] = extractBetween(block, "A)", "\nB)").trim();
                 options[1] = extractBetween(block, "B)", "\nC)").trim();
                 options[2] = extractBetween(block, "C)", "\nD)").trim();
                 options[3] = extractBetween(block, "D)", "\nAnswer:").trim();
-                
+
                 // Parse answer
                 String answerLine = extractBetween(block, "Answer:", "\nExplanation:");
                 int correctAnswer = parseAnswerLetter(answerLine.trim());
-                
+
                 // Parse explanation
                 String explanation = extractAfter(block, "Explanation:");
-                
+
                 questions.add(new Question(questionText.trim(), options, correctAnswer, explanation.trim()));
             } catch (Exception e) {
                 Log.e(TAG, "Error parsing question block", e);
             }
         }
-        
+
         return questions;
     }
 
     private String extractBetween(String text, String start, String end) {
         int startIndex = text.indexOf(start);
         int endIndex = text.indexOf(end, startIndex);
-        if (startIndex == -1 || endIndex == -1) return "";
+        if (startIndex == -1 || endIndex == -1)
+            return "";
         return text.substring(startIndex + start.length(), endIndex);
     }
 
     private String extractAfter(String text, String marker) {
         int index = text.indexOf(marker);
-        if (index == -1) return "";
+        if (index == -1)
+            return "";
         return text.substring(index + marker.length());
     }
 
     private int parseAnswerLetter(String answer) {
         answer = answer.toUpperCase().trim();
-        if (answer.startsWith("A")) return 0;
-        if (answer.startsWith("B")) return 1;
-        if (answer.startsWith("C")) return 2;
-        if (answer.startsWith("D")) return 3;
+        if (answer.startsWith("A"))
+            return 0;
+        if (answer.startsWith("B"))
+            return 1;
+        if (answer.startsWith("C"))
+            return 2;
+        if (answer.startsWith("D"))
+            return 3;
         return 0; // Default to A
     }
 }

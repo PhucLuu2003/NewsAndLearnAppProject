@@ -1,5 +1,6 @@
 package com.example.newsandlearn.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -8,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.OvershootInterpolator;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +19,8 @@ import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
+import com.example.newsandlearn.Activity.PhonicsActivity;
+import com.example.newsandlearn.Activity.SurvivalVocabularyActivity;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.AnimationHelper;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,23 +48,22 @@ public class LearnFragment extends Fragment {
     // Views - Core Modules
     private CardView vocabularyCard, grammarCard, listeningCard;
     private CardView speakingCard, readingCard, writingCard;
-    
-    // Views - Learning Resources
-    private CardView kidsLearningCard, storiesCard, gamesCard, videoLessonsCard;
-    
+
+    // Views - Learning Resources (Updated: Phonics & Survival Vocabulary)
+    private CardView phonicsCard, survivalVocabCard, gamesCard, videoLessonsCard;
+
     // Views - Daily Goal
     private CardView dailyGoalCard;
     private ProgressBar dailyGoalProgress;
     private TextView goalProgressText;
-    
 
-
-    public LearnFragment() {}
+    public LearnFragment() {
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_learn_new, container, false);
 
         // Initialize Firebase
@@ -71,7 +74,7 @@ public class LearnFragment extends Fragment {
         initializeViews(view);
         setupListeners();
         animateCardsOnLoad();
-        
+
         // Load data from Firebase
         loadDailyGoalFromFirebase();
         loadModuleProgressFromFirebase();
@@ -85,61 +88,153 @@ public class LearnFragment extends Fragment {
         grammarCard = view.findViewById(R.id.grammar_card);
         listeningCard = view.findViewById(R.id.listening_card);
         readingCard = view.findViewById(R.id.reading_card);
-        
-        // Learning Resource Cards
-        kidsLearningCard = view.findViewById(R.id.kids_learning_card);
-        storiesCard = view.findViewById(R.id.stories_card);
+
+        // Learning Resource Cards (Updated: Phonics & Survival Vocabulary)
+        phonicsCard = view.findViewById(R.id.kids_learning_card);
+        survivalVocabCard = view.findViewById(R.id.stories_card);
         gamesCard = view.findViewById(R.id.games_card);
         videoLessonsCard = view.findViewById(R.id.video_lessons_card);
-        
+
         dailyGoalCard = view.findViewById(R.id.daily_goal_card);
-        
+
         // Progress
         dailyGoalProgress = view.findViewById(R.id.daily_goal_progress);
         goalProgressText = view.findViewById(R.id.goal_progress_text);
-        
+
     }
 
     private void setupListeners() {
         // Add press/release animations to core module cards
-        setupCardListener(vocabularyCard, new VocabularyFragment(), "Vocabulary");
+        // Vocabulary now uses SurvivalVocabularyActivity (merged)
+        setupVocabularyCard();
         setupCardListener(grammarCard, new GrammarFragment(), "Grammar");
         setupCardListener(listeningCard, new ListeningFragment(), "Listening");
         // Speaking and Writing are hidden
         // setupCardListener(speakingCard, new SpeakingFragment(), "Speaking");
         setupCardListener(readingCard, new ReadingFragment(), "Reading");
         // setupCardListener(writingCard, new WritingFragment(), "Writing");
-        
-        // Learning Resource Cards - Show coming soon messages
-        setupResourceCardListener(kidsLearningCard, "Kids Learning");
-        setupResourceCardListener(storiesCard, "Beginner Stories");
+
+        // Learning Resource Cards - Phonics (Survival Vocabulary merged into Vocabulary)
+        setupPhonicsCard();
+        // survivalVocabCard is now hidden - merged into vocabularyCard
+        if (survivalVocabCard != null) {
+            survivalVocabCard.setVisibility(View.GONE);
+        }
         setupResourceCardListener(gamesCard, "Games");
         setupResourceCardListener(videoLessonsCard, "Video Lessons");
     }
+
+    private void setupVocabularyCard() {
+        if (vocabularyCard == null)
+            return;
+
+        vocabularyCard.setOnClickListener(v -> {
+            v.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        v.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(100)
+                                .setInterpolator(new OvershootInterpolator(2f))
+                                .start();
+
+                        trackModuleAccess("Vocabulary");
+
+                        // Launch SurvivalVocabularyActivity (merged vocabulary system)
+                        Intent intent = new Intent(getActivity(), SurvivalVocabularyActivity.class);
+                        startActivity(intent);
+                        if (getActivity() != null) {
+                            getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                        }
+                    })
+                    .start();
+        });
+
+        vocabularyCard.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).start();
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                    break;
+            }
+            return false;
+        });
+    }
+
+    private void setupPhonicsCard() {
+        if (phonicsCard == null)
+            return;
+
+        phonicsCard.setOnClickListener(v -> {
+            v.animate()
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        v.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(100)
+                                .setInterpolator(new OvershootInterpolator(2f))
+                                .start();
+
+                        trackModuleAccess("Phonics");
+
+                        // Launch PhonicsActivity
+                        Intent intent = new Intent(getActivity(), PhonicsActivity.class);
+                        startActivity(intent);
+                        if (getActivity() != null) {
+                            getActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                        }
+                    })
+                    .start();
+        });
+
+        phonicsCard.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_DOWN:
+                    v.animate().scaleX(0.95f).scaleY(0.95f).setDuration(100).start();
+                    break;
+                case android.view.MotionEvent.ACTION_UP:
+                case android.view.MotionEvent.ACTION_CANCEL:
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                    break;
+            }
+            return false;
+        });
+    }
+
+    // setupSurvivalVocabCard() removed - merged into setupVocabularyCard()
 
     private void setupCardListener(CardView card, Fragment fragment, String moduleName) {
         card.setOnClickListener(v -> {
             // Button press animation
             v.animate()
-                .scaleX(0.95f)
-                .scaleY(0.95f)
-                .setDuration(100)
-                .withEndAction(() -> {
-                    v.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(100)
-                        .start();
-                    
-                    // Track module access
-                    trackModuleAccess(moduleName);
-                    
-                    // Navigate to fragment
-                    openFragment(fragment);
-                })
-                .start();
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        v.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(100)
+                                .start();
+
+                        // Track module access
+                        trackModuleAccess(moduleName);
+
+                        // Navigate to fragment
+                        openFragment(fragment);
+                    })
+                    .start();
         });
-        
+
         // Add scale effect on touch
         card.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -156,32 +251,33 @@ public class LearnFragment extends Fragment {
     }
 
     private void setupResourceCardListener(CardView card, String resourceName) {
-        if (card == null) return;
-        
+        if (card == null)
+            return;
+
         card.setOnClickListener(v -> {
             // Button press animation
             v.animate()
-                .scaleX(0.95f)
-                .scaleY(0.95f)
-                .setDuration(100)
-                .withEndAction(() -> {
-                    v.animate()
-                        .scaleX(1f)
-                        .scaleY(1f)
-                        .setDuration(100)
-                        .start();
-                    
-                    // Track module access
-                    trackModuleAccess(resourceName);
-                    
-                    // Show coming soon message
-                    Toast.makeText(getContext(), 
-                        "🎉 " + resourceName + " coming soon! Stay tuned!", 
-                        Toast.LENGTH_SHORT).show();
-                })
-                .start();
+                    .scaleX(0.95f)
+                    .scaleY(0.95f)
+                    .setDuration(100)
+                    .withEndAction(() -> {
+                        v.animate()
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(100)
+                                .start();
+
+                        // Track module access
+                        trackModuleAccess(resourceName);
+
+                        // Show coming soon message
+                        Toast.makeText(getContext(),
+                                "🎉 " + resourceName + " coming soon! Stay tuned!",
+                                Toast.LENGTH_SHORT).show();
+                    })
+                    .start();
         });
-        
+
         // Add scale effect on touch
         card.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -197,40 +293,40 @@ public class LearnFragment extends Fragment {
         });
     }
 
-
-
     private void animateCardsOnLoad() {
-        if (getContext() == null) return;
-        
+        if (getContext() == null)
+            return;
+
         // Staggered fade-in animation for cards
         animateCardEntrance(dailyGoalCard, 0);
-        
+
         // Core modules
         animateCardEntrance(vocabularyCard, 100);
         animateCardEntrance(grammarCard, 150);
         animateCardEntrance(listeningCard, 200);
         animateCardEntrance(readingCard, 250);
-        
-        // Learning resources
-        animateCardEntrance(kidsLearningCard, 300);
-        animateCardEntrance(storiesCard, 350);
-        animateCardEntrance(gamesCard, 400);
-        animateCardEntrance(videoLessonsCard, 450);
+
+        // Learning resources (survivalVocabCard merged into vocabularyCard)
+        animateCardEntrance(phonicsCard, 300);
+        // survivalVocabCard is now hidden
+        animateCardEntrance(gamesCard, 350);
+        animateCardEntrance(videoLessonsCard, 400);
     }
-    
+
     private void animateCardEntrance(View view, long delay) {
-        if (view == null || getContext() == null) return;
-        
+        if (view == null || getContext() == null)
+            return;
+
         view.setAlpha(0f);
         view.setTranslationY(50f);
-        
+
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             if (view != null) {
                 view.animate()
-                    .alpha(1f)
-                    .translationY(0f)
-                    .setDuration(400)
-                    .start();
+                        .alpha(1f)
+                        .translationY(0f)
+                        .setDuration(400)
+                        .start();
             }
         }, delay);
     }
@@ -243,7 +339,7 @@ public class LearnFragment extends Fragment {
 
         String userId = currentUser.getUid();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-        
+
         db.collection("users").document(userId)
                 .collection("daily_goals").document(today)
                 .get()
@@ -251,7 +347,7 @@ public class LearnFragment extends Fragment {
                     if (document.exists()) {
                         Long completed = document.getLong("completed");
                         Long total = document.getLong("total");
-                        
+
                         if (completed != null && total != null) {
                             updateDailyGoalUI(completed.intValue(), total.intValue());
                         } else {
@@ -266,13 +362,13 @@ public class LearnFragment extends Fragment {
                     setDefaultDailyGoal();
                 });
     }
-    
+
     private void createDefaultDailyGoal(String userId, String today) {
         Map<String, Object> dailyGoal = new HashMap<>();
         dailyGoal.put("completed", 0);
         dailyGoal.put("total", 5);
         dailyGoal.put("date", today);
-        
+
         db.collection("users").document(userId)
                 .collection("daily_goals").document(today)
                 .set(dailyGoal)
@@ -280,19 +376,20 @@ public class LearnFragment extends Fragment {
                     updateDailyGoalUI(0, 5);
                 });
     }
-    
+
     private void setDefaultDailyGoal() {
         updateDailyGoalUI(2, 5);
     }
-    
+
     private void updateDailyGoalUI(int completed, int total) {
-        if (goalProgressText == null || dailyGoalProgress == null) return;
-        
+        if (goalProgressText == null || dailyGoalProgress == null)
+            return;
+
         int progress = total > 0 ? (int) ((completed / (float) total) * 100) : 0;
-        
+
         // Animate progress bar
         animateProgressBar(dailyGoalProgress, progress);
-        
+
         // Update text with animation
         goalProgressText.setText(completed + "/" + total + " completed");
         animateTextChange(goalProgressText);
@@ -305,7 +402,7 @@ public class LearnFragment extends Fragment {
         }
 
         String userId = currentUser.getUid();
-        
+
         db.collection("users").document(userId)
                 .collection("module_progress").document("current")
                 .get()
@@ -320,7 +417,7 @@ public class LearnFragment extends Fragment {
                     setDefaultModuleProgress();
                 });
     }
-    
+
     private void createDefaultModuleProgress(String userId) {
         Map<String, Object> progress = new HashMap<>();
         progress.put("vocabulary", 0);
@@ -329,7 +426,7 @@ public class LearnFragment extends Fragment {
         progress.put("speaking", 0);
         progress.put("reading", 0);
         progress.put("writing", 0);
-        
+
         db.collection("users").document(userId)
                 .collection("module_progress").document("current")
                 .set(progress)
@@ -337,35 +434,37 @@ public class LearnFragment extends Fragment {
                     setDefaultModuleProgress();
                 });
     }
-    
+
     private void updateModuleProgressUI(DocumentSnapshot document) {
         // Module progress is now tracked in Firebase but not displayed individually
         // The data is still loaded for tracking purposes
     }
-    
+
     private void setDefaultModuleProgress() {
         // Default progress values are set in Firebase
     }
 
     private void trackModuleAccess(String moduleName) {
-        if (currentUser == null) return;
-        
+        if (currentUser == null)
+            return;
+
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 .format(new Date());
-        
+
         Map<String, Object> accessLog = new HashMap<>();
         accessLog.put("module", moduleName);
         accessLog.put("timestamp", timestamp);
-        
+
         db.collection("users").document(userId)
                 .collection("module_access")
                 .add(accessLog);
     }
 
     private void animateProgressBar(ProgressBar progressBar, int targetProgress) {
-        if (progressBar == null) return;
-        
+        if (progressBar == null)
+            return;
+
         Handler handler = new Handler(Looper.getMainLooper());
         Runnable runnable = new Runnable() {
             int progress = 0;
@@ -381,33 +480,33 @@ public class LearnFragment extends Fragment {
         };
         handler.post(runnable);
     }
-    
+
     private void animateTextChange(TextView textView) {
-        if (textView == null || getContext() == null) return;
-        
+        if (textView == null || getContext() == null)
+            return;
+
         textView.setAlpha(0.4f);
         textView.animate()
-            .alpha(1f)
-            .setDuration(400)
-            .start();
+                .alpha(1f)
+                .setDuration(400)
+                .start();
     }
 
-
     private void openFragment(Fragment fragment) {
-        if (getActivity() == null) return;
-        
+        if (getActivity() == null)
+            return;
+
         getParentFragmentManager().beginTransaction()
                 .setCustomAnimations(
                         R.anim.slide_in_right,
                         R.anim.slide_out_left,
                         R.anim.slide_in_left,
-                        R.anim.slide_out_right
-                )
+                        R.anim.slide_out_right)
                 .replace(R.id.container, fragment)
                 .addToBackStack(null)
                 .commit();
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();

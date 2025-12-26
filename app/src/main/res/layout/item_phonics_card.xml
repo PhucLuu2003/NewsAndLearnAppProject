@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 🎴 Phonics Lesson Card - Beautiful Animated Card -->
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_lesson"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="6dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="4dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Top Section - Letter & Symbol -->
+        <FrameLayout
+            android:id="@+id/container_top"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@drawable/gradient_blue_purple">
+
+            <!-- Decorative Circles -->
+            <View
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_gravity="top|end"
+                android:layout_marginTop="-20dp"
+                android:layout_marginEnd="-20dp"
+                android:background="@drawable/circle_white_10"
+                android:alpha="0.15" />
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="bottom|start"
+                android:layout_marginBottom="-10dp"
+                android:layout_marginStart="-10dp"
+                android:background="@drawable/circle_white_10"
+                android:alpha="0.1" />
+
+            <!-- Big Letter -->
+            <TextView
+                android:id="@+id/tv_letter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="A"
+                android:textSize="48sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-black" />
+
+            <!-- IPA Symbol Badge -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="8dp"
+                app:cardCornerRadius="8dp"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:id="@+id/tv_ipa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="/eɪ/"
+                    android:textSize="12sp"
+                    android:textColor="#6366F1"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp"
+                    android:fontFamily="sans-serif-medium" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Completion Badge -->
+            <ImageView
+                android:id="@+id/icon_completed"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
+                android:src="@drawable/ic_check_circle"
+                android:visibility="gone"
+                app:tint="@android:color/white" />
+
+            <!-- Sound Button -->
+            <ImageView
+                android:id="@+id/btn_play_sound"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_gravity="bottom|end"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                android:src="@drawable/ic_volume_up"
+                android:background="@drawable/circle_white_ripple"
+                android:clickable="true"
+                android:focusable="true"
+                app:tint="#6366F1" />
+        </FrameLayout>
+
+        <!-- Bottom Section - Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/white"
+            android:padding="12dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Letter A"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#1F2937"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Example Words -->
+            <TextView
+                android:id="@+id/tv_examples"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="🍎 Apple, 🐜 Ant"
+                android:textSize="11sp"
+                android:textColor="#6B7280"
+                android:maxLines="1"
+                android:ellipsize="end" />
+
+            <!-- Progress & XP -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- XP Badge -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_xp_badge"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⭐"
+                        android:textSize="10sp" />
+
+                    <TextView
+                        android:id="@+id/tv_xp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="+10 XP"
+                        android:textSize="10sp"
+                        android:textColor="#F59E0B"
+                        android:fontFamily="sans-serif-medium" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- Level Badge -->
+                <LinearLayout
+                    android:id="@+id/container_level"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <View
+                        android:id="@+id/dot_level"
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@drawable/circle_green" />
+
+                    <TextView
+                        android:id="@+id/tv_level"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="Easy"
+                        android:textSize="10sp"
+                        android:textColor="#10B981" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
