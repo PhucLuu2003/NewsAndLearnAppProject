@@ -31,15 +31,15 @@
                 android:src="@drawable/ic_arrow_back"
                 app:tint="#FFFFFF" />
 
-            <TextView
-                android:id="@+id/lesson_title"
-                android:layout_width="wrap_content"
+            <ProgressBar
+                android:id="@+id/lesson_progress_bar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Daily Conversation"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_weight="1"
+                android:layout_marginHorizontal="16dp"
+                android:max="100"
+                android:progress="0" />
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -57,6 +57,15 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/lesson_illustration"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginBottom="24dp"
+                android:scaleType="centerCrop"
+                app:shapeAppearanceOverlay="@style/RoundedCorners"
+                android:background="#2C2C2E" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -89,7 +98,6 @@
 
             </LinearLayout>
 
-            <!-- Answer Area -->
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/answer_area"
                 android:layout_width="match_parent"
@@ -101,7 +109,6 @@
                 app:alignContent="flex_start"
                 app:flexWrap="wrap" />
 
-            <!-- Word Pool -->
             <com.google.android.flexbox.FlexboxLayout
                 android:id="@+id/word_pool_area"
                 android:layout_width="match_parent"
@@ -128,5 +135,12 @@
         app:cornerRadius="30dp"
         app:backgroundTint="@color/primary"
         android:elevation="8dp"/>
+
+    <FrameLayout
+        android:id="@+id/bottom_sheet_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="16dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

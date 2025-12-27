@@ -6,10 +6,6 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ListeningQuestion - Question for listening comprehension
- * Loaded from Firebase, NO hard-coded questions
- */
 public class ListeningQuestion implements Parcelable {
 
     public enum QuestionType {
@@ -23,20 +19,14 @@ public class ListeningQuestion implements Parcelable {
     private String id;
     private String questionText;
     private QuestionType type;
+    private String audioUrl;
+    private String imageUrl; // <-- New field for question-specific image
     private List<String> options;      // For multiple choice, or distractors for SENTENCE_BUILDING
     private String correctAnswer;      // Correct choice for MC, or the full sentence for SENTENCE_BUILDING
     private String explanation;        // Why this is the correct answer
     private int timestampSeconds;      // When in audio this question relates to
 
     public ListeningQuestion() {
-        // Required for Firebase
-        this.options = new ArrayList<>();
-    }
-
-    public ListeningQuestion(String id, String questionText, QuestionType type) {
-        this.id = id;
-        this.questionText = questionText;
-        this.type = type;
         this.options = new ArrayList<>();
     }
 
@@ -49,9 +39,10 @@ public class ListeningQuestion implements Parcelable {
                 type = QuestionType.valueOf(typeName);
             }
         } catch (IllegalArgumentException e) {
-            // Handle case where enum name is not found, maybe default or log
             type = QuestionType.MULTIPLE_CHOICE;
         }
+        audioUrl = in.readString();
+        imageUrl = in.readString();
         options = in.createStringArrayList();
         correctAnswer = in.readString();
         explanation = in.readString();
@@ -63,6 +54,8 @@ public class ListeningQuestion implements Parcelable {
         dest.writeString(id);
         dest.writeString(questionText);
         dest.writeString(type != null ? type.name() : "");
+        dest.writeString(audioUrl);
+        dest.writeString(imageUrl);
         dest.writeStringList(options);
         dest.writeString(correctAnswer);
         dest.writeString(explanation);
@@ -86,13 +79,6 @@ public class ListeningQuestion implements Parcelable {
         }
     };
 
-    public void addOption(String option) {
-        if (options == null) {
-            options = new ArrayList<>();
-        }
-        options.add(option);
-    }
-
     public boolean checkAnswer(String userAnswer) {
         if (correctAnswer == null || userAnswer == null) {
             return false;
@@ -109,6 +95,12 @@ public class ListeningQuestion implements Parcelable {
 
     public QuestionType getType() { return type; }
     public void setType(QuestionType type) { this.type = type; }
+
+    public String getAudioUrl() { return audioUrl; }
+    public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public List<String> getOptions() { return options; }
     public void setOptions(List<String> options) { this.options = options; }
