@@ -33,6 +33,7 @@ import com.example.newsandlearn.Model.Question;
 import com.example.newsandlearn.Model.VideoLesson;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.AnimationHelper;
+import com.example.newsandlearn.View.QuestionMarkerProgressBar;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -57,13 +58,15 @@ public class VideoLessonActivity extends AppCompatActivity implements
     private View questionContainer;
     private FrameLayout questionFragmentContainer;
     private ImageView correctIcon, incorrectIcon, backButton;
-    private ProgressBar loadingIndicator, lessonProgress;
+    private ProgressBar loadingIndicator;
+    private QuestionMarkerProgressBar lessonProgress;
     private TextView lessonTitle, lessonLevel, questionProgressText;
     private View progressContainer;
 
     private VideoLesson currentLesson;
     private List<Question> sortedQuestions;
     private int currentQuestionIndex = -1;
+    private int questionsAnsweredCorrectly = 0;
     private boolean isQuestionShowing = false;
 
     private FirebaseFirestore db;
@@ -117,6 +120,9 @@ public class VideoLessonActivity extends AppCompatActivity implements
                 if (playbackState == Player.STATE_READY) {
                     loadingIndicator.setVisibility(View.GONE);
                     startProgressTracking();
+                } else if (playbackState == Player.STATE_ENDED) {
+                    // Video completed - launch completion activity
+                    launchVideoCompletionActivity();
                 }
             }
 
@@ -127,6 +133,22 @@ public class VideoLessonActivity extends AppCompatActivity implements
                 }
             }
         });
+    }
+
+    private void launchVideoCompletionActivity() {
+        if (currentLesson == null) return;
+        
+        long watchDuration = player != null ? player.getDuration() / 1000 : 0;
+        int totalQuestions = sortedQuestions != null ? sortedQuestions.size() : 0;
+        
+        Intent intent = new Intent(this, VideoCompletionActivity.class);
+        intent.putExtra("lessonId", getIntent().getStringExtra("lesson_id"));
+        intent.putExtra("lessonTitle", currentLesson.getTitle());
+        intent.putExtra("watchDuration", watchDuration);
+        intent.putExtra("questionsAnswered", questionsAnsweredCorrectly);
+        intent.putExtra("totalQuestions", totalQuestions);
+        startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private Handler progressHandler = new Handler(Looper.getMainLooper());
@@ -217,6 +239,17 @@ public class VideoLessonActivity extends AppCompatActivity implements
         // Sort questions
         sortedQuestions = new ArrayList<>(currentLesson.getQuestions());
         Collections.sort(sortedQuestions, Comparator.comparingInt(Question::getAppearAtSecond));
+
+        // Set question markers on progress bar
+        if (lessonProgress != null && !sortedQuestions.isEmpty()) {
+            List<Integer> timestamps = new ArrayList<>();
+            for (Question q : sortedQuestions) {
+                timestamps.add(q.getAppearAtSecond());
+            }
+            // Get video duration (will be set properly after video loads)
+            int duration = currentLesson.getDuration() > 0 ? currentLesson.getDuration() : 300;
+            lessonProgress.setQuestionMarkers(timestamps, duration);
+        }
 
         // Load media based on URL type
         if (isYouTubeUrl(videoUrl)) {
@@ -503,6 +536,7 @@ public class VideoLessonActivity extends AppCompatActivity implements
     @Override
     public void onQuestionAnswered(boolean isCorrect) {
         if (isCorrect) {
+            questionsAnsweredCorrectly++;
             showCorrectFeedback();
         } else {
             showIncorrectFeedback();

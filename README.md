@@ -100,6 +100,15 @@
 6. Enable Storage
 ```
 
+### **2.1 Gemini (AI) Setup (Optional)**
+- Do not hardcode API keys in source code.
+- Add this to `local.properties` (not committed):
+   - `GEMINI_API_KEY=YOUR_KEY`
+- Or set environment variable before build:
+   - `GEMINI_API_KEY=YOUR_KEY`
+
+If you previously committed an API key, rotate it immediately.
+
 ### **3. Build & Run**
 ```bash
 1. Open project in Android Studio

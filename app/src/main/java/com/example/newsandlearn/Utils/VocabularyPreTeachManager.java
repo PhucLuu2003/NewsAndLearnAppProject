@@ -7,6 +7,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.newsandlearn.BuildConfig;
 import com.example.newsandlearn.R;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
@@ -32,33 +33,39 @@ import java.util.concurrent.Executors;
  * Giúp người học chuẩn bị tốt hơn và tăng khả năng hiểu bài
  */
 public class VocabularyPreTeachManager {
-    
+
     private static VocabularyPreTeachManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
     private List<PreTeachWord> preTeachWords;
-    
+
     private VocabularyPreTeachManager() {
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", "AIzaSyAXGYeWoZ9y3aerzHUatkdcAXhXWd5EzA8");
+        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
+            throw new IllegalStateException(
+                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        }
+        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
         model = GenerativeModelFutures.from(gm);
         executor = Executors.newSingleThreadExecutor();
         preTeachWords = new ArrayList<>();
     }
-    
+
     public static synchronized VocabularyPreTeachManager getInstance() {
         if (instance == null) {
             instance = new VocabularyPreTeachManager();
         }
         return instance;
     }
-    
+
     /**
      * Phân tích bài viết và chọn 5-10 từ quan trọng nhất để dạy trước
      */
-    public void analyzeAndSelectWords(String articleContent, String articleTitle, String userLevel, PreTeachCallback callback) {
+    public void analyzeAndSelectWords(String articleContent, String articleTitle, String userLevel,
+            PreTeachCallback callback) {
         preTeachWords.clear();
-        
-        String prompt = "Analyze this article and select the 5-10 MOST IMPORTANT vocabulary words that a " + userLevel + " learner should know BEFORE reading:\n\n" +
+
+        String prompt = "Analyze this article and select the 5-10 MOST IMPORTANT vocabulary words that a " + userLevel
+                + " learner should know BEFORE reading:\n\n" +
                 "Title: " + articleTitle + "\n" +
                 "Article: " + articleContent + "\n\n" +
                 "Selection criteria:\n" +
@@ -84,19 +91,19 @@ public class VocabularyPreTeachManager {
                 "  \"article_summary\": \"One sentence summary of what the article is about\"\n" +
                 "}\n\n" +
                 "Limit to 5-10 words maximum. Return ONLY valid JSON.";
-        
+
         Content content = new Content.Builder()
                 .addText(prompt)
                 .build();
-        
+
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-        
+
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
                 try {
                     String jsonText = result.getText().trim();
-                    
+
                     // Clean JSON
                     if (jsonText.startsWith("```json")) {
                         jsonText = jsonText.substring(7);
@@ -105,15 +112,15 @@ public class VocabularyPreTeachManager {
                         jsonText = jsonText.substring(0, jsonText.length() - 3);
                     }
                     jsonText = jsonText.trim();
-                    
+
                     JSONObject json = new JSONObject(jsonText);
                     String summary = json.getString("article_summary");
-                    
+
                     JSONArray wordsArray = json.getJSONArray("key_words");
-                    
+
                     for (int i = 0; i < wordsArray.length(); i++) {
                         JSONObject wordObj = wordsArray.getJSONObject(i);
-                        
+
                         PreTeachWord word = new PreTeachWord();
                         word.word = wordObj.getString("word");
                         word.importance = wordObj.getInt("importance");
@@ -124,24 +131,24 @@ public class VocabularyPreTeachManager {
                         word.pronunciation = wordObj.getString("pronunciation");
                         word.wordType = wordObj.getString("word_type");
                         word.memoryTip = wordObj.getString("memory_tip");
-                        
+
                         preTeachWords.add(word);
                     }
-                    
+
                     callback.onSuccess(preTeachWords, summary);
-                    
+
                 } catch (Exception e) {
                     callback.onError("Failed to analyze vocabulary: " + e.getMessage());
                 }
             }
-            
+
             @Override
             public void onFailure(Throwable t) {
                 callback.onError("AI Error: " + t.getMessage());
             }
         }, executor);
     }
-    
+
     /**
      * Hiển thị Pre-Teach dialog trước khi đọc bài
      */
@@ -150,12 +157,12 @@ public class VocabularyPreTeachManager {
             resultCallback.onSkipped();
             return;
         }
-        
+
         Dialog dialog = new Dialog(context);
         dialog.setContentView(R.layout.dialog_vocabulary_preteach);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.setCancelable(false);
-        
+
         TextView tvTitle = dialog.findViewById(R.id.tv_preteach_title);
         TextView tvSummary = dialog.findViewById(R.id.tv_article_summary);
         TextView tvInstruction = dialog.findViewById(R.id.tv_instruction);
@@ -164,26 +171,26 @@ public class VocabularyPreTeachManager {
         MaterialButton btnSkip = dialog.findViewById(R.id.btn_skip);
         ProgressBar progressBar = dialog.findViewById(R.id.progress_learning);
         TextView tvProgress = dialog.findViewById(R.id.tv_progress);
-        
+
         tvTitle.setText("📚 Key Vocabulary Preview");
         tvSummary.setText("This article is about: " + articleSummary);
         tvInstruction.setText("Learn these " + preTeachWords.size() + " important words first:");
-        
+
         // Add word cards
-        final int[] currentWordIndex = {0};
-        final int[] learnedCount = {0};
-        
+        final int[] currentWordIndex = { 0 };
+        final int[] learnedCount = { 0 };
+
         showWordCard(context, wordsContainer, currentWordIndex[0], new WordCardCallback() {
             @Override
             public void onWordLearned() {
                 learnedCount[0]++;
                 currentWordIndex[0]++;
-                
+
                 // Update progress
                 int progress = (learnedCount[0] * 100) / preTeachWords.size();
                 progressBar.setProgress(progress);
                 tvProgress.setText(learnedCount[0] + "/" + preTeachWords.size() + " learned");
-                
+
                 if (currentWordIndex[0] < preTeachWords.size()) {
                     // Show next word
                     wordsContainer.removeAllViews();
@@ -194,11 +201,11 @@ public class VocabularyPreTeachManager {
                     btnStartReading.setText("🎉 Start Reading Now!");
                 }
             }
-            
+
             @Override
             public void onWordSkipped() {
                 currentWordIndex[0]++;
-                
+
                 if (currentWordIndex[0] < preTeachWords.size()) {
                     wordsContainer.removeAllViews();
                     showWordCard(context, wordsContainer, currentWordIndex[0], this);
@@ -207,20 +214,20 @@ public class VocabularyPreTeachManager {
                 }
             }
         });
-        
+
         btnStartReading.setOnClickListener(v -> {
             dialog.dismiss();
             resultCallback.onCompleted(learnedCount[0], preTeachWords.size());
         });
-        
+
         btnSkip.setOnClickListener(v -> {
             dialog.dismiss();
             resultCallback.onSkipped();
         });
-        
+
         dialog.show();
     }
-    
+
     /**
      * Hiển thị card cho một từ
      */
@@ -228,11 +235,11 @@ public class VocabularyPreTeachManager {
         if (wordIndex >= preTeachWords.size()) {
             return;
         }
-        
+
         PreTeachWord word = preTeachWords.get(wordIndex);
-        
+
         View cardView = View.inflate(context, R.layout.item_preteach_word_card, null);
-        
+
         TextView tvWord = cardView.findViewById(R.id.tv_word);
         TextView tvPronunciation = cardView.findViewById(R.id.tv_pronunciation);
         TextView tvWordType = cardView.findViewById(R.id.tv_word_type);
@@ -243,7 +250,7 @@ public class VocabularyPreTeachManager {
         ChipGroup chipImportance = cardView.findViewById(R.id.chip_importance);
         MaterialButton btnGotIt = cardView.findViewById(R.id.btn_got_it);
         MaterialButton btnSkipWord = cardView.findViewById(R.id.btn_skip_word);
-        
+
         tvWord.setText(word.word);
         tvPronunciation.setText("/" + word.pronunciation + "/");
         tvWordType.setText(word.wordType);
@@ -251,7 +258,7 @@ public class VocabularyPreTeachManager {
         tvVietnamese.setText("🇻🇳 " + word.vietnamese);
         tvExample.setText("\"" + word.exampleSentence + "\"");
         tvMemoryTip.setText("💡 " + word.memoryTip);
-        
+
         // Show importance stars
         for (int i = 0; i < Math.min(word.importance, 5); i++) {
             Chip chip = new Chip(context);
@@ -259,26 +266,26 @@ public class VocabularyPreTeachManager {
             chip.setClickable(false);
             chipImportance.addView(chip);
         }
-        
+
         btnGotIt.setOnClickListener(v -> {
             word.wasLearned = true;
             callback.onWordLearned();
         });
-        
+
         btnSkipWord.setOnClickListener(v -> {
             callback.onWordSkipped();
         });
-        
+
         container.addView(cardView);
     }
-    
+
     /**
      * Lấy danh sách từ đã pre-teach
      */
     public List<PreTeachWord> getPreTeachWords() {
         return new ArrayList<>(preTeachWords);
     }
-    
+
     /**
      * Kiểm tra xem từ có trong danh sách pre-teach không
      */
@@ -290,14 +297,14 @@ public class VocabularyPreTeachManager {
         }
         return false;
     }
-    
+
     /**
      * Reset
      */
     public void reset() {
         preTeachWords.clear();
     }
-    
+
     // Data classes
     public static class PreTeachWord {
         public String word;
@@ -311,20 +318,23 @@ public class VocabularyPreTeachManager {
         public String memoryTip;
         public boolean wasLearned = false;
     }
-    
+
     // Callbacks
     public interface PreTeachCallback {
         void onSuccess(List<PreTeachWord> words, String articleSummary);
+
         void onError(String error);
     }
-    
+
     public interface PreTeachResultCallback {
         void onCompleted(int learnedCount, int totalCount);
+
         void onSkipped();
     }
-    
+
     private interface WordCardCallback {
         void onWordLearned();
+
         void onWordSkipped();
     }
 }

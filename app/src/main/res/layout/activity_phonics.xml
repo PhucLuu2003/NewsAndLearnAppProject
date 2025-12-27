@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 🎨 Phonics Activity - Premium UI with Lottie Animations -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F8F9FA">
+
+    <!-- Collapsing Header -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:background="@drawable/gradient_purple_pink"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="@color/primary"
+            app:expandedTitleGravity="bottom"
+            app:expandedTitleMarginStart="24dp"
+            app:expandedTitleMarginBottom="80dp">
+
+            <!-- Background Animation -->
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/header_animation"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                app:lottie_rawRes="@raw/loading"
+                app:lottie_autoPlay="true"
+                app:lottie_loop="true"
+                app:layout_collapseMode="parallax" />
+
+            <!-- Toolbar -->
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                app:navigationIcon="@drawable/ic_arrow_back"
+                app:navigationIconTint="@android:color/white" />
+
+            <!-- Header Content -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:padding="24dp"
+                app:layout_collapseMode="parallax">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🗣️ Phonics Foundation"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Master pronunciation from A-Z"
+                    android:textSize="15sp"
+                    android:textColor="@android:color/white"
+                    android:alpha="0.9" />
+
+                <!-- Progress Summary -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_completed_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0/26"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Letters"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.8" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_sounds_count"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0/44"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sounds"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.8" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_xp_earned"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="0 XP"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/white" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Earned"
+                            android:textSize="12sp"
+                            android:textColor="@android:color/white"
+                            android:alpha="0.8" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.appbar.CollapsingToolbarLayout>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- Content -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Category Tabs -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
+                app:cardBackgroundColor="@android:color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scrollbars="none">
+
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chip_group_categories"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="12dp"
+                        app:singleSelection="true">
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_alphabet"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔤 Alphabet"
+                            android:checked="true"
+                            app:chipBackgroundColor="@color/chip_bg_selector" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_vowels"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔴 Vowels"
+                            app:chipBackgroundColor="@color/chip_bg_selector" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_consonants"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔵 Consonants"
+                            app:chipBackgroundColor="@color/chip_bg_selector" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chip_stress"
+                            style="@style/Widget.MaterialComponents.Chip.Choice"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="💪 Stress"
+                            app:chipBackgroundColor="@color/chip_bg_selector" />
+
+                    </com.google.android.material.chip.ChipGroup>
+                </HorizontalScrollView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Lessons Grid -->
+            <TextView
+                android:id="@+id/tv_section_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔤 Alphabet (A-Z)"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#1F2937"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Loading Indicator -->
+            <ProgressBar
+                android:id="@+id/progress_loading"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:visibility="gone" />
+
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/empty_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="40dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📚"
+                    android:textSize="64sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="No lessons available"
+                    android:textSize="18sp"
+                    android:textColor="#6B7280" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_seed_data"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="🎲 Load Sample Data"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
+            <!-- Lessons RecyclerView (Grid) -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_lessons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clipToPadding="false"
+                android:nestedScrollingEnabled="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Record FAB -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fab_record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="24dp"
+        android:text="🎤 Practice"
+        android:textColor="@android:color/white"
+        app:icon="@drawable/ic_mic"
+        app:iconTint="@android:color/white"
+        app:backgroundTint="@color/primary" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

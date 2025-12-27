@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Premium gradient background: Green to Blue -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:angle="135"
-        android:startColor="@color/gradient_green_blue_start"
-        android:endColor="@color/gradient_green_blue_end"
+        android:startColor="#11998E"
+        android:centerColor="#38B2AC"
+        android:endColor="#4299E1"
         android:type="linear" />
-    <corners android:radius="16dp" />
+    <corners android:radius="20dp" />
 </shape>

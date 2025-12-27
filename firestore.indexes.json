@@ -1,0 +1,49 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "phonics_lessons",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "vocabulary_categories",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "order",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "survival_words",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "word",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "articles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "publishedDate",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

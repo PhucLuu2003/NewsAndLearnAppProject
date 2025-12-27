@@ -3,6 +3,19 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use { load(it) }
+    }
+}
+
+val geminiApiKey: String = System.getenv("GEMINI_API_KEY")
+    ?: localProperties.getProperty("GEMINI_API_KEY")
+    ?: ""
+
 android {
     namespace = "com.example.newsandlearn"
     compileSdk {
@@ -15,6 +28,14 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        // Do NOT hardcode API keys in source. Provide via local.properties or env var.
+        // local.properties: GEMINI_API_KEY=your_key
+        buildConfigField(
+            "String",
+            "GEMINI_API_KEY",
+            "\"${geminiApiKey.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

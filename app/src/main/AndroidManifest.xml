@@ -203,6 +203,45 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         
+        <!-- Leaderboard Activity -->
+        <activity
+            android:name=".Activity.LeaderboardActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- Video Completion Activity -->
+        <activity
+            android:name=".Activity.VideoCompletionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- Story-Based Learning Game Activity -->
+        <activity
+            android:name=".Activity.StoryGameActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
+        <!-- 🗣️ Phonics Activity - NEW -->
+        <activity
+            android:name=".Activity.PhonicsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <!-- 💬 Survival Vocabulary Activity - NEW -->
+        <activity
+            android:name=".Activity.SurvivalVocabularyActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
+        <!-- 📚 Category Words Activity - NEW -->
+        <activity
+            android:name=".Activity.CategoryWordsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="adjustResize" />
+        
     </application>
 
 </manifest>

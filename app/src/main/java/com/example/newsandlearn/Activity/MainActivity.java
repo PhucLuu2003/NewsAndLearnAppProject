@@ -45,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
         if (!dataUploaded) {
             Log.d("MainActivity", "Uploading sample data to Firebase...");
 
+
             // Upload lessons
-            AddLessonDataHelper.addDirectionsLesson();
-            AddLessonDataHelper.addRestaurantLesson();
+            // Removed: addDirectionsLesson() and addRestaurantLesson()
+
 
             SampleDataHelper sampleHelper = new SampleDataHelper();
             sampleHelper.generateAllSampleData(new SampleDataHelper.OnCompleteListener() {
@@ -96,5 +97,31 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+    }
+
+    /**
+     * Navigate to a specific tab programmatically
+     * @param tabIndex 0=Home, 1=Articles, 2=Learn, 3=Games, 4=Profile
+     */
+    public void navigateToTab(int tabIndex) {
+        if (bottomNav == null) return;
+        
+        switch (tabIndex) {
+            case 0:
+                bottomNav.setSelectedItemId(R.id.nav_home);
+                break;
+            case 1:
+                bottomNav.setSelectedItemId(R.id.nav_article);
+                break;
+            case 2:
+                bottomNav.setSelectedItemId(R.id.nav_learn);
+                break;
+            case 3:
+                bottomNav.setSelectedItemId(R.id.nav_games);
+                break;
+            case 4:
+                bottomNav.setSelectedItemId(R.id.nav_profile);
+                break;
+        }
     }
 }
