@@ -11,15 +11,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.newsandlearn.Model.ListeningLesson;
 import com.example.newsandlearn.R;
 
 import java.util.List;
 
-/**
- * ListeningAdapter - RecyclerView adapter for listening lessons
- * Displays data loaded from Firebase dynamically
- */
 public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.ListeningViewHolder> {
 
     private Context context;
@@ -48,7 +45,6 @@ public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.List
         ListeningLesson lesson = lessonList.get(position);
         holder.bind(lesson);
         
-        // Add animation
         com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(context, holder.itemView, position);
     }
 
@@ -77,20 +73,13 @@ public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.List
         }
 
         public void bind(ListeningLesson lesson) {
-            // Title
             lessonTitle.setText(lesson.getTitle());
-
-            // Duration
             durationText.setText(lesson.getFormattedDuration());
+            levelText.setText(lesson.getLevel() != null ? lesson.getLevel() : "A1");
 
-            // Level
-            levelText.setText(lesson.getLevel() != null ? lesson.getLevel() : "B1");
-
-            // Questions count
             int qCount = lesson.getQuestionCount();
             questionsText.setText(qCount + (qCount == 1 ? " question" : " questions"));
 
-            // Progress (if completed)
             if (lesson.isCompleted() && lesson.getUserScore() > 0) {
                 progressLayout.setVisibility(View.VISIBLE);
                 scoreText.setText(lesson.getUserScore() + "%");
@@ -98,12 +87,11 @@ public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.List
                 progressLayout.setVisibility(View.GONE);
             }
 
-            // TODO: Load thumbnail from Firebase Storage URL
-            // Glide.with(context).load(lesson.getThumbnailUrl()).into(thumbnail);
+            if (lesson.getThumbnailUrl() != null && !lesson.getThumbnailUrl().isEmpty()) {
+                Glide.with(context).load(lesson.getThumbnailUrl()).into(thumbnail);
+            }
 
-            // Click listener
             itemView.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, itemView); // Scale animation
                 if (listener != null) {
                     listener.onLessonClick(lesson);
                 }

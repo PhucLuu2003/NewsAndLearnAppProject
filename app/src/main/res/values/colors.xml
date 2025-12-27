@@ -211,4 +211,7 @@
     
     <!-- Game Colors -->
     <color name="orange">#F59E0B</color>  <!-- Amber 500 for game UI -->
-</resources>
+
+    <color name="green_correct">#2E7D32</color>
+    <color name="red_incorrect">#B71C1C</color>
+    </resources>
