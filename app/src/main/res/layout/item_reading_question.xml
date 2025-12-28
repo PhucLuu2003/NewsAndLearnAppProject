@@ -5,8 +5,8 @@
     android:layout_height="wrap_content"
     android:layout_marginStart="0dp"
     android:layout_marginEnd="0dp"
-    android:layout_marginTop="12dp"
-    android:layout_marginBottom="12dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
     app:cardCornerRadius="16dp"
     app:cardElevation="4dp"
     app:strokeWidth="1dp"
@@ -19,17 +19,24 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Question Number Badge -->
         <TextView
             android:id="@+id/question_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Question 1"
             android:textColor="@color/primary"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="bold"
             android:letterSpacing="0.05"
-            android:layout_marginBottom="12dp" />
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:background="@drawable/badge_background"
+            android:layout_marginBottom="16dp" />
 
+        <!-- Question Text -->
         <TextView
             android:id="@+id/question_text"
             android:layout_width="match_parent"
@@ -39,8 +46,9 @@
             android:textSize="17sp"
             android:textStyle="bold"
             android:lineSpacingExtra="6dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="20dp" />
 
+        <!-- Options RadioGroup -->
         <RadioGroup
             android:id="@+id/options_group"
             android:layout_width="match_parent"

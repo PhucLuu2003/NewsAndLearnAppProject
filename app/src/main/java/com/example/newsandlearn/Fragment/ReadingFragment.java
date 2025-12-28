@@ -1,8 +1,8 @@
 package com.example.newsandlearn.Fragment;
 
 import android.content.Intent;
-
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,32 +32,24 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ReadingFragment - Enhanced with Gamification and Smart Recommendations
- * Features: XP/Level display, AI recommendations, trending articles
- */
 public class ReadingFragment extends Fragment {
 
     private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView readingRecyclerView, recommendedRecyclerView;
+    private RecyclerView readingRecyclerView;
     private ProgressBar loadingIndicator;
-    private LinearLayout emptyState, gamificationCard, recommendedSection;
-    private TextView articlesRead, avgScore, levelText, xpText;
-    private ProgressBar levelProgressBar;
-    private ChipGroup categoryChipGroup;
+    private LinearLayout emptyState;
+    private TextView articlesRead, avgScore;
 
     private List<ReadingArticle> allArticles;
     private List<ReadingArticle> filteredArticles;
-    private List<ReadingArticle> recommendedArticles;
-    private ReadingAdapter adapter, recommendedAdapter;
+    private ReadingAdapter adapter;
     private String currentCategory = "all";
+    private String currentLevel = "all";
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
     private GamificationManager gamificationManager;
     private SmartRecommendationEngine recommendationEngine;
-
-    public ReadingFragment() {}
 
     @Nullable
     @Override
@@ -67,10 +59,8 @@ public class ReadingFragment extends Fragment {
 
         initializeServices();
         initializeViews(view);
-        setupRecyclerView();
-        setupListeners();
-        loadGamificationData();
-        loadRecommendations();
+        setupRecyclerView(view);
+        setupListeners(view);
         loadReadingArticles();
 
         return view;
@@ -82,40 +72,34 @@ public class ReadingFragment extends Fragment {
         gamificationManager = GamificationManager.getInstance();
         recommendationEngine = SmartRecommendationEngine.getInstance();
         allArticles = new ArrayList<>();
-        filteredArticles = new ArrayList<>();
-        recommendedArticles = new ArrayList<>();
+        filteredArticles = new ArrayList<>(); // Initialized once
     }
 
     private void initializeViews(View view) {
         articlesRead = view.findViewById(R.id.articles_read);
         avgScore = view.findViewById(R.id.avg_score);
-        categoryChipGroup = view.findViewById(R.id.category_chip_group);
         swipeRefresh = view.findViewById(R.id.swipe_refresh);
         readingRecyclerView = view.findViewById(R.id.reading_recycler_view);
         loadingIndicator = view.findViewById(R.id.loading_indicator);
         emptyState = view.findViewById(R.id.empty_state);
-        View articlesCard = view.findViewById(R.id.articles_card);
-        View scoreCard = view.findViewById(R.id.score_card);
-        
-        // Staggered Entrance Animation
-        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(view.getContext(), articlesCard, 0);
-        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(view.getContext(), scoreCard, 1);
     }
 
-    private void setupRecyclerView() {
+    private void setupRecyclerView(View view) {
         readingRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ReadingAdapter(getContext(), filteredArticles, article -> {
             Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.ReadingActivity.class);
-            // Pass article ID to load from Firebase
-            intent.putExtra("article_id", article.getId()); 
+            intent.putExtra("article_id", article.getId());
             startActivity(intent);
         });
         readingRecyclerView.setAdapter(adapter);
+
+        readingRecyclerView.post(() -> Log.d("RV_DEBUG", "childCount=" + readingRecyclerView.getChildCount()));
     }
 
-    private void setupListeners() {
+    private void setupListeners(View view) {
         swipeRefresh.setOnRefreshListener(this::loadReadingArticles);
 
+        ChipGroup categoryChipGroup = view.findViewById(R.id.category_chip_group);
         categoryChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
             if (checkedId == R.id.chip_all) {
                 currentCategory = "all";
@@ -126,85 +110,94 @@ public class ReadingFragment extends Fragment {
             }
             filterArticles();
         });
+
+        ChipGroup levelChipGroup = view.findViewById(R.id.level_chip_group);
+        levelChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.chip_level_all) {
+                currentLevel = "all";
+            } else if (checkedId == R.id.chip_a1) {
+                currentLevel = "A1";
+            } else if (checkedId == R.id.chip_a2) {
+                currentLevel = "A2";
+            } else if (checkedId == R.id.chip_b1) {
+                currentLevel = "B1";
+            } else if (checkedId == R.id.chip_b2) {
+                currentLevel = "B2";
+            }
+            filterArticles();
+        });
     }
 
-    /**
-     * Load reading articles from Firebase - DYNAMIC
-     */
     private void loadReadingArticles() {
         showLoading(true);
-
-        db.collection("reading_lessons")
-                .get()
+        db.collection("reading_lessons").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     allArticles.clear();
-
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         ReadingArticle article = document.toObject(ReadingArticle.class);
                         if (article != null) {
+                            article.setId(document.getId());
                             allArticles.add(article);
                         }
                     }
-
                     if (auth.getCurrentUser() != null) {
                         loadUserProgress();
                     } else {
                         updateStats();
                         filterArticles();
                         showLoading(false);
-                        swipeRefresh.setRefreshing(false);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error loading articles", Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
                 });
     }
 
     private void loadUserProgress() {
         String userId = auth.getCurrentUser().getUid();
-
-        db.collection("users").document(userId)
-                .collection("reading_progress")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String articleId = document.getString("articleId");
-                        Boolean completed = document.getBoolean("completed");
-                        Long score = document.getLong("userScore");
-                        Long readCount = document.getLong("readCount");
-
+        db.collection("users").document(userId).collection("reading_progress").get()
+                .addOnSuccessListener(progressSnapshots -> {
+                    for (QueryDocumentSnapshot doc : progressSnapshots) {
                         for (ReadingArticle article : allArticles) {
-                            if (article.getId().equals(articleId)) {
-                                if (completed != null) article.setCompleted(completed);
-                                if (score != null) article.setUserScore(score.intValue());
-                                if (readCount != null) article.setReadCount(readCount.intValue());
+                            if (article.getId().equals(doc.getId())) {
+                                if (doc.getBoolean("completed") != null) {
+                                    article.setCompleted(doc.getBoolean("completed"));
+                                }
+                                if (doc.getLong("userScore") != null) {
+                                    article.setUserScore(doc.getLong("userScore").intValue());
+                                }
                                 break;
                             }
                         }
                     }
-
                     updateStats();
                     filterArticles();
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                })
+                .addOnFailureListener(e -> {
+                    showLoading(false);
+                    filterArticles();
                 });
     }
 
     private void filterArticles() {
-        filteredArticles.clear();
-
+        List<ReadingArticle> temp = new ArrayList<>();
         for (ReadingArticle article : allArticles) {
-            if (currentCategory.equals("all") || 
-                (article.getCategory() != null && article.getCategory().equals(currentCategory))) {
-                filteredArticles.add(article);
+            boolean categoryMatches = currentCategory.equals("all") ||
+                    (article.getCategory() != null && article.getCategory().equalsIgnoreCase(currentCategory));
+
+            boolean levelMatches = currentLevel.equals("all") ||
+                    (article.getLevel() != null && article.getLevel().equalsIgnoreCase(currentLevel));
+
+            if (categoryMatches && levelMatches) {
+                temp.add(article);
             }
         }
 
-        adapter.notifyDataSetChanged();
+        adapter.updateData(temp);
 
-        if (filteredArticles.isEmpty()) {
+        if (temp.isEmpty()) {
             showEmptyState();
         } else {
             hideEmptyState();
@@ -215,27 +208,29 @@ public class ReadingFragment extends Fragment {
         int readCount = 0;
         int totalScore = 0;
         int scoredCount = 0;
-
         for (ReadingArticle article : allArticles) {
-            if (article.isCompleted()) readCount++;
+            if (article.isCompleted()) {
+                readCount++;
+            }
             if (article.getUserScore() > 0) {
                 totalScore += article.getUserScore();
                 scoredCount++;
             }
         }
-
         articlesRead.setText(String.valueOf(readCount));
         avgScore.setText(scoredCount > 0 ? (totalScore / scoredCount) + "%" : "0%");
     }
 
-    private void showLoading(boolean show) {
-        if (show) {
+    private void showLoading(boolean isLoading) {
+        if (isLoading) {
             loadingIndicator.setVisibility(View.VISIBLE);
             readingRecyclerView.setVisibility(View.GONE);
             emptyState.setVisibility(View.GONE);
         } else {
             loadingIndicator.setVisibility(View.GONE);
+            readingRecyclerView.setVisibility(View.VISIBLE);
         }
+        swipeRefresh.setRefreshing(isLoading);
     }
 
     private void showEmptyState() {
@@ -248,80 +243,9 @@ public class ReadingFragment extends Fragment {
         readingRecyclerView.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Load gamification data (XP, Level, Badges)
-     */
-    private void loadGamificationData() {
-        if (auth.getCurrentUser() == null) return;
-
-        gamificationManager.loadGamification(new GamificationManager.GamificationCallback() {
-            @Override
-            public void onSuccess(ReadingGamification gamification) {
-                if (getActivity() == null) return;
-                
-                // Update gamification UI (if views exist)
-                // levelText.setText("Level " + gamification.getCurrentLevel());
-                // xpText.setText(gamification.getCurrentLevelXP() + " / " + gamification.getNextLevelXP() + " XP");
-                // levelProgressBar.setProgress(gamification.getLevelProgress());
-                
-                // Show new badges if any
-                List<ReadingGamification.Badge> newBadges = gamification.getNewBadges();
-                if (!newBadges.isEmpty()) {
-                    showBadgeEarnedDialog(newBadges.get(0));
-                    gamification.markBadgesAsSeen();
-                }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                // Silently fail - gamification is optional
-            }
-        });
-    }
-
-    /**
-     * Load smart recommendations
-     */
-    private void loadRecommendations() {
-        recommendationEngine.getRecommendations(5, new SmartRecommendationEngine.RecommendationCallback() {
-            @Override
-            public void onSuccess(List<ReadingArticle> recommendations) {
-                if (getActivity() == null) return;
-                
-                recommendedArticles.clear();
-                recommendedArticles.addAll(recommendations);
-                
-                // Update recommended adapter if it exists
-                // if (recommendedAdapter != null) {
-                //     recommendedAdapter.notifyDataSetChanged();
-                // }
-            }
-
-            @Override
-            public void onFailure(Exception e) {
-                // Silently fail - recommendations are optional
-            }
-        });
-    }
-
-    /**
-     * Show badge earned dialog
-     */
-    private void showBadgeEarnedDialog(ReadingGamification.Badge badge) {
-        if (getActivity() == null) return;
-        
-        new androidx.appcompat.app.AlertDialog.Builder(getActivity())
-            .setTitle("🏆 Badge Earned!")
-            .setMessage("Congratulations! You earned the \"" + badge.getName() + "\" badge!\n\n" + 
-                       badge.getDescription())
-            .setPositiveButton("Awesome!", null)
-            .show();
-    }
-
     @Override
     public void onResume() {
         super.onResume();
         loadReadingArticles();
-        loadGamificationData(); // Refresh gamification data
     }
 }
