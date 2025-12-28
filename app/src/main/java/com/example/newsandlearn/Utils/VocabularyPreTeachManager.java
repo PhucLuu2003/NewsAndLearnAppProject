@@ -34,18 +34,36 @@ import java.util.concurrent.Executors;
  */
 public class VocabularyPreTeachManager {
 
+    private static final String TAG = "VocabularyPreTeachManager";
     private static VocabularyPreTeachManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
     private List<PreTeachWord> preTeachWords;
+    private boolean isAIAvailable = false;
 
     private VocabularyPreTeachManager() {
-        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Vocabulary pre-teach will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
         preTeachWords = new ArrayList<>();
     }
@@ -56,12 +74,22 @@ public class VocabularyPreTeachManager {
         }
         return instance;
     }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
+    }
 
     /**
      * Phân tích bài viết và chọn 5-10 từ quan trọng nhất để dạy trước
      */
     public void analyzeAndSelectWords(String articleContent, String articleTitle, String userLevel,
             PreTeachCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available - GEMINI_API_KEY not configured");
+            return;
+        }
+        
         preTeachWords.clear();
 
         String prompt = "Analyze this article and select the 5-10 MOST IMPORTANT vocabulary words that a " + userLevel

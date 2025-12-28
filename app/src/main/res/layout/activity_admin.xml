@@ -64,6 +64,19 @@
                 app:backgroundTint="@color/green"
                 android:layout_marginBottom="12dp" />
 
+            <!-- Manage Firestore (CRUD) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_manage_firestore"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🗂️ Quản lý Firestore (CRUD)"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:padding="16dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/purple"
+                android:layout_marginBottom="12dp" />
+
             <!-- Divider -->
             <View
                 android:layout_width="match_parent"

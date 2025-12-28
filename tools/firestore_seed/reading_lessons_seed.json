@@ -1,0 +1,652 @@
+[
+    {
+        "id": "news_habits_001",
+        "title": "Small Habits, Big Results",
+        "category": "news",
+        "level": "B1",
+        "wordCount": 420,
+        "estimatedMinutes": 3,
+        "summary": "How tiny daily habits can change your long‑term results.",
+        "imageKeywords": [
+            "habits",
+            "journal",
+            "routine",
+            "self improvement",
+            "reading"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?habits,journal,routine",
+        "passage": "Many people want big changes, but they try to do everything at once. This often fails because motivation is not stable. A better approach is to build small habits. A habit is a behavior you repeat regularly. When a habit is small, it feels easy, so you are more likely to do it again tomorrow.\n\nFor example, if you want to read more, you can start with five minutes a day. If you want to exercise, you can begin with a short walk after dinner. Over time, these small actions become automatic. They also create a sense of progress.\n\nAnother key idea is consistency. Doing a small habit every day is usually more powerful than doing a big habit once a week. Consistency builds trust in yourself. When you trust yourself, you become more confident and you take on harder goals.\n\nFinally, remember that habits need a supportive environment. If you want to practice English, keep a short article on your phone and open it during a break. If you want to eat healthier, prepare simple snacks in advance. Small habits, repeated daily, can produce big results.",
+        "keyVocabulary": [
+            "motivation",
+            "stable",
+            "approach",
+            "regularly",
+            "automatic",
+            "consistency",
+            "powerful",
+            "supportive",
+            "environment",
+            "advance"
+        ],
+        "exercises": [
+            {
+                "question": "Why do people often fail when they try to change everything at once?",
+                "options": [
+                    "Because motivation is not stable",
+                    "Because habits are always boring",
+                    "Because small habits are too hard",
+                    "Because goals should be avoided"
+                ],
+                "correctAnswer": "Because motivation is not stable",
+                "explanation": "The first paragraph says big changes often fail because motivation is not stable. Small habits work better because they are easier to repeat."
+            },
+            {
+                "question": "What is the main benefit of small habits?",
+                "options": [
+                    "They require expensive tools",
+                    "They feel easy and are repeatable",
+                    "They work only for athletes",
+                    "They replace all goals"
+                ],
+                "correctAnswer": "They feel easy and are repeatable",
+                "explanation": "The passage explains that when a habit is small, it feels easy, so you are more likely to do it again tomorrow."
+            },
+            {
+                "question": "According to the passage, what makes habits easier to keep?",
+                "options": [
+                    "A supportive environment",
+                    "Perfect weather",
+                    "Watching TV",
+                    "Avoiding routines"
+                ],
+                "correctAnswer": "A supportive environment",
+                "explanation": "In the final paragraph, the author says habits need a supportive environment, like keeping an article on your phone or preparing snacks in advance."
+            }
+        ]
+    },
+    {
+        "id": "story_lost_phone_001",
+        "title": "The Lost Phone",
+        "category": "story",
+        "level": "A2",
+        "wordCount": 360,
+        "estimatedMinutes": 3,
+        "summary": "A short story about staying calm and solving a problem.",
+        "imageKeywords": [
+            "bus",
+            "phone",
+            "city",
+            "commute",
+            "calm"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?bus,city,phone",
+        "passage": "Lan was on her way home after class. The bus was crowded and noisy. She held her bag close and listened to music. When the bus stopped, she quickly got off and walked toward a small shop.\n\nSuddenly, she touched her pocket and froze. Her phone was not there. She checked her bag, her jacket, and the ground. Nothing. For a moment, she felt panic. Then she took a deep breath and tried to think clearly.\n\nLan remembered that she used her phone on the bus. She walked back to the bus stop and asked a driver. The driver said, “The next bus is coming in two minutes.” Lan waited and watched the road carefully.\n\nWhen the bus arrived, Lan stepped inside and looked at the seats. There, near the window, was her phone. She thanked the driver and smiled. On the way home, she learned an important lesson: staying calm helps you find solutions faster.",
+        "keyVocabulary": [
+            "crowded",
+            "held",
+            "suddenly",
+            "froze",
+            "panic",
+            "clearly",
+            "carefully",
+            "arrived",
+            "thanked",
+            "lesson"
+        ],
+        "exercises": [
+            {
+                "question": "Where did Lan last use her phone?",
+                "options": [
+                    "On the bus",
+                    "In the shop",
+                    "At home",
+                    "At school"
+                ],
+                "correctAnswer": "On the bus",
+                "explanation": "Lan remembered she used her phone on the bus, so the correct location is 'On the bus'."
+            },
+            {
+                "question": "What did Lan do after she felt panic?",
+                "options": [
+                    "She ran away",
+                    "She took a deep breath and thought clearly",
+                    "She bought a new phone",
+                    "She called the police immediately"
+                ],
+                "correctAnswer": "She took a deep breath and thought clearly",
+                "explanation": "The story says she felt panic, then took a deep breath and tried to think clearly."
+            },
+            {
+                "question": "What lesson did Lan learn?",
+                "options": [
+                    "Buses are always late",
+                    "Music is dangerous",
+                    "Staying calm helps you solve problems",
+                    "Phones should be turned off"
+                ],
+                "correctAnswer": "Staying calm helps you solve problems",
+                "explanation": "The ending states the lesson directly: staying calm helps you find solutions faster."
+            }
+        ]
+    },
+    {
+        "id": "news_sleep_001",
+        "title": "Why Sleep Matters for Learning",
+        "category": "news",
+        "level": "B1",
+        "wordCount": 460,
+        "estimatedMinutes": 4,
+        "summary": "Sleep supports memory, focus, and long-term learning.",
+        "imageKeywords": [
+            "sleep",
+            "night",
+            "study",
+            "bed",
+            "brain"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?sleep,study,night",
+        "passage": "People often think learning happens only while studying, but your brain also learns while you sleep. During sleep, the brain organizes information from the day. It strengthens useful memories and removes some unnecessary details. This process can improve your ability to remember new words, grammar rules, and facts.\n\nSleep also affects focus. If you sleep too little, you may feel tired and distracted. You might read the same paragraph many times without understanding it. With enough sleep, your attention improves and you can learn faster.\n\nTo sleep better, keep a regular schedule. Try to go to bed and wake up at similar times each day. Reduce screen time before bed, and make your room darker and quieter. Even small changes can improve sleep quality.\n\nIf you are learning English, sleep is part of your study plan. A well‑rested brain is more prepared to understand, remember, and use the language.",
+        "keyVocabulary": [
+            "organizes",
+            "strengthens",
+            "unnecessary",
+            "process",
+            "focus",
+            "distracted",
+            "attention",
+            "regular",
+            "reduce",
+            "quality"
+        ],
+        "exercises": [
+            {
+                "question": "What does the brain do during sleep?",
+                "options": [
+                    "It forgets everything",
+                    "It organizes information and strengthens memories",
+                    "It stops working completely",
+                    "It only dreams about food"
+                ],
+                "correctAnswer": "It organizes information and strengthens memories",
+                "explanation": "The first paragraph says the brain organizes information and strengthens useful memories during sleep."
+            },
+            {
+                "question": "Why is sleep important for focus?",
+                "options": [
+                    "It makes screens brighter",
+                    "It prevents learning new words",
+                    "It helps you avoid being tired and distracted",
+                    "It replaces studying"
+                ],
+                "correctAnswer": "It helps you avoid being tired and distracted",
+                "explanation": "The passage explains that too little sleep makes you tired and distracted, while enough sleep improves attention."
+            },
+            {
+                "question": "Which habit can improve sleep quality?",
+                "options": [
+                    "Going to bed at random times",
+                    "Keeping a regular schedule",
+                    "Drinking coffee at midnight",
+                    "Watching videos in bed for hours"
+                ],
+                "correctAnswer": "Keeping a regular schedule",
+                "explanation": "In the third paragraph, the author recommends keeping a regular sleep schedule to sleep better."
+            }
+        ]
+    },
+    {
+        "id": "story_mini_goal_001",
+        "title": "The 10‑Minute Challenge",
+        "category": "story",
+        "level": "A2",
+        "wordCount": 390,
+        "estimatedMinutes": 3,
+        "summary": "A learner uses a tiny daily goal to stay consistent.",
+        "imageKeywords": [
+            "study",
+            "timer",
+            "notebook",
+            "daily goal",
+            "student"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?study,notebook,timer",
+        "passage": "Minh wanted to improve his English, but he always felt too busy. One day, he made a simple promise: he would study for ten minutes every day. Not one hour. Not a perfect plan. Just ten minutes.\n\nOn the first day, he read a short article and wrote down three new words. On the second day, he listened to a short video and repeated two sentences. The tasks were small, so he did not feel pressure.\n\nAfter two weeks, Minh noticed something surprising. Ten minutes felt easier than he expected, so he sometimes studied longer. More importantly, he stopped feeling guilty. His daily practice became normal, like brushing his teeth.\n\nMinh learned that progress does not require huge effort every day. It requires a goal you can actually keep.",
+        "keyVocabulary": [
+            "promise",
+            "perfect",
+            "pressure",
+            "noticed",
+            "surprising",
+            "expected",
+            "importantly",
+            "guilty",
+            "practice",
+            "requires"
+        ],
+        "exercises": [
+            {
+                "question": "What was Minh's daily goal?",
+                "options": [
+                    "Study for ten minutes",
+                    "Study for three hours",
+                    "Never study",
+                    "Only watch movies"
+                ],
+                "correctAnswer": "Study for ten minutes",
+                "explanation": "The story says Minh promised to study for ten minutes every day."
+            },
+            {
+                "question": "Why did Minh feel less pressure?",
+                "options": [
+                    "Because the tasks were small",
+                    "Because he stopped learning",
+                    "Because exams were canceled",
+                    "Because English became easy instantly"
+                ],
+                "correctAnswer": "Because the tasks were small",
+                "explanation": "It states the tasks were small, so he did not feel pressure."
+            },
+            {
+                "question": "What did Minh learn about progress?",
+                "options": [
+                    "It needs huge effort every day",
+                    "It needs a goal you can keep",
+                    "It requires luck",
+                    "It requires expensive courses"
+                ],
+                "correctAnswer": "It needs a goal you can keep",
+                "explanation": "The last line says progress requires a goal you can actually keep, not huge effort every day."
+            }
+        ]
+    },
+    {
+        "id": "news_city_bikes_001",
+        "title": "City Bikes and Cleaner Air",
+        "category": "news",
+        "level": "B1",
+        "wordCount": 480,
+        "estimatedMinutes": 4,
+        "summary": "More people use bicycles to reduce traffic and pollution.",
+        "imageKeywords": [
+            "bicycle",
+            "bike lane",
+            "city",
+            "clean air",
+            "cycling"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?bicycle,city,bikelane",
+        "passage": "In many cities, traffic is a daily problem. Cars move slowly, streets are noisy, and the air becomes dirty. To reduce these issues, some cities invest in bike lanes and public bicycle systems.\n\nWhen bike lanes are safe and connected, more people choose bicycles for short trips. This can reduce traffic, save time, and improve public health. Cycling is also cheaper than driving.\n\nHowever, building a bike‑friendly city takes planning. Bike lanes need clear signs, good lighting, and enough space. Drivers and cyclists must also learn to share the road respectfully.\n\nExperts say cities that support cycling often become more comfortable for everyone, including people who still use cars. Cleaner air and quieter streets are benefits shared by the whole community.",
+        "keyVocabulary": [
+            "traffic",
+            "reduce",
+            "invest",
+            "connected",
+            "public health",
+            "cheaper",
+            "planning",
+            "lighting",
+            "respectfully",
+            "community"
+        ],
+        "exercises": [
+            {
+                "question": "Why do cities build bike lanes?",
+                "options": [
+                    "To increase traffic",
+                    "To reduce traffic and pollution",
+                    "To make streets noisier",
+                    "To stop people from walking"
+                ],
+                "correctAnswer": "To reduce traffic and pollution",
+                "explanation": "The first paragraph says cities invest in bike lanes to reduce traffic problems and dirty air."
+            },
+            {
+                "question": "What can make more people choose bicycles?",
+                "options": [
+                    "Unsafe roads",
+                    "Safe and connected bike lanes",
+                    "More expensive bikes",
+                    "Fewer signs"
+                ],
+                "correctAnswer": "Safe and connected bike lanes",
+                "explanation": "The passage says when bike lanes are safe and connected, more people choose bicycles for short trips."
+            },
+            {
+                "question": "What must drivers and cyclists learn?",
+                "options": [
+                    "To avoid each other forever",
+                    "To share the road respectfully",
+                    "To drive faster",
+                    "To remove bike lanes"
+                ],
+                "correctAnswer": "To share the road respectfully",
+                "explanation": "It explicitly states drivers and cyclists must learn to share the road respectfully."
+            }
+        ]
+    },
+    {
+        "id": "story_kind_message_001",
+        "title": "A Kind Message",
+        "category": "story",
+        "level": "A2",
+        "wordCount": 340,
+        "estimatedMinutes": 3,
+        "summary": "A small act of kindness changes someone's day.",
+        "imageKeywords": [
+            "friendship",
+            "message",
+            "support",
+            "student",
+            "kindness"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?friendship,message,kindness",
+        "passage": "Mai was nervous about her English presentation. She practiced at home, but her voice shook when she imagined the classroom. On the morning of the presentation, she felt her stomach tighten.\n\nBefore class, she opened her phone and saw a message from her friend: “You can do it. Speak slowly. I believe in you.” Mai read it twice. The words were simple, but they felt warm and real.\n\nDuring the presentation, Mai still felt nervous, but she remembered the message. She paused, breathed, and continued. Her classmates listened, and the teacher smiled.\n\nAfter class, Mai thanked her friend. She realized that support does not always need big actions. Sometimes a short, kind message is enough to change a day.",
+        "keyVocabulary": [
+            "nervous",
+            "presentation",
+            "imagined",
+            "tighten",
+            "believe",
+            "warm",
+            "paused",
+            "breathed",
+            "realized",
+            "support"
+        ],
+        "exercises": [
+            {
+                "question": "Why was Mai nervous?",
+                "options": [
+                    "She lost her phone",
+                    "She had an English presentation",
+                    "She hated messages",
+                    "She was late for class"
+                ],
+                "correctAnswer": "She had an English presentation",
+                "explanation": "The opening says Mai was nervous about her English presentation."
+            },
+            {
+                "question": "What did Mai do during the presentation?",
+                "options": [
+                    "She stopped immediately",
+                    "She paused, breathed, and continued",
+                    "She ran out of the room",
+                    "She forgot her name"
+                ],
+                "correctAnswer": "She paused, breathed, and continued",
+                "explanation": "The passage says she paused, breathed, and continued while remembering her friend's message."
+            },
+            {
+                "question": "What did Mai learn at the end?",
+                "options": [
+                    "Support always needs big actions",
+                    "A kind message can change a day",
+                    "Messages are useless",
+                    "Presentations should be canceled"
+                ],
+                "correctAnswer": "A kind message can change a day",
+                "explanation": "At the end, Mai realizes a short kind message can be enough to change someone's day."
+            }
+        ]
+    },
+    {
+        "id": "science_brain_plasticity_001",
+        "title": "Your Brain Can Change",
+        "category": "science",
+        "level": "B2",
+        "wordCount": 560,
+        "estimatedMinutes": 5,
+        "summary": "Neuroplasticity explains how practice reshapes skills over time.",
+        "imageKeywords": [
+            "brain",
+            "neurons",
+            "science",
+            "learning",
+            "focus"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?brain,science,learning",
+        "passage": "Many people believe they are either “good” at a skill or “bad” at it. But modern research suggests the brain is more flexible than we once thought. This flexibility is called neuroplasticity. It means the brain can change its structure and connections when you practice, learn, and repeat behaviors.\n\nWhen you study a language, for example, you build new pathways for sounds, words, and grammar patterns. At first, these pathways are weak. You may forget quickly or make the same mistakes. With consistent practice, the pathways become stronger and faster, similar to a trail that becomes clearer when more people walk on it.\n\nNeuroplasticity also explains why breaks matter. After intense learning, the brain needs time to organize information. Sleep, rest, and even short walks can support this process. In addition, struggling is not always a sign of failure. It can be a sign that your brain is working hard to form new connections.\n\nThe key is to practice in a smart way: repeat important patterns, get feedback, and increase difficulty gradually. Over weeks and months, small improvements add up. Your brain can change, and your skills can grow.",
+        "keyVocabulary": [
+            "flexible",
+            "research",
+            "neuroplasticity",
+            "structure",
+            "connections",
+            "pathways",
+            "consistent",
+            "organize",
+            "struggling",
+            "gradually"
+        ],
+        "exercises": [
+            {
+                "question": "What does neuroplasticity mean?",
+                "options": [
+                    "The brain never changes",
+                    "The brain can change through learning and practice",
+                    "Only children can learn languages",
+                    "Memory is always perfect"
+                ],
+                "correctAnswer": "The brain can change through learning and practice",
+                "explanation": "The passage defines neuroplasticity as the brain changing its structure and connections through practice and learning."
+            },
+            {
+                "question": "Why can breaks and sleep help learning?",
+                "options": [
+                    "They delete new information",
+                    "They help the brain organize information",
+                    "They stop the brain from working",
+                    "They make practice unnecessary"
+                ],
+                "correctAnswer": "They help the brain organize information",
+                "explanation": "It says after intense learning the brain needs time to organize information, and sleep/rest support this process."
+            },
+            {
+                "question": "Which strategy is recommended in the passage?",
+                "options": [
+                    "Increase difficulty gradually",
+                    "Avoid feedback",
+                    "Study only once a month",
+                    "Never make mistakes"
+                ],
+                "correctAnswer": "Increase difficulty gradually",
+                "explanation": "The final paragraph recommends repeating patterns, getting feedback, and increasing difficulty gradually."
+            }
+        ]
+    },
+    {
+        "id": "culture_food_markets_001",
+        "title": "Learning at a Local Food Market",
+        "category": "culture",
+        "level": "B1",
+        "wordCount": 470,
+        "estimatedMinutes": 4,
+        "summary": "A local market can be a great place to practice language and culture.",
+        "imageKeywords": [
+            "market",
+            "food",
+            "vegetables",
+            "street market",
+            "culture"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?market,food,vegetables",
+        "passage": "If you want to understand a city, visit a local food market. Markets are full of daily life: fresh vegetables, seasonal fruit, and many different smells. People talk, negotiate prices, and share short stories about their products.\n\nFor language learners, markets are also useful classrooms. You can practice simple questions like “How much is this?” or “Where is it from?” Because the conversation is short, it feels less stressful than a long discussion. You can repeat the same phrases many times and become more confident.\n\nMarkets also teach culture. You learn which ingredients are common, how people cook at home, and what foods are popular during special holidays. Even small details, such as how sellers greet customers, can show local values.\n\nTo learn effectively, go with a small goal. Choose three words you want to use, or one question you want to ask. Take notes after you leave. A market visit can become a simple, enjoyable study habit.",
+        "keyVocabulary": [
+            "seasonal",
+            "negotiate",
+            "products",
+            "classrooms",
+            "stressful",
+            "phrases",
+            "confident",
+            "ingredients",
+            "holidays",
+            "enjoyable"
+        ],
+        "exercises": [
+            {
+                "question": "Why are markets useful for language learners?",
+                "options": [
+                    "Conversations are short and easy to repeat",
+                    "No one talks in markets",
+                    "They replace all textbooks",
+                    "They are always quiet"
+                ],
+                "correctAnswer": "Conversations are short and easy to repeat",
+                "explanation": "The passage says market conversations are short, so learners can repeat the same phrases and gain confidence."
+            },
+            {
+                "question": "What can markets teach besides language?",
+                "options": [
+                    "Only math",
+                    "Culture and daily life",
+                    "Computer programming",
+                    "Nothing important"
+                ],
+                "correctAnswer": "Culture and daily life",
+                "explanation": "It explains markets show daily life and culture: ingredients, cooking habits, holidays, and greetings."
+            },
+            {
+                "question": "What is a good strategy for learning effectively at a market?",
+                "options": [
+                    "Go with a small goal",
+                    "Avoid asking questions",
+                    "Stay only one minute",
+                    "Never take notes"
+                ],
+                "correctAnswer": "Go with a small goal",
+                "explanation": "The last paragraph recommends going with a small goal, like using three words or asking one question."
+            }
+        ]
+    },
+    {
+        "id": "news_remote_work_001",
+        "title": "Remote Work: Benefits and Challenges",
+        "category": "news",
+        "level": "B2",
+        "wordCount": 540,
+        "estimatedMinutes": 5,
+        "summary": "Remote work can save commuting time but needs strong communication.",
+        "imageKeywords": [
+            "remote work",
+            "laptop",
+            "home office",
+            "video call",
+            "team"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?remote-work,home-office,laptop",
+        "passage": "Remote work has become common in many industries. For some workers, it offers important benefits. They save commuting time, have more flexible schedules, and can work in a quieter environment. Some companies also reduce costs by using smaller offices.\n\nHowever, remote work brings challenges. Communication can become harder when people are not in the same room. Small problems may take longer to solve, and misunderstandings can happen more easily. New employees may also feel isolated because they do not meet coworkers in person.\n\nTo succeed, teams often set clear routines. They use shared calendars, short daily check‑ins, and written summaries after meetings. These habits help everyone stay aligned. Remote workers also need boundaries. Without boundaries, they may work too long and feel burned out.\n\nExperts suggest a balanced approach. Many companies choose hybrid work, where employees spend some days at home and some days in the office. This model tries to keep flexibility while supporting teamwork and social connection.",
+        "keyVocabulary": [
+            "industries",
+            "benefits",
+            "commuting",
+            "flexible",
+            "communication",
+            "misunderstandings",
+            "isolated",
+            "routines",
+            "boundaries",
+            "hybrid"
+        ],
+        "exercises": [
+            {
+                "question": "What is one benefit of remote work mentioned in the passage?",
+                "options": [
+                    "Longer commuting time",
+                    "Saving commuting time",
+                    "More misunderstandings",
+                    "No schedules"
+                ],
+                "correctAnswer": "Saving commuting time",
+                "explanation": "The passage lists saving commuting time as a key benefit of remote work."
+            },
+            {
+                "question": "What is a common challenge of remote work?",
+                "options": [
+                    "Communication can become harder",
+                    "Offices become larger",
+                    "People never need meetings",
+                    "Employees always feel connected"
+                ],
+                "correctAnswer": "Communication can become harder",
+                "explanation": "It says communication can be harder when people are not in the same room, leading to misunderstandings."
+            },
+            {
+                "question": "Why do teams use written summaries after meetings?",
+                "options": [
+                    "To stay aligned",
+                    "To avoid teamwork",
+                    "To make work slower",
+                    "To reduce clarity"
+                ],
+                "correctAnswer": "To stay aligned",
+                "explanation": "The passage says written summaries help everyone stay aligned when working remotely."
+            }
+        ]
+    },
+    {
+        "id": "story_mountain_path_001",
+        "title": "The Mountain Path",
+        "category": "story",
+        "level": "B1",
+        "wordCount": 500,
+        "estimatedMinutes": 4,
+        "summary": "A short story about patience and steady effort.",
+        "imageKeywords": [
+            "mountain",
+            "hiking",
+            "trail",
+            "nature",
+            "view"
+        ],
+        "imageUrl": "https://source.unsplash.com/featured/1200x675/?mountain,hiking,trail",
+        "passage": "On Saturday morning, Tuan decided to hike a small mountain near his town. The weather was cool, and the sky was clear. At the start of the path, he felt excited and walked quickly.\n\nAfter twenty minutes, the slope became steeper. Tuan’s legs started to ache, and his breathing became heavy. He considered turning back. Then he noticed an older man walking slowly ahead. The man took small steps, paused when needed, and kept moving without hurry.\n\nTuan followed the same rhythm. Step by step, the path felt less frightening. He stopped thinking about the top and focused on the next few meters. After another half hour, the trees opened and the view appeared. The town looked quiet and far away.\n\nTuan realized the climb was not about speed. It was about patience and steady effort. On the way down, he smiled. The mountain had taught him a lesson he could use in study and in life.",
+        "keyVocabulary": [
+            "hike",
+            "path",
+            "slope",
+            "steeper",
+            "ache",
+            "considered",
+            "rhythm",
+            "focused",
+            "patience",
+            "steady"
+        ],
+        "exercises": [
+            {
+                "question": "Why did Tuan want to turn back?",
+                "options": [
+                    "The sky was clear",
+                    "The slope became steeper and he felt tired",
+                    "He forgot his phone",
+                    "He met a friend"
+                ],
+                "correctAnswer": "The slope became steeper and he felt tired",
+                "explanation": "After twenty minutes, the slope became steeper and his legs ached, so he considered turning back."
+            },
+            {
+                "question": "What did the older man do while walking?",
+                "options": [
+                    "He ran quickly",
+                    "He took small steps and paused when needed",
+                    "He sat down and quit",
+                    "He walked backward"
+                ],
+                "correctAnswer": "He took small steps and paused when needed",
+                "explanation": "The story describes the older man taking small steps, pausing when needed, and continuing without hurry."
+            },
+            {
+                "question": "What lesson did Tuan learn?",
+                "options": [
+                    "Speed is everything",
+                    "Patience and steady effort matter",
+                    "Mountains are dangerous",
+                    "Studying is easy"
+                ],
+                "correctAnswer": "Patience and steady effort matter",
+                "explanation": "Near the end, Tuan realizes the climb is about patience and steady effort, not speed."
+            }
+        ]
+    }
+]

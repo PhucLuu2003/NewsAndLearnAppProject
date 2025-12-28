@@ -12,7 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.newsandlearn.Activity.ArticleDetailActivity;
+import com.example.newsandlearn.Activity.EnhancedArticleDetailActivity;
 import com.example.newsandlearn.Model.Article;
 import com.example.newsandlearn.R;
 
@@ -43,11 +43,11 @@ public class HomeArticleAdapter extends RecyclerView.Adapter<HomeArticleAdapter.
         holder.title.setText(article.getTitle());
         holder.source.setText(article.getSource());
         holder.readTime.setText(article.getReadTime() + " min");
-        
+
         // Set level with colored badge
         String level = article.getLevel();
         holder.level.setText(level != null ? level : "easy");
-        
+
         // Set badge color based on level
         int badgeDrawable;
         if (level != null) {
@@ -88,10 +88,8 @@ public class HomeArticleAdapter extends RecyclerView.Adapter<HomeArticleAdapter.
 
         // Click listener
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(context, ArticleDetailActivity.class);
+            Intent intent = new Intent(context, EnhancedArticleDetailActivity.class);
             intent.putExtra("article_id", article.getId());
-            intent.putExtra("article_title", article.getTitle());
-            intent.putExtra("article_url", article.getUrl());
             context.startActivity(intent);
         });
 

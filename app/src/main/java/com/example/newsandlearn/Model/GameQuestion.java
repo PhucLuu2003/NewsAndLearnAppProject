@@ -70,6 +70,8 @@ public class GameQuestion implements Serializable {
     public String getAudioUrl() { return audioUrl; }
     public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
 
-    public int getTimeLimit() { return timeLimit; }
+    public int getTimeLimit() { 
+        return timeLimit > 0 ? timeLimit : 30; // Default to 30 seconds if not set
+    }
     public void setTimeLimit(int timeLimit) { this.timeLimit = timeLimit; }
 }

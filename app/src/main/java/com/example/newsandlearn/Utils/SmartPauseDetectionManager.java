@@ -30,10 +30,12 @@ import java.util.concurrent.Executors;
  */
 public class SmartPauseDetectionManager {
 
+    private static final String TAG = "SmartPauseDetectionManager";
     private static SmartPauseDetectionManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
     private Handler handler;
+    private boolean isAIAvailable = false;
 
     private long lastScrollTime = 0;
     private int lastScrollPosition = 0;
@@ -48,12 +50,28 @@ public class SmartPauseDetectionManager {
     private int lastRereadPosition = -1;
 
     private SmartPauseDetectionManager() {
-        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Smart pause detection will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
         handler = new Handler(Looper.getMainLooper());
     }
@@ -63,6 +81,10 @@ public class SmartPauseDetectionManager {
             instance = new SmartPauseDetectionManager();
         }
         return instance;
+    }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
     }
 
     /**
@@ -146,6 +168,12 @@ public class SmartPauseDetectionManager {
      * Phân tích lý do pause bằng AI
      */
     private void analyzePauseReason(Context context, String section, int rereadCount, PauseAnalysisCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available");
+            return;
+        }
+        
         String prompt = "Analyze why a reader might pause at this section:\n\n" +
                 "Section: " + section + "\n" +
                 "Re-read count: " + rereadCount + "\n\n" +

@@ -21,10 +21,13 @@ import com.example.newsandlearn.Model.Article;
 import com.example.newsandlearn.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class SearchActivity extends AppCompatActivity implements DynamicArticleAdapter.OnArticleClickListener {
 
@@ -34,13 +37,15 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
     private LottieAnimationView loadingIndicator;
     private LinearLayout emptyStateLayout;
     private TextView emptyStateText;
-    
+
     private DynamicArticleAdapter adapter;
     private List<Article> allArticles = new ArrayList<>();
     private List<Article> filteredArticles = new ArrayList<>();
-    
+
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+
+    private final Set<String> favoriteIds = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,14 +97,14 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
 
         // Load all articles from Firebase
         loadAllArticles();
-        
+
         // Focus on search input and show keyboard
         searchInput.requestFocus();
     }
 
     private void loadAllArticles() {
         showLoading(true);
-        
+
         db.collection("articles")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -109,21 +114,64 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
                         article.setId(document.getId());
                         allArticles.add(article);
                     }
-                    showLoading(false);
-                    
-                    // If there's already text in search, perform search
-                    String currentQuery = searchInput.getText().toString();
-                    if (!currentQuery.isEmpty()) {
-                        performSearch(currentQuery);
-                    } else {
-                        showEmptyState(true, "🔍 Start typing to search articles...");
-                    }
+
+                    // Mark favorites (if logged in) so UI is accurate
+                    preloadFavoriteState(() -> {
+                        showLoading(false);
+
+                        // If there's already text in search, perform search
+                        String currentQuery = searchInput.getText().toString();
+                        if (!currentQuery.isEmpty()) {
+                            performSearch(currentQuery);
+                        } else {
+                            showEmptyState(true, "🔍 Start typing to search articles...");
+                        }
+                    });
+
                 })
                 .addOnFailureListener(e -> {
                     showLoading(false);
-                    Toast.makeText(this, "❌ Error loading articles: " + e.getMessage(), 
+                    Toast.makeText(this, "❌ Error loading articles: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     showEmptyState(true, "⚠️ Failed to load articles.\nPlease try again.");
+                });
+    }
+
+    private void preloadFavoriteState(Runnable onDone) {
+        if (auth.getCurrentUser() == null) {
+            favoriteIds.clear();
+            for (Article a : allArticles) {
+                if (a != null)
+                    a.setFavorite(false);
+            }
+            if (onDone != null)
+                onDone.run();
+            return;
+        }
+
+        String userId = auth.getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("favorites")
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    favoriteIds.clear();
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        favoriteIds.add(doc.getId());
+                    }
+
+                    for (Article a : allArticles) {
+                        if (a != null && a.getId() != null) {
+                            a.setFavorite(favoriteIds.contains(a.getId()));
+                        }
+                    }
+
+                    if (onDone != null)
+                        onDone.run();
+                })
+                .addOnFailureListener(e -> {
+                    if (onDone != null)
+                        onDone.run();
                 });
     }
 
@@ -138,25 +186,25 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
         // Filter articles based on query
         filteredArticles.clear();
         String lowerQuery = query.toLowerCase().trim();
-        
+
         for (Article article : allArticles) {
-            boolean matchesTitle = article.getTitle() != null && 
+            boolean matchesTitle = article.getTitle() != null &&
                     article.getTitle().toLowerCase().contains(lowerQuery);
-            boolean matchesCategory = article.getCategory() != null && 
+            boolean matchesCategory = article.getCategory() != null &&
                     article.getCategory().toLowerCase().contains(lowerQuery);
-            boolean matchesSource = article.getSource() != null && 
+            boolean matchesSource = article.getSource() != null &&
                     article.getSource().toLowerCase().contains(lowerQuery);
-            boolean matchesLevel = article.getLevel() != null && 
+            boolean matchesLevel = article.getLevel() != null &&
                     article.getLevel().toLowerCase().contains(lowerQuery);
-            
+
             if (matchesTitle || matchesCategory || matchesSource || matchesLevel) {
                 filteredArticles.add(article);
             }
         }
-        
+
         // Update adapter
         adapter.setArticles(filteredArticles);
-        
+
         // Show/hide empty state
         if (filteredArticles.isEmpty()) {
             showEmptyState(true, "😔 No results found for \"" + query + "\"");
@@ -193,27 +241,43 @@ public class SearchActivity extends AppCompatActivity implements DynamicArticleA
             Toast.makeText(this, "⚠️ Please login to save favorites", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         String userId = auth.getCurrentUser().getUid();
         boolean newFavoriteState = !article.isFavorite();
-        
-        db.collection("users")
-                .document(userId)
-                .collection("favorites")
-                .document(article.getId())
-                .set(article)
-                .addOnSuccessListener(aVoid -> {
-                    article.setFavorite(newFavoriteState);
-                    adapter.notifyDataSetChanged();
-                    
-                    String message = newFavoriteState ? 
-                            "❤️ Added to favorites!" : 
-                            "💔 Removed from favorites";
-                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "❌ Error: " + e.getMessage(), 
-                            Toast.LENGTH_SHORT).show();
-                });
+
+        if (article.getId() == null || article.getId().isEmpty()) {
+            Toast.makeText(this, "❌ Missing article id", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (newFavoriteState) {
+            db.collection("users")
+                    .document(userId)
+                    .collection("favorites")
+                    .document(article.getId())
+                    .set(article)
+                    .addOnSuccessListener(aVoid -> {
+                        article.setFavorite(true);
+                        favoriteIds.add(article.getId());
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(this, "❤️ Added to favorites!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(
+                            e -> Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        } else {
+            db.collection("users")
+                    .document(userId)
+                    .collection("favorites")
+                    .document(article.getId())
+                    .delete()
+                    .addOnSuccessListener(aVoid -> {
+                        article.setFavorite(false);
+                        favoriteIds.remove(article.getId());
+                        adapter.notifyDataSetChanged();
+                        Toast.makeText(this, "💔 Removed from favorites", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(
+                            e -> Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }
     }
 }

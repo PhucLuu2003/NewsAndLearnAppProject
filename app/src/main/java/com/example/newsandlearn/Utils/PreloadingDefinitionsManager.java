@@ -29,20 +29,38 @@ import java.util.concurrent.Executors;
  */
 public class PreloadingDefinitionsManager {
 
+    private static final String TAG = "PreloadingDefinitionsManager";
     private static PreloadingDefinitionsManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
     private Map<String, WordDefinition> preloadedDefinitions;
     private List<String> difficultWords;
     private boolean isPreloading = false;
+    private boolean isAIAvailable = false;
 
     private PreloadingDefinitionsManager() {
-        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Definition preloading will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
         preloadedDefinitions = new HashMap<>();
         difficultWords = new ArrayList<>();
@@ -54,12 +72,22 @@ public class PreloadingDefinitionsManager {
         }
         return instance;
     }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
+    }
 
     /**
      * Phân tích bài viết và pre-load định nghĩa cho từ khó
      */
     public void preloadArticleDefinitions(Context context, String articleContent, String userLevel,
             PreloadCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available - GEMINI_API_KEY not configured");
+            return;
+        }
+        
         if (isPreloading) {
             callback.onError("Already preloading...");
             return;

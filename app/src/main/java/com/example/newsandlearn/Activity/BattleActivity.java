@@ -72,10 +72,10 @@ public class BattleActivity extends AppCompatActivity {
 
         // Initialize views
         initializeViews();
-        
+
         // Create monster
         createMonster();
-        
+
         // Load questions
         loadQuestions();
     }
@@ -100,17 +100,19 @@ public class BattleActivity extends AppCompatActivity {
         optionB.setOnClickListener(v -> checkAnswer(1));
         optionC.setOnClickListener(v -> checkAnswer(2));
         optionD.setOnClickListener(v -> checkAnswer(3));
+
+        // Disable buttons initially until questions are loaded
+        enableButtons(false);
     }
 
     private void createMonster() {
         // Create monster based on level
         String monsterType = currentLevel.getLevelNumber() % 5 == 0 ? "boss" : "normal";
         monster = new Monster(
-            "monster_" + currentLevel.getId(),
-            currentLevel.getTheme() + " Monster",
-            currentLevel.getLevelNumber(),
-            monsterType
-        );
+                "monster_" + currentLevel.getId(),
+                currentLevel.getTheme() + " Monster",
+                currentLevel.getLevelNumber(),
+                monsterType);
 
         updateMonsterUI();
         updatePlayerUI();
@@ -124,20 +126,44 @@ public class BattleActivity extends AppCompatActivity {
         }
 
         questions = new ArrayList<>();
+        final int expected = currentLevel.getQuestionIds().size();
+        final int[] completed = { 0 };
+
+        // Show a helpful message while loading.
+        battleLog.setText("Loading questions...");
+        enableButtons(false);
+
         for (String questionId : currentLevel.getQuestionIds()) {
             db.collection("game_questions").document(questionId)
                     .get()
                     .addOnSuccessListener(document -> {
                         if (document.exists()) {
                             GameQuestion question = document.toObject(GameQuestion.class);
-                            questions.add(question);
-                            
-                            if (questions.size() == currentLevel.getQuestionIds().size()) {
-                                Collections.shuffle(questions);
-                                showNextQuestion();
+                            if (question != null) {
+                                questions.add(question);
                             }
                         }
+                        completed[0]++;
+                        maybeStartQuestions(expected, completed[0]);
+                    })
+                    .addOnFailureListener(e -> {
+                        completed[0]++;
+                        maybeStartQuestions(expected, completed[0]);
                     });
+        }
+    }
+
+    private void maybeStartQuestions(int expected, int completed) {
+        if (completed < expected) {
+            return;
+        }
+
+        if (questions != null && !questions.isEmpty()) {
+            Collections.shuffle(questions);
+            showNextQuestion();
+        } else {
+            // Fallback to random questions if assigned IDs were invalid/missing.
+            loadRandomQuestions();
         }
     }
 
@@ -151,7 +177,7 @@ public class BattleActivity extends AppCompatActivity {
                         GameQuestion q = doc.toObject(GameQuestion.class);
                         questions.add(q);
                     });
-                    
+
                     if (!questions.isEmpty()) {
                         Collections.shuffle(questions);
                         showNextQuestion();
@@ -161,12 +187,20 @@ public class BattleActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error loading questions", Toast.LENGTH_SHORT).show();
-                    finish();
+                    Toast.makeText(this, "Error loading questions: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    battleLog.setText("Failed to load questions.");
+                    enableButtons(false);
                 });
     }
 
     private void showNextQuestion() {
+        // Check if questions are loaded
+        if (questions == null || questions.isEmpty()) {
+            battleLog.setText("Loading questions...");
+            enableButtons(false);
+            return;
+        }
+
         if (currentQuestionIndex >= questions.size()) {
             // All questions answered
             endBattle(true);
@@ -184,28 +218,46 @@ public class BattleActivity extends AppCompatActivity {
         }
 
         GameQuestion question = questions.get(currentQuestionIndex);
-        
+
         // Update UI
         questionText.setText(question.getQuestion());
         List<String> options = question.getOptions();
-        if (options.size() >= 4) {
+        if (options != null && options.size() >= 4) {
             optionA.setText("A. " + options.get(0));
             optionB.setText("B. " + options.get(1));
             optionC.setText("C. " + options.get(2));
             optionD.setText("D. " + options.get(3));
         }
 
-        // Reset button states
+        // Reset button states and enable buttons
         resetButtonStates();
         enableButtons(true);
 
+        // Make sure buttons are clickable
+        optionA.setClickable(true);
+        optionB.setClickable(true);
+        optionC.setClickable(true);
+        optionD.setClickable(true);
+
         // Start timer
         startQuestionTimer(question.getTimeLimit());
-        
+
         battleLog.setText("Answer the question to attack!");
     }
 
     private void checkAnswer(int selectedIndex) {
+        // Check if questions are loaded
+        if (questions == null || questions.isEmpty()) {
+            Toast.makeText(this, "Questions not loaded yet. Please wait...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Check if currentQuestionIndex is valid
+        if (currentQuestionIndex < 0 || currentQuestionIndex >= questions.size()) {
+            Toast.makeText(this, "Invalid question index", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (questionTimer != null) {
             questionTimer.cancel();
         }
@@ -219,14 +271,14 @@ public class BattleActivity extends AppCompatActivity {
             correctAnswers++;
             highlightCorrectAnswer(selectedIndex);
             battleLog.setText("✅ Correct! You attack the monster!");
-            
+
             // Player attacks monster
             playerAttack();
-            
+
         } else {
             highlightWrongAnswer(selectedIndex, question.getCorrectAnswerIndex());
             battleLog.setText("❌ Wrong! Monster attacks you!");
-            
+
             // Monster attacks player
             monsterAttack();
         }
@@ -242,12 +294,12 @@ public class BattleActivity extends AppCompatActivity {
         int damage = player.getAttack();
         monster.takeDamage(damage);
         updateMonsterUI();
-        
+
         // Animate monster
         animateHit(monsterImage);
-        
+
         Toast.makeText(this, "💥 Dealt " + damage + " damage!", Toast.LENGTH_SHORT).show();
-        
+
         // Gain EXP
         player.gainExp(10);
         updatePlayerUI();
@@ -257,7 +309,7 @@ public class BattleActivity extends AppCompatActivity {
         int damage = monster.getAttack();
         player.takeDamage(damage);
         updatePlayerUI();
-        
+
         Toast.makeText(this, "💔 Took " + damage + " damage!", Toast.LENGTH_SHORT).show();
     }
 
@@ -267,7 +319,7 @@ public class BattleActivity extends AppCompatActivity {
             public void onTick(long millisUntilFinished) {
                 int secondsLeft = (int) (millisUntilFinished / 1000);
                 timerText.setText(secondsLeft + "s");
-                
+
                 if (secondsLeft <= 5) {
                     timerText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
                 }
@@ -306,7 +358,7 @@ public class BattleActivity extends AppCompatActivity {
     private void highlightWrongAnswer(int wrongIndex, int correctIndex) {
         MaterialButton wrongButton = getButtonByIndex(wrongIndex);
         MaterialButton correctButton = getButtonByIndex(correctIndex);
-        
+
         if (wrongButton != null) {
             wrongButton.setBackgroundColor(getResources().getColor(android.R.color.holo_red_light));
         }
@@ -331,11 +383,16 @@ public class BattleActivity extends AppCompatActivity {
 
     private MaterialButton getButtonByIndex(int index) {
         switch (index) {
-            case 0: return optionA;
-            case 1: return optionB;
-            case 2: return optionC;
-            case 3: return optionD;
-            default: return null;
+            case 0:
+                return optionA;
+            case 1:
+                return optionB;
+            case 2:
+                return optionC;
+            case 3:
+                return optionD;
+            default:
+                return null;
         }
     }
 
@@ -351,14 +408,12 @@ public class BattleActivity extends AppCompatActivity {
         }
 
         int stars = calculateStars();
-        
+
         String title = victory ? "🎉 Victory!" : "💀 Defeated!";
-        String message = victory ? 
-            "You defeated the monster!\n\n" +
-            "Correct Answers: " + correctAnswers + "/" + questions.size() + "\n" +
-            "Stars Earned: " + getStarString(stars) + "\n" +
-            "EXP Gained: " + monster.getExpReward() :
-            "You were defeated!\nTry again to improve!";
+        String message = victory ? "You defeated the monster!\n\n" +
+                "Correct Answers: " + correctAnswers + "/" + questions.size() + "\n" +
+                "Stars Earned: " + getStarString(stars) + "\n" +
+                "EXP Gained: " + monster.getExpReward() : "You were defeated!\nTry again to improve!";
 
         new MaterialAlertDialogBuilder(this)
                 .setTitle(title)
@@ -375,9 +430,12 @@ public class BattleActivity extends AppCompatActivity {
 
     private int calculateStars() {
         float accuracy = (float) correctAnswers / questions.size();
-        if (accuracy >= 0.9) return 3;
-        if (accuracy >= 0.7) return 2;
-        if (accuracy >= 0.5) return 1;
+        if (accuracy >= 0.9)
+            return 3;
+        if (accuracy >= 0.7)
+            return 2;
+        if (accuracy >= 0.5)
+            return 1;
         return 0;
     }
 
@@ -390,18 +448,24 @@ public class BattleActivity extends AppCompatActivity {
     }
 
     private void saveProgress(int stars) {
-        if (auth.getCurrentUser() == null) return;
+        if (auth.getCurrentUser() == null)
+            return;
 
         String userId = auth.getCurrentUser().getUid();
-        
+
         // Update level completion
         currentLevel.complete(stars);
+        
+        // Update player's highest completed level to unlock next level
+        player.completeLevel(currentLevel.getLevelNumber());
+        
+        // Save level progress
         db.collection("users").document(userId)
                 .collection("game_levels")
                 .document(currentLevel.getId())
                 .set(currentLevel);
 
-        // Save character progress
+        // Save character progress (including highestCompletedLevel)
         db.collection("users").document(userId)
                 .collection("game_character")
                 .document("main")

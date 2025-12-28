@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.FirebaseDataSeeder;
 import com.example.newsandlearn.Utils.GameDataSeeder;
+import com.example.newsandlearn.Utils.RoleManager;
 import com.example.newsandlearn.Utils.VideoUrlUpdater;
 import com.google.android.material.button.MaterialButton;
 
@@ -21,7 +22,9 @@ import com.google.android.material.button.MaterialButton;
  */
 public class AdminActivity extends AppCompatActivity {
 
-    private MaterialButton btnSeedAll, btnSeedArticles, btnSeedVideos, btnSeedVocab, btnSeedGame, btnSeedLearnModules, btnUpdateVideoUrls;
+    private MaterialButton btnSeedAll, btnSeedArticles, btnSeedVideos, btnSeedVocab, btnSeedGame, btnSeedLearnModules,
+            btnUpdateVideoUrls;
+    private MaterialButton btnManageFirestore;
     private ProgressBar progressBar;
     private TextView tvStatus;
     private ScrollView scrollView;
@@ -39,6 +42,26 @@ public class AdminActivity extends AppCompatActivity {
 
         initializeViews();
         setupListeners();
+
+        // Hard gate: only admin can access this activity.
+        showProgress(true);
+        RoleManager.isCurrentUserAdmin(new RoleManager.RoleCheckCallback() {
+            @Override
+            public void onResult(boolean isAdmin) {
+                if (!isAdmin) {
+                    Toast.makeText(AdminActivity.this, "Bạn không có quyền Admin", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
+                showProgress(false);
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(AdminActivity.this, "Không kiểm tra được quyền: " + error, Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
     }
 
     private void initializeViews() {
@@ -49,6 +72,7 @@ public class AdminActivity extends AppCompatActivity {
         btnSeedGame = findViewById(R.id.btn_seed_game);
         btnSeedLearnModules = findViewById(R.id.btn_seed_learn_modules);
         btnUpdateVideoUrls = findViewById(R.id.btn_update_video_urls);
+        btnManageFirestore = findViewById(R.id.btn_manage_firestore);
         progressBar = findViewById(R.id.progress_bar);
         tvStatus = findViewById(R.id.tv_status);
         scrollView = findViewById(R.id.scroll_view);
@@ -62,6 +86,10 @@ public class AdminActivity extends AppCompatActivity {
         btnSeedGame.setOnClickListener(v -> seedGameData());
         btnSeedLearnModules.setOnClickListener(v -> seedLearnModules());
         btnUpdateVideoUrls.setOnClickListener(v -> updateVideoUrls());
+
+        btnManageFirestore.setOnClickListener(v -> {
+            startActivity(new android.content.Intent(AdminActivity.this, AdminFirestoreActivity.class));
+        });
     }
 
     private void seedAllData() {
@@ -237,7 +265,7 @@ public class AdminActivity extends AppCompatActivity {
 
     private void showProgress(boolean show) {
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        
+
         // Disable all buttons while processing
         btnSeedAll.setEnabled(!show);
         btnSeedArticles.setEnabled(!show);
@@ -246,6 +274,9 @@ public class AdminActivity extends AppCompatActivity {
         btnSeedGame.setEnabled(!show);
         btnSeedLearnModules.setEnabled(!show);
         btnUpdateVideoUrls.setEnabled(!show);
+        if (btnManageFirestore != null) {
+            btnManageFirestore.setEnabled(!show);
+        }
     }
 
     private void appendStatus(String message) {

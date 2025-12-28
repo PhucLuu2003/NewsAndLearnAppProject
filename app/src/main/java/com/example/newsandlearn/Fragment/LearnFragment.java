@@ -49,8 +49,8 @@ public class LearnFragment extends Fragment {
     private CardView vocabularyCard, grammarCard, listeningCard;
     private CardView speakingCard, readingCard, writingCard;
 
-    // Views - Learning Resources (Updated: Phonics & Survival Vocabulary)
-    private CardView phonicsCard, survivalVocabCard, gamesCard, videoLessonsCard;
+    // Views - Learning Resources (Only Phonics)
+    private CardView phonicsCard, survivalVocabCard;
 
     // Views - Daily Goal
     private CardView dailyGoalCard;
@@ -89,11 +89,9 @@ public class LearnFragment extends Fragment {
         listeningCard = view.findViewById(R.id.listening_card);
         readingCard = view.findViewById(R.id.reading_card);
 
-        // Learning Resource Cards (Updated: Phonics & Survival Vocabulary)
+        // Learning Resource Cards (Only Phonics)
         phonicsCard = view.findViewById(R.id.kids_learning_card);
         survivalVocabCard = view.findViewById(R.id.stories_card);
-        gamesCard = view.findViewById(R.id.games_card);
-        videoLessonsCard = view.findViewById(R.id.video_lessons_card);
 
         dailyGoalCard = view.findViewById(R.id.daily_goal_card);
 
@@ -114,14 +112,12 @@ public class LearnFragment extends Fragment {
         setupCardListener(readingCard, new ReadingFragment(), "Reading");
         // setupCardListener(writingCard, new WritingFragment(), "Writing");
 
-        // Learning Resource Cards - Phonics (Survival Vocabulary merged into Vocabulary)
+        // Learning Resource Cards - Only Phonics
         setupPhonicsCard();
         // survivalVocabCard is now hidden - merged into vocabularyCard
         if (survivalVocabCard != null) {
             survivalVocabCard.setVisibility(View.GONE);
         }
-        setupResourceCardListener(gamesCard, "Games");
-        setupResourceCardListener(videoLessonsCard, "Video Lessons");
     }
 
     private void setupVocabularyCard() {
@@ -306,11 +302,8 @@ public class LearnFragment extends Fragment {
         animateCardEntrance(listeningCard, 200);
         animateCardEntrance(readingCard, 250);
 
-        // Learning resources (survivalVocabCard merged into vocabularyCard)
+        // Learning resources - Only Phonics
         animateCardEntrance(phonicsCard, 300);
-        // survivalVocabCard is now hidden
-        animateCardEntrance(gamesCard, 350);
-        animateCardEntrance(videoLessonsCard, 400);
     }
 
     private void animateCardEntrance(View view, long delay) {

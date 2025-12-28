@@ -369,33 +369,15 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-        </LinearLayout>
 
-        <!-- Section Title: Learning Resources -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="🌟 Learning Resources"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="#1F2937"
-            android:layout_marginBottom="12dp"
-            android:layout_marginTop="8dp" />
-
-        <!-- Learning Resources Grid (2 columns) - Updated: Phonics & Survival Vocabulary -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- Row 1: Phonics & Survival Vocabulary (NEW!) -->
+            <!-- Row 3: Phonics (moved from Learning Resources) -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:baselineAligned="false">
 
-                <!-- 🗣️ Phonics Module (Replaces Kids Learning) -->
+                <!-- 🗣️ Phonics Module -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/kids_learning_card"
                     android:layout_width="0dp"
@@ -470,195 +452,23 @@
                     </FrameLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- 💬 Survival Vocabulary Module (Replaces Stories) -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/stories_card"
+                <!-- Empty space to maintain grid -->
+                <View
                     android:layout_width="0dp"
                     android:layout_height="150dp"
                     android:layout_weight="1"
                     android:layout_marginStart="8dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/gradient_green_teal">
-
-                        <!-- Decorative circle -->
-                        <View
-                            android:layout_width="80dp"
-                            android:layout_height="80dp"
-                            android:layout_gravity="top|end"
-                            android:layout_marginTop="-25dp"
-                            android:layout_marginEnd="-25dp"
-                            android:background="@drawable/circle_white_10"
-                            android:alpha="0.15" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="💬"
-                                android:textSize="40sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Survival Words"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="200+ essential words"
-                                android:textSize="10sp"
-                                android:textColor="#FFFFFF"
-                                android:alpha="0.9" />
-
-                            <!-- NEW badge -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="6dp"
-                                android:text="✨ NEW"
-                                android:textSize="9sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFD700"
-                                android:background="@drawable/bg_tag_transparent"
-                                android:paddingHorizontal="8dp"
-                                android:paddingVertical="2dp" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-            </LinearLayout>
-
-            <!-- Row 2: Games & Video Lessons -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:baselineAligned="false">
-
-                <!-- Games Module -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/games_card"
-                    android:layout_width="0dp"
-                    android:layout_height="150dp"
-                    android:layout_weight="1"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/gradient_green_blue">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🎮"
-                                android:textSize="40sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Games"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Play &amp; learn"
-                                android:textSize="10sp"
-                                android:textColor="#FFFFFF"
-                                android:alpha="0.9" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- Video Lessons Module -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/video_lessons_card"
-                    android:layout_width="0dp"
-                    android:layout_height="150dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginBottom="16dp"
-                    app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="3dp"
-                    app:strokeWidth="0dp">
-
-                    <FrameLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/gradient_red_orange">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:orientation="vertical"
-                            android:padding="16dp"
-                            android:gravity="center">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="🎬"
-                                android:textSize="40sp" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="8dp"
-                                android:text="Video Lessons"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF" />
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="2dp"
-                                android:text="Watch &amp; learn"
-                                android:textSize="10sp"
-                                android:textColor="#FFFFFF"
-                                android:alpha="0.9" />
-                        </LinearLayout>
-                    </FrameLayout>
-                </com.google.android.material.card.MaterialCardView>
+                    android:visibility="invisible" />
             </LinearLayout>
 
         </LinearLayout>
+
+        <!-- Hidden Survival Vocab Card (merged into Vocabulary) -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/stories_card"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone" />
 
     </LinearLayout>
 

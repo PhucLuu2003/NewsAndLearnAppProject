@@ -27,7 +27,8 @@ public class ProgressHelper {
      */
     public static void incrementDailyGoal() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -47,7 +48,7 @@ public class ProgressHelper {
                         dailyGoal.put("completed", 1);
                         dailyGoal.put("total", 5);
                         dailyGoal.put("date", today);
-                        
+
                         db.collection("users").document(userId)
                                 .collection("daily_goals").document(today)
                                 .set(dailyGoal);
@@ -57,12 +58,15 @@ public class ProgressHelper {
 
     /**
      * Update module progress
-     * @param moduleName: "vocabulary", "grammar", "listening", "speaking", "reading", "writing"
+     * 
+     * @param moduleName:        "vocabulary", "grammar", "listening", "speaking",
+     *                           "reading", "writing"
      * @param progressIncrement: How much to increase (e.g., 5 for 5%)
      */
     public static void updateModuleProgress(String moduleName, int progressIncrement) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String moduleKey = moduleName.toLowerCase();
@@ -73,11 +77,13 @@ public class ProgressHelper {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         Long currentProgress = document.getLong(moduleKey);
-                        int newProgress = (currentProgress != null ? currentProgress.intValue() : 0) + progressIncrement;
-                        
+                        int newProgress = (currentProgress != null ? currentProgress.intValue() : 0)
+                                + progressIncrement;
+
                         // Cap at 100%
-                        if (newProgress > 100) newProgress = 100;
-                        
+                        if (newProgress > 100)
+                            newProgress = 100;
+
                         db.collection("users").document(userId)
                                 .collection("module_progress").document("current")
                                 .update(moduleKey, newProgress);
@@ -91,7 +97,7 @@ public class ProgressHelper {
                         progress.put("reading", 0);
                         progress.put("writing", 0);
                         progress.put(moduleKey, progressIncrement);
-                        
+
                         db.collection("users").document(userId)
                                 .collection("module_progress").document("current")
                                 .set(progress);
@@ -101,7 +107,8 @@ public class ProgressHelper {
 
     /**
      * Complete a lesson - updates both daily goal and module progress
-     * @param moduleName: Name of the module
+     * 
+     * @param moduleName:        Name of the module
      * @param progressIncrement: Progress to add (default: 5%)
      */
     public static void completeLesson(String moduleName, int progressIncrement) {
@@ -112,29 +119,32 @@ public class ProgressHelper {
 
     /**
      * Complete a quiz - updates progress with bonus
+     * 
      * @param moduleName: Name of the module
-     * @param score: Quiz score (0-100)
+     * @param score:      Quiz score (0-100)
      */
     public static void completeQuiz(String moduleName, int score) {
         incrementDailyGoal();
-        
+
         // Give progress based on score
         int progressIncrement = (int) (score * 0.1); // 100 score = 10% progress
         updateModuleProgress(moduleName, progressIncrement);
-        
+
         // Log quiz result
         logQuizResult(moduleName, score);
     }
 
     /**
      * Add vocabulary word to user's collection
-     * @param word: The vocabulary word
+     * 
+     * @param word:       The vocabulary word
      * @param definition: Word definition
-     * @param level: Difficulty level
+     * @param level:      Difficulty level
      */
     public static void addVocabulary(String word, String definition, String level) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -160,12 +170,14 @@ public class ProgressHelper {
 
     /**
      * Update vocabulary word status
+     * 
      * @param wordId: Document ID of the word
      * @param status: "new", "learning", "known", "mastered"
      */
     public static void updateVocabularyStatus(String wordId, String status) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -183,12 +195,14 @@ public class ProgressHelper {
 
     /**
      * Log reading progress
+     * 
      * @param articleId: ID of the article
-     * @param progress: Reading progress (0-100)
+     * @param progress:  Reading progress (0-100)
      */
     public static void updateReadingProgress(String articleId, int progress) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -213,13 +227,50 @@ public class ProgressHelper {
     }
 
     /**
+     * Log reading progress with scroll position to support "resume reading".
+     * 
+     * @param articleId ID of the article
+     * @param progress  Reading progress (0-100)
+     * @param scrollY   Current scrollY inside the article (nullable)
+     */
+    public static void updateReadingProgress(String articleId, int progress, Integer scrollY) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null)
+            return;
+
+        String userId = currentUser.getUid();
+        String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(new Date());
+
+        Map<String, Object> readingData = new HashMap<>();
+        readingData.put("articleId", articleId);
+        readingData.put("progress", progress);
+        readingData.put("lastRead", timestamp);
+        readingData.put("completed", progress >= 100);
+        if (scrollY != null) {
+            readingData.put("scrollY", scrollY);
+        }
+
+        db.collection("users").document(userId)
+                .collection("reading_progress").document(articleId)
+                .set(readingData)
+                .addOnSuccessListener(aVoid -> {
+                    if (progress >= 100) {
+                        updateModuleProgress("reading", 5);
+                        incrementDailyGoal();
+                    }
+                });
+    }
+
+    /**
      * Log user activity
-     * @param moduleName: Module name
+     * 
+     * @param moduleName:   Module name
      * @param activityType: Type of activity (lesson_completed, quiz_taken, etc.)
      */
     private static void logActivity(String moduleName, String activityType) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -237,12 +288,14 @@ public class ProgressHelper {
 
     /**
      * Log quiz result
+     * 
      * @param moduleName: Module name
-     * @param score: Quiz score
+     * @param score:      Quiz score
      */
     private static void logQuizResult(String moduleName, int score) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -261,11 +314,13 @@ public class ProgressHelper {
 
     /**
      * Update study time (in minutes)
+     * 
      * @param minutes: Study duration in minutes
      */
     public static void updateStudyTime(int minutes) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -282,7 +337,7 @@ public class ProgressHelper {
                         Map<String, Object> studyTime = new HashMap<>();
                         studyTime.put("date", today);
                         studyTime.put("minutes", minutes);
-                        
+
                         db.collection("users").document(userId)
                                 .collection("study_time").document(today)
                                 .set(studyTime);
@@ -296,7 +351,8 @@ public class ProgressHelper {
      */
     public static void updateStreak() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser == null) return;
+        if (currentUser == null)
+            return;
 
         String userId = currentUser.getUid();
         String today = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
@@ -308,18 +364,18 @@ public class ProgressHelper {
                     if (document.exists()) {
                         String lastActive = document.getString("lastActiveDate");
                         Long currentStreak = document.getLong("currentStreak");
-                        
+
                         int newStreak = 1;
                         if (lastActive != null && currentStreak != null) {
                             // Check if yesterday
                             // Simple check - you may want to improve this
                             newStreak = currentStreak.intValue() + 1;
                         }
-                        
+
                         Map<String, Object> updates = new HashMap<>();
                         updates.put("currentStreak", newStreak);
                         updates.put("lastActiveDate", today);
-                        
+
                         db.collection("users").document(userId)
                                 .collection("progress").document("current")
                                 .update(updates);

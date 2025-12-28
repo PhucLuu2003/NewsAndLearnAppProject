@@ -63,13 +63,15 @@ import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.slider.Slider;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-
 
 public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
@@ -84,12 +86,13 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private ProgressBar readingProgress;
     private TextView progressText;
     private FloatingActionButton fabAddVocab;
-    
+
     // New UI elements
     private ImageView btnTTS, btnSettings, btnCollections, btnAnalytics;
     private FloatingActionButton fabAICoach, fabBionicReading, fabVocabMap;
 
     private FirebaseFirestore db;
+    private FirebaseAuth auth;
     private String articleId;
     private String articleLevel;
     private String articleCategory;
@@ -98,14 +101,29 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private String selectedText = "";
     private int selectionStart = 0;
     private int selectionEnd = 0;
-    
+
     // Reading settings
     private float fontSize = 16f;
     private float lineSpacing = 1.5f;
     private String readingTheme = "light"; // light, dark, sepia
     private boolean isTTSPlaying = false;
     private boolean isFavorite = false;
-    
+
+    // Loaded article fields used for saving to favorites
+    private String loadedTitle;
+    private String loadedContent;
+    private String loadedCategory;
+    private String loadedLevel;
+    private String loadedImageUrl;
+    private String loadedSource;
+    private com.google.firebase.Timestamp loadedPublishedDate;
+    private Long loadedReadingTime;
+
+    // Resume state
+    private boolean restoringState = false;
+    private Integer pendingRestoreScrollY = null;
+    private Integer pendingRestoreProgress = null;
+
     // New managers
     private AIReadingCoach aiCoach;
     private BionicReadingManager bionicManager;
@@ -117,7 +135,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private InteractiveQuizManager quizManager;
     private boolean isBionicEnabled = false;
     private String fullArticleContent = "";
-    
+
     // ✨ NEW ADVANCED FEATURES
     private ComprehensionCheckpointManager checkpointManager;
     private SceneVisualizationManager sceneVisualizationManager;
@@ -132,6 +150,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
         // Initialize Firebase
         db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         // Get article ID from intent
         articleId = getIntent().getStringExtra("article_id");
@@ -143,12 +162,12 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         setupTextSelection();
         setupClickListeners();
         loadArticleData();
-        
+
         // Initialize TTS
         TTSManager.getInstance().initialize(this, () -> {
             Toast.makeText(this, "Text-to-Speech ready", Toast.LENGTH_SHORT).show();
         });
-        
+
         // Initialize new managers
         aiCoach = AIReadingCoach.getInstance();
         bionicManager = BionicReadingManager.getInstance();
@@ -156,7 +175,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         highlightManager = RealtimeHighlightManager.getInstance();
         quizManager = InteractiveQuizManager.getInstance();
         bionicManager.setHighlightColor(getResources().getColor(R.color.primary));
-        
+
         // Initialize voice feedback
         voiceFeedback = VoiceFeedbackManager.getInstance();
         voiceFeedback.initialize(this, new VoiceFeedbackManager.InitCallback() {
@@ -170,7 +189,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 // Silent fail
             }
         });
-        
+
         // ✨ Initialize NEW ADVANCED FEATURES
         checkpointManager = ComprehensionCheckpointManager.getInstance();
         sceneVisualizationManager = SceneVisualizationManager.getInstance();
@@ -199,7 +218,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         readingProgress = findViewById(R.id.reading_progress);
         progressText = findViewById(R.id.progress_text);
         fabAddVocab = findViewById(R.id.fab_add_vocab);
-        
+
         // New buttons
         btnTTS = findViewById(R.id.btn_tts);
         btnSettings = findViewById(R.id.btn_settings);
@@ -207,7 +226,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         btnAnalytics = findViewById(R.id.btn_analytics);
         aiAssistantBubble = findViewById(R.id.ai_assistant_bubble);
         floatingToolBar = findViewById(R.id.floating_tool_bar);
-        
+
         setupAIAssistant();
         setupFloatingToolBar();
         applyInitialContentAnimations();
@@ -224,21 +243,21 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     private void setupClickListeners() {
         // FAB for adding vocabulary
         fabAddVocab.setOnClickListener(v -> showAddVocabularyDialog());
-        
+
         // TTS Button
         btnTTS.setOnClickListener(v -> toggleTTS());
-        
+
         // Settings Button
         btnSettings.setOnClickListener(v -> showReadingSettings());
-        
+
         // Collections Button
         btnCollections.setOnClickListener(v -> showCollectionsSheet());
-        
+
         // Analytics Button
         btnAnalytics.setOnClickListener(v -> {
             startActivity(new Intent(this, ReadingAnalyticsActivity.class));
         });
-        
+
         // Favorite Button
         favoriteButton.setOnClickListener(v -> toggleFavorite());
     }
@@ -254,66 +273,69 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
     private void setupAIAssistant() {
         aiAssistantBubble.setOnClickListener(v -> showAICoach());
-        
+
         // Pulse animation
         Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
         aiAssistantBubble.startAnimation(pulse);
     }
 
     private void setupScrollListener() {
-        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) 
-                (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Calculate reading progress
-            int contentHeight = v.getChildAt(0).getHeight();
-            int scrollViewHeight = v.getHeight();
-            int maxScroll = contentHeight - scrollViewHeight;
+        scrollView.setOnScrollChangeListener(
+                (NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                    if (restoringState)
+                        return;
+                    // Calculate reading progress
+                    int contentHeight = v.getChildAt(0).getHeight();
+                    int scrollViewHeight = v.getHeight();
+                    int maxScroll = contentHeight - scrollViewHeight;
 
-            if (maxScroll > 0) {
-                int progress = (int) ((scrollY / (float) maxScroll) * 100);
-                updateProgress(progress);
-                
-                // ✨ FEATURE 2: COMPREHENSION CHECKPOINTS
-                // Check if we should show a checkpoint
-                if (checkpointManager.shouldShowCheckpoint(fullArticleContent, scrollY, maxScroll)) {
-                    int checkpointIndex = checkpointManager.getCurrentCheckpointIndex();
-                    checkpointManager.showCheckpoint(this, checkpointIndex, 
-                        new ComprehensionCheckpointManager.CheckpointResultCallback() {
-                            @Override
-                            public void onCheckpointCompleted(boolean isCorrect) {
-                                checkpointManager.incrementCheckpointIndex();
-                                if (isCorrect) {
-                                    Toast.makeText(EnhancedArticleDetailActivity.this, 
-                                        "🎉 +5 XP for comprehension!", Toast.LENGTH_SHORT).show();
-                                }
-                            }
+                    if (maxScroll > 0) {
+                        int progress = (int) ((scrollY / (float) maxScroll) * 100);
+                        updateProgress(progress);
+
+                        // ✨ FEATURE 2: COMPREHENSION CHECKPOINTS
+                        // Check if we should show a checkpoint
+                        if (checkpointManager.shouldShowCheckpoint(fullArticleContent, scrollY, maxScroll)) {
+                            int checkpointIndex = checkpointManager.getCurrentCheckpointIndex();
+                            checkpointManager.showCheckpoint(this, checkpointIndex,
+                                    new ComprehensionCheckpointManager.CheckpointResultCallback() {
+                                        @Override
+                                        public void onCheckpointCompleted(boolean isCorrect) {
+                                            checkpointManager.incrementCheckpointIndex();
+                                            if (isCorrect) {
+                                                Toast.makeText(EnhancedArticleDetailActivity.this,
+                                                        "🎉 +5 XP for comprehension!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+                                    });
                         }
-                    );
-                }
-            }
-            
-            // ✨ FEATURE 3: SMART PAUSE DETECTION
-            // Update scroll position for pause detection
-            pauseDetectionManager.updateScrollPosition(scrollY, maxScroll);
-            
-            // Content parallax/fade effect
-            float alpha = 1.0f - (scrollY / 1000f);
-            if (alpha < 0) alpha = 0;
-            articleImage.setAlpha(alpha);
-            
-            // Expand/Collapse AI Bubble based on scroll
-            if (scrollY > oldScrollY && scrollY > 200) {
-                // Scrolling down - Hide main toolbars, show floating bar
-                aiAssistantBubble.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(300).start();
-                floatingToolBar.setVisibility(View.VISIBLE);
-                floatingToolBar.animate().alpha(1f).translationY(0).setDuration(400).start();
-                toolbar.animate().alpha(0f).setDuration(300).start();
-            } else if (scrollY < oldScrollY) {
-                // Scrolling up - Show main toolbars, hide floating bar
-                aiAssistantBubble.animate().scaleX(1.1f).scaleY(1.1f).alpha(1.0f).setDuration(300).start();
-                floatingToolBar.animate().alpha(0f).translationY(100).setDuration(300).withEndAction(() -> floatingToolBar.setVisibility(View.GONE)).start();
-                toolbar.animate().alpha(1f).setDuration(300).start();
-            }
-        });
+                    }
+
+                    // ✨ FEATURE 3: SMART PAUSE DETECTION
+                    // Update scroll position for pause detection
+                    pauseDetectionManager.updateScrollPosition(scrollY, maxScroll);
+
+                    // Content parallax/fade effect
+                    float alpha = 1.0f - (scrollY / 1000f);
+                    if (alpha < 0)
+                        alpha = 0;
+                    articleImage.setAlpha(alpha);
+
+                    // Expand/Collapse AI Bubble based on scroll
+                    if (scrollY > oldScrollY && scrollY > 200) {
+                        // Scrolling down - Hide main toolbars, show floating bar
+                        aiAssistantBubble.animate().scaleX(0f).scaleY(0f).alpha(0f).setDuration(300).start();
+                        floatingToolBar.setVisibility(View.VISIBLE);
+                        floatingToolBar.animate().alpha(1f).translationY(0).setDuration(400).start();
+                        toolbar.animate().alpha(0f).setDuration(300).start();
+                    } else if (scrollY < oldScrollY) {
+                        // Scrolling up - Show main toolbars, hide floating bar
+                        aiAssistantBubble.animate().scaleX(1.1f).scaleY(1.1f).alpha(1.0f).setDuration(300).start();
+                        floatingToolBar.animate().alpha(0f).translationY(100).setDuration(300)
+                                .withEndAction(() -> floatingToolBar.setVisibility(View.GONE)).start();
+                        toolbar.animate().alpha(1f).setDuration(300).start();
+                    }
+                });
     }
 
     private void applyInitialContentAnimations() {
@@ -325,7 +347,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         articleTitle.setAlpha(0f);
         articleTitle.setTranslationY(50f);
         articleContent.setAlpha(0f);
-        
+
         // Animate in
         categoryBadge.animate().alpha(1f).translationY(0).setDuration(500).setStartDelay(300).start();
         levelBadge.animate().alpha(1f).translationY(0).setDuration(500).setStartDelay(400).start();
@@ -362,12 +384,12 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 int start = articleContent.getSelectionStart();
                 int end = articleContent.getSelectionEnd();
-                
+
                 if (start >= 0 && end > start) {
                     selectedText = articleContent.getText().toString().substring(start, end);
                     selectionStart = start;
                     selectionEnd = end;
-                    
+
                     switch (item.getItemId()) {
                         case 1: // Highlight
                             showHighlightSheet();
@@ -398,7 +420,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     }
 
     // ==================== TTS FUNCTIONALITY ====================
-    
+
     private void toggleTTS() {
         if (isTTSPlaying) {
             stopTTS();
@@ -406,14 +428,14 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             startTTS();
         }
     }
-    
+
     private void startTTS() {
         String content = articleContent.getText().toString();
         if (content.isEmpty()) {
             Toast.makeText(this, "No content to read", Toast.LENGTH_SHORT).show();
             return;
         }
-        
+
         TTSManager.getInstance().speak(content, new TTSManager.TTSCallback() {
             @Override
             public void onStart() {
@@ -437,7 +459,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     private void stopTTS() {
         TTSManager.getInstance().stop();
         isTTSPlaying = false;
@@ -445,15 +467,14 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     }
 
     // ==================== DICTIONARY FUNCTIONALITY ====================
-    
+
     private void showDictionaryDialog(String word) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_dictionary);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.getWindow().setLayout(
                 (int) (getResources().getDisplayMetrics().widthPixels * 0.9),
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-        );
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
         TextView tvWord = dialog.findViewById(R.id.tv_word);
         TextView tvPhonetic = dialog.findViewById(R.id.tv_phonetic);
@@ -481,18 +502,18 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DictionaryWord dictionaryWord) {
                 progressBar.setVisibility(View.GONE);
-                
+
                 if (dictionaryWord.getPhonetic() != null) {
                     tvPhonetic.setText(dictionaryWord.getPhonetic());
                 }
-                
+
                 // Display meanings
                 if (dictionaryWord.getMeanings() != null) {
                     for (DictionaryWord.Meaning meaning : dictionaryWord.getMeanings()) {
                         addMeaningView(meaningsContainer, meaning);
                     }
                 }
-                
+
                 // Get Vietnamese translation
                 translationContainer.setVisibility(View.VISIBLE);
                 TranslationAPI.getInstance().translateToVietnamese(word, new TranslationAPI.TranslationCallback() {
@@ -517,27 +538,28 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
         dialog.show();
     }
-    
+
     private void addMeaningView(LinearLayout container, DictionaryWord.Meaning meaning) {
         View meaningView = getLayoutInflater().inflate(R.layout.item_meaning, container, false);
-        
+
         TextView tvPartOfSpeech = meaningView.findViewById(R.id.tv_part_of_speech);
         LinearLayout definitionsContainer = meaningView.findViewById(R.id.definitions_container);
-        
+
         tvPartOfSpeech.setText(meaning.getPartOfSpeech());
-        
+
         if (meaning.getDefinitions() != null) {
             int count = 1;
             for (DictionaryWord.Definition definition : meaning.getDefinitions()) {
-                if (count > 3) break; // Show max 3 definitions
-                
+                if (count > 3)
+                    break; // Show max 3 definitions
+
                 TextView tvDefinition = new TextView(this);
                 tvDefinition.setText(count + ". " + definition.getDefinition());
                 tvDefinition.setTextColor(getResources().getColor(R.color.text_primary));
                 tvDefinition.setTextSize(14);
                 tvDefinition.setPadding(0, 8, 0, 8);
                 definitionsContainer.addView(tvDefinition);
-                
+
                 if (definition.getExample() != null && !definition.getExample().isEmpty()) {
                     TextView tvExample = new TextView(this);
                     tvExample.setText("   \"" + definition.getExample() + "\"");
@@ -547,19 +569,19 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                     tvExample.setPadding(0, 4, 0, 12);
                     definitionsContainer.addView(tvExample);
                 }
-                
+
                 count++;
             }
         }
-        
+
         container.addView(meaningView);
     }
 
     // ==================== TRANSLATION FUNCTIONALITY ====================
-    
+
     private void translateText(String text) {
         Toast.makeText(this, "Translating...", Toast.LENGTH_SHORT).show();
-        
+
         TranslationAPI.getInstance().translateToVietnamese(text, new TranslationAPI.TranslationCallback() {
             @Override
             public void onSuccess(String translatedText) {
@@ -568,34 +590,35 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
             @Override
             public void onError(String error) {
-                Toast.makeText(EnhancedArticleDetailActivity.this, "Translation error: " + error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(EnhancedArticleDetailActivity.this, "Translation error: " + error, Toast.LENGTH_SHORT)
+                        .show();
             }
         });
     }
-    
+
     private void showTranslationDialog(String original, String translation) {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_translation);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-        
+
         TextView tvOriginal = dialog.findViewById(R.id.tv_original);
         TextView tvTranslation = dialog.findViewById(R.id.tv_translation);
         MaterialButton btnClose = dialog.findViewById(R.id.btn_close);
-        
+
         tvOriginal.setText(original);
         tvTranslation.setText(translation);
-        
+
         btnClose.setOnClickListener(v -> dialog.dismiss());
-        
+
         dialog.show();
     }
 
     // ==================== HIGHLIGHT FUNCTIONALITY ====================
-    
+
     private void showHighlightSheet() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         bottomSheet.setContentView(R.layout.bottom_sheet_highlight);
-        
+
         LinearLayout colorYellow = bottomSheet.findViewById(R.id.color_yellow);
         LinearLayout colorGreen = bottomSheet.findViewById(R.id.color_green);
         LinearLayout colorBlue = bottomSheet.findViewById(R.id.color_blue);
@@ -603,78 +626,104 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         EditText editNote = bottomSheet.findViewById(R.id.edit_note);
         MaterialButton btnCancel = bottomSheet.findViewById(R.id.btn_cancel);
         MaterialButton btnSave = bottomSheet.findViewById(R.id.btn_save);
-        
-        final String[] selectedColor = {"yellow"};
-        
+
+        if (editNote != null) {
+            int currentTextColor = articleContent != null ? articleContent.getCurrentTextColor()
+                    : getResources().getColor(R.color.text_primary);
+            editNote.setTextColor(currentTextColor);
+            editNote.setHintTextColor(adjustAlpha(currentTextColor, 0.6f));
+        }
+
+        final String[] selectedColor = { "yellow" };
+
         colorYellow.setOnClickListener(v -> selectedColor[0] = "yellow");
         colorGreen.setOnClickListener(v -> selectedColor[0] = "green");
         colorBlue.setOnClickListener(v -> selectedColor[0] = "blue");
         colorRed.setOnClickListener(v -> selectedColor[0] = "red");
-        
+
         btnCancel.setOnClickListener(v -> bottomSheet.dismiss());
-        
+
         btnSave.setOnClickListener(v -> {
             String note = editNote.getText().toString();
             saveHighlight(selectedColor[0], note);
             bottomSheet.dismiss();
         });
-        
+
         bottomSheet.show();
     }
-    
+
     private void saveHighlight(String color, String note) {
         int colorInt = getColorForHighlight(color);
-        
+
         // Apply highlight to text
         SpannableString spannableString = new SpannableString(articleContent.getText());
         BackgroundColorSpan highlightSpan = new BackgroundColorSpan(colorInt);
         spannableString.setSpan(highlightSpan, selectionStart, selectionEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         articleContent.setText(spannableString);
-        
+
         // Save to Firebase
         HighlightManager.getInstance().saveHighlight(
-            articleId, selectedText, selectionStart, selectionEnd, color, note,
-            new HighlightManager.HighlightCallback() {
-                @Override
-                public void onSuccess() {
-                    Toast.makeText(EnhancedArticleDetailActivity.this, "✅ Highlight saved!", Toast.LENGTH_SHORT).show();
-                }
+                articleId, selectedText, selectionStart, selectionEnd, color, note,
+                new HighlightManager.HighlightCallback() {
+                    @Override
+                    public void onSuccess() {
+                        if (note != null && !note.trim().isEmpty()) {
+                            Toast.makeText(EnhancedArticleDetailActivity.this, "✅ Highlight saved (with note)",
+                                    Toast.LENGTH_SHORT)
+                                    .show();
+                        } else {
+                            Toast.makeText(EnhancedArticleDetailActivity.this, "✅ Highlight saved!", Toast.LENGTH_SHORT)
+                                    .show();
+                        }
+                    }
 
-                @Override
-                public void onError(String error) {
-                    Toast.makeText(EnhancedArticleDetailActivity.this, "❌ " + error, Toast.LENGTH_SHORT).show();
-                }
-            }
-        );
+                    @Override
+                    public void onError(String error) {
+                        Toast.makeText(EnhancedArticleDetailActivity.this, "❌ " + error, Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
-    
+
+    private static int adjustAlpha(int color, float factor) {
+        int alpha = Math.round(android.graphics.Color.alpha(color) * factor);
+        int red = android.graphics.Color.red(color);
+        int green = android.graphics.Color.green(color);
+        int blue = android.graphics.Color.blue(color);
+        return android.graphics.Color.argb(alpha, red, green, blue);
+    }
+
     private int getColorForHighlight(String color) {
         switch (color) {
-            case "yellow": return Color.YELLOW;
-            case "green": return Color.parseColor("#8BC34A");
-            case "blue": return Color.parseColor("#03A9F4");
-            case "red": return Color.parseColor("#F44336");
-            default: return Color.YELLOW;
+            case "yellow":
+                return Color.YELLOW;
+            case "green":
+                return Color.parseColor("#8BC34A");
+            case "blue":
+                return Color.parseColor("#03A9F4");
+            case "red":
+                return Color.parseColor("#F44336");
+            default:
+                return Color.YELLOW;
         }
     }
 
     // ==================== READING SETTINGS ====================
-    
+
     private void showReadingSettings() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         bottomSheet.setContentView(R.layout.bottom_sheet_reading_settings);
-        
+
         ChipGroup themeChipGroup = bottomSheet.findViewById(R.id.theme_chip_group);
         Slider fontSizeSlider = bottomSheet.findViewById(R.id.font_size_slider);
         Slider lineSpacingSlider = bottomSheet.findViewById(R.id.line_spacing_slider);
         Slider ttsSpeedSlider = bottomSheet.findViewById(R.id.tts_speed_slider);
         MaterialButton btnApply = bottomSheet.findViewById(R.id.btn_apply);
-        
+
         // Set current values
         fontSizeSlider.setValue(fontSize);
         lineSpacingSlider.setValue(lineSpacing);
         ttsSpeedSlider.setValue(TTSManager.getInstance().getSpeechRate());
-        
+
         btnApply.setOnClickListener(v -> {
             // Apply theme
             int selectedId = themeChipGroup.getCheckedChipId();
@@ -685,31 +734,31 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             } else if (selectedId == R.id.chip_sepia) {
                 applyTheme("sepia");
             }
-            
+
             // Apply font size
             fontSize = fontSizeSlider.getValue();
             articleContent.setTextSize(fontSize);
-            
+
             // Apply line spacing
             lineSpacing = lineSpacingSlider.getValue();
             articleContent.setLineSpacing(0, lineSpacing);
-            
+
             // Apply TTS speed
             TTSManager.getInstance().setSpeechRate(ttsSpeedSlider.getValue());
-            
+
             Toast.makeText(this, "✅ Settings applied!", Toast.LENGTH_SHORT).show();
             bottomSheet.dismiss();
         });
-        
+
         bottomSheet.show();
     }
-    
+
     private void applyTheme(String theme) {
         String oldTheme = readingTheme;
         readingTheme = theme;
-        
+
         int bgColorStart, bgColorEnd, textColorStart, textColorEnd;
-        
+
         // Get start colors
         if ("light".equals(oldTheme)) {
             bgColorStart = Color.WHITE;
@@ -757,24 +806,73 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     }
 
     // ==================== COLLECTIONS FUNCTIONALITY ====================
-    
+
     private void showCollectionsSheet() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         bottomSheet.setContentView(R.layout.bottom_sheet_collections);
-        
+
         MaterialButton btnCreateCollection = bottomSheet.findViewById(R.id.btn_create_collection);
-        
+
         btnCreateCollection.setOnClickListener(v -> {
             // TODO: Show create collection dialog
             Toast.makeText(this, "Create collection feature coming soon!", Toast.LENGTH_SHORT).show();
         });
-        
+
         bottomSheet.show();
     }
-    
+
     private void toggleFavorite() {
-        isFavorite = !isFavorite;
-        
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "⚠️ Please login to save favorites", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (articleId == null || articleId.isEmpty()) {
+            Toast.makeText(this, "❌ Missing article id", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean newFavoriteState = !isFavorite;
+        isFavorite = newFavoriteState;
+        applyFavoriteIcon();
+
+        String userId = auth.getCurrentUser().getUid();
+        if (isFavorite) {
+            java.util.Map<String, Object> data = new java.util.HashMap<>();
+            data.put("articleId", articleId);
+            data.put("title", loadedTitle);
+            data.put("content", loadedContent);
+            data.put("category", loadedCategory);
+            data.put("level", loadedLevel);
+            data.put("imageUrl", loadedImageUrl);
+            data.put("source", loadedSource);
+            data.put("publishedDate", loadedPublishedDate);
+            data.put("readingTime", loadedReadingTime);
+            data.put("updatedAt", FieldValue.serverTimestamp());
+
+            db.collection("users")
+                    .document(userId)
+                    .collection("favorites")
+                    .document(articleId)
+                    .set(data)
+                    .addOnSuccessListener(
+                            aVoid -> Toast.makeText(this, "❤️ Added to favorites!", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(
+                            e -> Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        } else {
+            db.collection("users")
+                    .document(userId)
+                    .collection("favorites")
+                    .document(articleId)
+                    .delete()
+                    .addOnSuccessListener(
+                            aVoid -> Toast.makeText(this, "💔 Removed from favorites", Toast.LENGTH_SHORT).show())
+                    .addOnFailureListener(
+                            e -> Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    private void applyFavoriteIcon() {
         if (isFavorite) {
             favoriteButton.setImageResource(R.drawable.ic_favorite);
             favoriteButton.setColorFilter(Color.RED);
@@ -782,31 +880,17 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             favoriteButton.setImageResource(R.drawable.ic_favorite_border);
             favoriteButton.setColorFilter(getResources().getColor(R.color.text_secondary));
         }
-        
-        CollectionManager.getInstance().toggleFavorite(articleId, isFavorite, new CollectionManager.CollectionCallback() {
-            @Override
-            public void onSuccess() {
-                String message = isFavorite ? "Added to favorites ❤️" : "Removed from favorites";
-                Toast.makeText(EnhancedArticleDetailActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(String error) {
-                Toast.makeText(EnhancedArticleDetailActivity.this, "Error: " + error, Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     // ==================== VOCABULARY FUNCTIONALITY ====================
-    
+
     private void showAddVocabularyDialog() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_add_vocabulary);
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.getWindow().setLayout(
                 (int) (getResources().getDisplayMetrics().widthPixels * 0.9),
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-        );
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
         EditText editWord = dialog.findViewById(R.id.edit_word);
         EditText editMeaning = dialog.findViewById(R.id.edit_meaning);
@@ -858,31 +942,35 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
     private String extractSentence(String text, int position) {
         int start = text.lastIndexOf('.', position);
-        if (start == -1) start = 0;
-        else start++;
-        
+        if (start == -1)
+            start = 0;
+        else
+            start++;
+
         int end = text.indexOf('.', position);
-        if (end == -1) end = text.length();
-        else end++;
-        
+        if (end == -1)
+            end = text.length();
+        else
+            end++;
+
         return text.substring(start, end).trim();
     }
 
     // ==================== PROGRESS TRACKING ====================
-    
+
     private void updateProgress(int progress) {
         if (progress > currentProgress) {
             currentProgress = progress;
-            
+
             // Smooth progress update with animation
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                 readingProgress.setProgress(progress, true);
+                readingProgress.setProgress(progress, true);
             } else {
-                 readingProgress.setProgress(progress);
+                readingProgress.setProgress(progress);
             }
-            
+
             progressText.setText(progress + "%");
-            
+
             // Pulse text on significant changes
             if (progress % 5 == 0) {
                 progressText.animate()
@@ -927,6 +1015,15 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                         Long readTime = document.getLong("readingTime");
                         com.google.firebase.Timestamp timestamp = document.getTimestamp("publishedDate");
 
+                        loadedTitle = title;
+                        loadedContent = content;
+                        loadedCategory = category;
+                        loadedLevel = level;
+                        loadedImageUrl = imageUrl;
+                        loadedSource = source;
+                        loadedPublishedDate = timestamp;
+                        loadedReadingTime = readTime;
+
                         // Store for analytics
                         articleLevel = level;
                         articleCategory = category;
@@ -939,54 +1036,58 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                         if (content != null) {
                             articleContent.setText(content);
                             fullArticleContent = content; // Save for advanced features
-                            
+
                             // ✨ FEATURE 1: VOCABULARY PRE-TEACH
                             // Show important vocabulary BEFORE reading
                             preTeachManager.analyzeAndSelectWords(
-                                content, 
-                                title != null ? title : "Article", 
-                                level != null ? level : "B1",
-                                new VocabularyPreTeachManager.PreTeachCallback() {
-                                    @Override
-                                    public void onSuccess(List<VocabularyPreTeachManager.PreTeachWord> words, String articleSummary) {
-                                        runOnUiThread(() -> {
-                                            preTeachManager.showPreTeachDialog(
-                                                EnhancedArticleDetailActivity.this,
-                                                articleSummary,
-                                                new VocabularyPreTeachManager.PreTeachResultCallback() {
-                                                    @Override
-                                                    public void onCompleted(int learnedCount, int totalCount) {
-                                                        Toast.makeText(EnhancedArticleDetailActivity.this, 
-                                                            "✅ " + learnedCount + "/" + totalCount + " words learned! Ready to read.", 
-                                                            Toast.LENGTH_SHORT).show();
-                                                        
-                                                        // Start other features after pre-teach
-                                                        initializeAdvancedFeatures(content, level);
-                                                    }
+                                    content,
+                                    title != null ? title : "Article",
+                                    level != null ? level : "B1",
+                                    new VocabularyPreTeachManager.PreTeachCallback() {
+                                        @Override
+                                        public void onSuccess(List<VocabularyPreTeachManager.PreTeachWord> words,
+                                                String articleSummary) {
+                                            runOnUiThread(() -> {
+                                                preTeachManager.showPreTeachDialog(
+                                                        EnhancedArticleDetailActivity.this,
+                                                        articleSummary,
+                                                        new VocabularyPreTeachManager.PreTeachResultCallback() {
+                                                            @Override
+                                                            public void onCompleted(int learnedCount, int totalCount) {
+                                                                Toast.makeText(EnhancedArticleDetailActivity.this,
+                                                                        "✅ " + learnedCount + "/" + totalCount
+                                                                                + " words learned! Ready to read.",
+                                                                        Toast.LENGTH_SHORT).show();
 
-                                                    @Override
-                                                    public void onSkipped() {
-                                                        // Still initialize features
-                                                        initializeAdvancedFeatures(content, level);
-                                                    }
-                                                }
-                                            );
-                                        });
-                                    }
+                                                                // Start other features after pre-teach
+                                                                initializeAdvancedFeatures(content, level);
+                                                            }
 
-                                    @Override
-                                    public void onError(String error) {
-                                        // Silent fail, continue with other features
-                                        initializeAdvancedFeatures(content, level);
-                                    }
-                                }
-                            );
+                                                            @Override
+                                                            public void onSkipped() {
+                                                                // Still initialize features
+                                                                initializeAdvancedFeatures(content, level);
+                                                            }
+                                                        });
+                                            });
+                                        }
+
+                                        @Override
+                                        public void onError(String error) {
+                                            // Silent fail, continue with other features
+                                            initializeAdvancedFeatures(content, level);
+                                        }
+                                    });
                         }
-                        if (category != null) categoryBadge.setText(category);
-                        if (level != null) levelBadge.setText(level);
-                        if (readTime != null) readingTime.setText(readTime + " min read");
+                        if (category != null)
+                            categoryBadge.setText(category);
+                        if (level != null)
+                            levelBadge.setText(level);
+                        if (readTime != null)
+                            readingTime.setText(readTime + " min read");
                         if (timestamp != null) {
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault());
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy",
+                                    java.util.Locale.getDefault());
                             publishDate.setText(sdf.format(timestamp.toDate()));
                         }
 
@@ -1010,6 +1111,10 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                                     .into(authorAvatar);
                         }
 
+                        // Restore user state once we have content laid out
+                        restoreFavoriteState();
+                        restoreReadingState();
+
                     } else {
                         Toast.makeText(this, "Article not found", Toast.LENGTH_SHORT).show();
                         finish();
@@ -1022,28 +1127,97 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 });
     }
 
+    private void restoreFavoriteState() {
+        if (auth.getCurrentUser() == null || articleId == null)
+            return;
+
+        String userId = auth.getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("favorites")
+                .document(articleId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    isFavorite = doc.exists();
+                    applyFavoriteIcon();
+                });
+    }
+
+    private void restoreReadingState() {
+        if (auth.getCurrentUser() == null || articleId == null)
+            return;
+
+        String userId = auth.getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("reading_progress")
+                .document(articleId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (!doc.exists())
+                        return;
+
+                    Long p = doc.getLong("progress");
+                    Long y = doc.getLong("scrollY");
+                    pendingRestoreProgress = p != null ? p.intValue() : null;
+                    pendingRestoreScrollY = y != null ? y.intValue() : null;
+
+                    applyRestoredReadingState();
+                });
+    }
+
+    private void applyRestoredReadingState() {
+        if (pendingRestoreProgress != null) {
+            currentProgress = pendingRestoreProgress;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                readingProgress.setProgress(currentProgress, false);
+            } else {
+                readingProgress.setProgress(currentProgress);
+            }
+            progressText.setText(currentProgress + "%");
+        }
+
+        scrollView.post(() -> {
+            restoringState = true;
+
+            int targetY;
+            if (pendingRestoreScrollY != null) {
+                targetY = pendingRestoreScrollY;
+            } else if (pendingRestoreProgress != null) {
+                int contentHeight = scrollView.getChildAt(0) != null ? scrollView.getChildAt(0).getHeight() : 0;
+                int maxScroll = Math.max(0, contentHeight - scrollView.getHeight());
+                targetY = (int) (maxScroll * (pendingRestoreProgress / 100f));
+            } else {
+                restoringState = false;
+                return;
+            }
+
+            scrollView.scrollTo(0, Math.max(0, targetY));
+            scrollView.postDelayed(() -> restoringState = false, 350);
+        });
+    }
+
     private void onArticleCompleted() {
         if (currentProgress == 100) {
             Toast.makeText(this, "🎉 Article completed! +5 XP", Toast.LENGTH_SHORT).show();
-            
+
             // Track analytics
             long endTime = System.currentTimeMillis();
             int minutes = (int) ((endTime - startTime) / 60000);
             ReadingAnalyticsManager.getInstance().trackArticleRead(
-                articleId, articleCategory, articleLevel, minutes
-            );
+                    articleId, articleCategory, articleLevel, minutes);
         }
     }
 
     // ==================== NEW ADVANCED FEATURES ====================
-    
+
     /**
      * Show AI Reading Coach
      */
     private void showAICoach() {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         bottomSheet.setContentView(R.layout.bottom_sheet_ai_coach);
-        
+
         TextView tvSentence = bottomSheet.findViewById(R.id.tv_analyzed_sentence);
         ProgressBar difficultyBar = bottomSheet.findViewById(R.id.difficulty_bar);
         TextView tvDifficultyScore = bottomSheet.findViewById(R.id.tv_difficulty_score);
@@ -1054,30 +1228,30 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         MaterialButton btnGetTips = bottomSheet.findViewById(R.id.btn_get_tips);
         ProgressBar progressAnalyzing = bottomSheet.findViewById(R.id.progress_analyzing);
         ImageView btnClose = bottomSheet.findViewById(R.id.btn_close_coach);
-        
+
         // Set article context
         aiCoach.setArticleContext(fullArticleContent);
-        
+
         // Analyze first sentence
         String[] sentences = fullArticleContent.split("[.!?]+");
-        final int[] currentSentenceIndex = {0};
-        
+        final int[] currentSentenceIndex = { 0 };
+
         if (sentences.length > 0) {
-            analyzeSentenceWithAI(sentences[0].trim(), tvSentence, difficultyBar, 
-                tvDifficultyScore, rvVocabulary, grammarContainer, tvLearningTip, progressAnalyzing);
+            analyzeSentenceWithAI(sentences[0].trim(), tvSentence, difficultyBar,
+                    tvDifficultyScore, rvVocabulary, grammarContainer, tvLearningTip, progressAnalyzing);
         }
-        
+
         btnAnalyzeNext.setOnClickListener(v -> {
             currentSentenceIndex[0]++;
             if (currentSentenceIndex[0] < sentences.length) {
-                analyzeSentenceWithAI(sentences[currentSentenceIndex[0]].trim(), 
-                    tvSentence, difficultyBar, tvDifficultyScore, rvVocabulary, 
-                    grammarContainer, tvLearningTip, progressAnalyzing);
+                analyzeSentenceWithAI(sentences[currentSentenceIndex[0]].trim(),
+                        tvSentence, difficultyBar, tvDifficultyScore, rvVocabulary,
+                        grammarContainer, tvLearningTip, progressAnalyzing);
             } else {
                 Toast.makeText(this, "✅ All sentences analyzed!", Toast.LENGTH_SHORT).show();
             }
         });
-        
+
         btnGetTips.setOnClickListener(v -> {
             progressAnalyzing.setVisibility(View.VISIBLE);
             aiCoach.getReadingTips(new AIReadingCoach.TipsCallback() {
@@ -1093,57 +1267,57 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 public void onFailure(Exception e) {
                     runOnUiThread(() -> {
                         progressAnalyzing.setVisibility(View.GONE);
-                        Toast.makeText(EnhancedArticleDetailActivity.this, 
-                            "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EnhancedArticleDetailActivity.this,
+                                "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
             });
         });
-        
+
         btnClose.setOnClickListener(v -> bottomSheet.dismiss());
-        
+
         bottomSheet.show();
     }
-    
-    private void analyzeSentenceWithAI(String sentence, TextView tvSentence, 
+
+    private void analyzeSentenceWithAI(String sentence, TextView tvSentence,
             ProgressBar difficultyBar, TextView tvDifficultyScore, RecyclerView rvVocabulary,
             LinearLayout grammarContainer, TextView tvLearningTip, ProgressBar progressBar) {
-        
+
         tvSentence.setText(sentence);
         progressBar.setVisibility(View.VISIBLE);
-        
+
         // FEATURE 1: Real-time highlighting while analyzing
         int startIndex = fullArticleContent.indexOf(sentence);
         if (startIndex != -1) {
             highlightManager.highlightWithAnimation(articleContent, fullArticleContent,
-                startIndex, startIndex + sentence.length(),
-                new RealtimeHighlightManager.HighlightCallback() {
-                    @Override
-                    public void onHighlightStarted() {
-                        // Highlight started
-                    }
-                });
+                    startIndex, startIndex + sentence.length(),
+                    new RealtimeHighlightManager.HighlightCallback() {
+                        @Override
+                        public void onHighlightStarted() {
+                            // Highlight started
+                        }
+                    });
         }
-        
+
         aiCoach.analyzeSentence(sentence, new AIReadingCoach.AnalysisCallback() {
             @Override
             public void onSuccess(AIReadingCoach.SentenceAnalysis analysis) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    
+
                     // Stop highlighting animation and show completion
                     if (startIndex != -1) {
-                        highlightManager.showCompletionHighlight(articleContent, 
-                            fullArticleContent, startIndex, startIndex + sentence.length());
+                        highlightManager.showCompletionHighlight(articleContent,
+                                fullArticleContent, startIndex, startIndex + sentence.length());
                     }
-                    
+
                     // Update difficulty
                     difficultyBar.setProgress(analysis.difficulty);
                     tvDifficultyScore.setText(analysis.difficulty + "/10");
-                    
+
                     // Update learning tip
                     tvLearningTip.setText(analysis.tip);
-                    
+
                     // Update grammar
                     grammarContainer.removeAllViews();
                     for (String grammar : analysis.grammar) {
@@ -1153,7 +1327,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                         tvGrammar.setPadding(0, 8, 0, 8);
                         grammarContainer.addView(tvGrammar);
                     }
-                    
+
                     // FEATURE 2: Voice feedback - speak analysis result
                     voiceFeedback.speakAnalysisResult(analysis, new VoiceFeedbackManager.SpeechCallback() {
                         @Override
@@ -1165,44 +1339,40 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                         public void onComplete() {
                             // FEATURE 3: Show interactive quiz after analysis
                             quizManager.showQuizFromAnalysis(
-                                EnhancedArticleDetailActivity.this,
-                                analysis,
-                                sentence,
-                                new InteractiveQuizManager.QuizCallback() {
-                                    @Override
-                                    public void onAnswered(boolean isCorrect) {
-                                        if (isCorrect) {
-                                            voiceFeedback.speakWithEmotion(
-                                                "Great job! You got it right!",
-                                                VoiceFeedbackManager.Emotion.EXCITED,
-                                                null
-                                            );
-                                        } else {
-                                            voiceFeedback.speakWithEmotion(
-                                                "Don't worry, keep learning!",
-                                                VoiceFeedbackManager.Emotion.ENCOURAGING,
-                                                null
-                                            );
+                                    EnhancedArticleDetailActivity.this,
+                                    analysis,
+                                    sentence,
+                                    new InteractiveQuizManager.QuizCallback() {
+                                        @Override
+                                        public void onAnswered(boolean isCorrect) {
+                                            if (isCorrect) {
+                                                voiceFeedback.speakWithEmotion(
+                                                        "Great job! You got it right!",
+                                                        VoiceFeedbackManager.Emotion.EXCITED,
+                                                        null);
+                                            } else {
+                                                voiceFeedback.speakWithEmotion(
+                                                        "Don't worry, keep learning!",
+                                                        VoiceFeedbackManager.Emotion.ENCOURAGING,
+                                                        null);
+                                            }
                                         }
-                                    }
 
-                                    @Override
-                                    public void onQuizComplete() {
-                                        // Quiz completed
-                                    }
-                                }
-                            );
+                                        @Override
+                                        public void onQuizComplete() {
+                                            // Quiz completed
+                                        }
+                                    });
                         }
 
                         @Override
                         public void onError(String error) {
                             // Voice error - still show quiz
                             quizManager.showQuizFromAnalysis(
-                                EnhancedArticleDetailActivity.this,
-                                analysis,
-                                sentence,
-                                null
-                            );
+                                    EnhancedArticleDetailActivity.this,
+                                    analysis,
+                                    sentence,
+                                    null);
                         }
                     });
                 });
@@ -1213,35 +1383,35 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
                     highlightManager.stopAnimation();
-                    Toast.makeText(EnhancedArticleDetailActivity.this, 
-                        "Analysis error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EnhancedArticleDetailActivity.this,
+                            "Analysis error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
         });
     }
-    
+
     private void showReadingTipsDialog(List<AIReadingCoach.ReadingTip> tips) {
         android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
         builder.setTitle("💡 Reading Tips");
-        
+
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < tips.size(); i++) {
             AIReadingCoach.ReadingTip tip = tips.get(i);
             message.append(tip.icon).append(" ").append(tip.title).append("\n");
             message.append(tip.description).append("\n\n");
         }
-        
+
         builder.setMessage(message.toString());
         builder.setPositiveButton("Got it!", null);
         builder.show();
     }
-    
+
     /**
      * Toggle Bionic Reading Mode
      */
     private void toggleBionicReading() {
         isBionicEnabled = !isBionicEnabled;
-        
+
         if (isBionicEnabled) {
             // Apply bionic reading
             SpannableString bionicText = bionicManager.applyBionicReading(fullArticleContent, 2);
@@ -1253,7 +1423,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             Toast.makeText(this, "Bionic Reading OFF", Toast.LENGTH_SHORT).show();
         }
     }
-    
+
     /**
      * Show Vocabulary Map
      */
@@ -1261,39 +1431,38 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         BottomSheetDialog bottomSheet = new BottomSheetDialog(this);
         View view = getLayoutInflater().inflate(R.layout.card_word_cloud, null);
         bottomSheet.setContentView(view);
-        
+
         FrameLayout wordCloudContainer = view.findViewById(R.id.word_cloud_container);
         TextView tvTotalWords = view.findViewById(R.id.tv_total_words);
         TextView tvUniqueWords = view.findViewById(R.id.tv_unique_words);
         TextView tvDiversity = view.findViewById(R.id.tv_diversity);
         ImageView btnRefresh = view.findViewById(R.id.btn_refresh_cloud);
-        
+
         // Generate word cloud
         generateWordCloud(wordCloudContainer, tvTotalWords, tvUniqueWords, tvDiversity);
-        
+
         btnRefresh.setOnClickListener(v -> {
             wordCloudContainer.removeAllViews();
             generateWordCloud(wordCloudContainer, tvTotalWords, tvUniqueWords, tvDiversity);
         });
-        
+
         bottomSheet.show();
     }
-    
-    private void generateWordCloud(FrameLayout container, TextView tvTotal, 
+
+    private void generateWordCloud(FrameLayout container, TextView tvTotal,
             TextView tvUnique, TextView tvDiversity) {
-        
+
         // Get statistics
-        VocabularyMapGenerator.VocabularyStats stats = 
-            vocabMapGenerator.getStatistics(fullArticleContent);
-        
+        VocabularyMapGenerator.VocabularyStats stats = vocabMapGenerator.getStatistics(fullArticleContent);
+
         tvTotal.setText(String.valueOf(stats.totalWords));
         tvUnique.setText(String.valueOf(stats.uniqueWords));
         tvDiversity.setText(String.format("%.0f%%", stats.vocabularyDiversity * 100));
-        
+
         // Generate word cloud items
-        List<VocabularyMapGenerator.WordCloudItem> cloudItems = 
-            vocabMapGenerator.generateWordCloud(fullArticleContent, 30);
-        
+        List<VocabularyMapGenerator.WordCloudItem> cloudItems = vocabMapGenerator.generateWordCloud(fullArticleContent,
+                30);
+
         // Add words to container
         Random random = new Random();
         for (VocabularyMapGenerator.WordCloudItem item : cloudItems) {
@@ -1302,22 +1471,20 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             wordView.setTextSize(item.size);
             wordView.setTextColor(Color.parseColor(item.color));
             wordView.setTypeface(null, android.graphics.Typeface.BOLD);
-            
+
             // Random position
             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT
-            );
-            params.leftMargin = random.nextInt(container.getWidth() > 0 ? 
-                container.getWidth() - 100 : 300);
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.leftMargin = random.nextInt(container.getWidth() > 0 ? container.getWidth() - 100 : 300);
             params.topMargin = random.nextInt(250);
             wordView.setLayoutParams(params);
-            
+
             // Click listener
             wordView.setOnClickListener(v -> {
                 showDictionaryDialog(item.word);
             });
-            
+
             container.addView(wordView);
         }
     }
@@ -1325,15 +1492,15 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        
+
         // Stop TTS
         if (isTTSPlaying) {
             stopTTS();
         }
-        
+
         // ✨ Stop pause detection
         pauseDetectionManager.stopTracking();
-        
+
         // Track reading time
         long endTime = System.currentTimeMillis();
         int minutes = (int) ((endTime - startTime) / 60000);
@@ -1343,7 +1510,8 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
 
         // Save final progress
         if (currentProgress > 0) {
-            ProgressHelper.updateReadingProgress(articleId, currentProgress);
+            Integer scrollY = scrollView != null ? scrollView.getScrollY() : null;
+            ProgressHelper.updateReadingProgress(articleId, currentProgress, scrollY);
         }
     }
 
@@ -1354,7 +1522,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         if (isTTSPlaying) {
             stopTTS();
         }
-        
+
         // Cleanup new managers
         if (highlightManager != null) {
             highlightManager.stopAnimation();
@@ -1365,7 +1533,7 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
         if (quizManager != null) {
             quizManager.dismissCurrentQuiz();
         }
-        
+
         // ✨ Cleanup advanced features
         if (pauseDetectionManager != null) {
             pauseDetectionManager.stopTracking();
@@ -1380,9 +1548,9 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             preTeachManager.reset();
         }
     }
-    
+
     // ✨ ==================== NEW ADVANCED FEATURES METHODS ====================
-    
+
     /**
      * Initialize all advanced reading features
      */
@@ -1392,9 +1560,9 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<ComprehensionCheckpointManager.Checkpoint> checkpoints) {
                 runOnUiThread(() -> {
-                    Toast.makeText(EnhancedArticleDetailActivity.this, 
-                        "📍 " + checkpoints.size() + " checkpoints ready", 
-                        Toast.LENGTH_SHORT).show();
+                    Toast.makeText(EnhancedArticleDetailActivity.this,
+                            "📍 " + checkpoints.size() + " checkpoints ready",
+                            Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -1403,26 +1571,25 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 // Silent fail
             }
         });
-        
-        // FEATURE 3: Pre-load definitions for difficult words
-        preloadingManager.preloadArticleDefinitions(this, content, level != null ? level : "B1", 
-            new PreloadingDefinitionsManager.PreloadCallback() {
-                @Override
-                public void onSuccess(int wordsPreloaded) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(EnhancedArticleDetailActivity.this, 
-                            "📚 " + wordsPreloaded + " definitions pre-loaded", 
-                            Toast.LENGTH_SHORT).show();
-                    });
-                }
 
-                @Override
-                public void onError(String error) {
-                    // Silent fail
-                }
-            }
-        );
-        
+        // FEATURE 3: Pre-load definitions for difficult words
+        preloadingManager.preloadArticleDefinitions(this, content, level != null ? level : "B1",
+                new PreloadingDefinitionsManager.PreloadCallback() {
+                    @Override
+                    public void onSuccess(int wordsPreloaded) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(EnhancedArticleDetailActivity.this,
+                                    "📚 " + wordsPreloaded + " definitions pre-loaded",
+                                    Toast.LENGTH_SHORT).show();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        // Silent fail
+                    }
+                });
+
         // FEATURE 4: Start smart pause detection
         pauseDetectionManager.startTracking(this, content, new SmartPauseDetectionManager.PauseDetectionCallback() {
             @Override
@@ -1441,20 +1608,19 @@ public class EnhancedArticleDetailActivity extends AppCompatActivity {
                 // User chose to continue
             }
         });
-        
-        // FEATURE 5: Find visualizable scenes (optional - can be triggered manually)
-        sceneVisualizationManager.findVisualizableScenes(content, 
-            new SceneVisualizationManager.SceneAnalysisCallback() {
-                @Override
-                public void onSuccess(String analysisJson) {
-                    // Scenes identified, can be visualized on demand
-                }
 
-                @Override
-                public void onError(String error) {
-                    // Silent fail
-                }
-            }
-        );
+        // FEATURE 5: Find visualizable scenes (optional - can be triggered manually)
+        sceneVisualizationManager.findVisualizableScenes(content,
+                new SceneVisualizationManager.SceneAnalysisCallback() {
+                    @Override
+                    public void onSuccess(String analysisJson) {
+                        // Scenes identified, can be visualized on demand
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        // Silent fail
+                    }
+                });
     }
 }

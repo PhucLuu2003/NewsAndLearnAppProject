@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
+        android:name=".NewsAndLearnApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -89,6 +90,27 @@
             android:exported="false"
             android:screenOrientation="portrait" />
 
+        <activity
+            android:name=".Activity.AdminFirestoreActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".Activity.AdminCollectionActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".Activity.AdminDocumentEditorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Admin Panel Activity (Tabbed Interface) -->
+        <activity
+            android:name=".Activity.AdminPanelActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
         <!-- Settings Activity -->
         <activity
             android:name=".Activity.SettingsActivity"
@@ -128,6 +150,12 @@
         <!-- Reading Activity -->
         <activity
             android:name=".Activity.ReadingActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <!-- Reading Review Activity -->
+        <activity
+            android:name=".Activity.ReadingReviewActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
         
@@ -242,6 +270,12 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
+
+        <!-- 💡 English Millionaire Activity -->
+        <activity
+            android:name=".Activity.MillionaireGameActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
         
     </application>
 

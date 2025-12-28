@@ -24,15 +24,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.example.newsandlearn.Activity.AllVideosActivity;
-import com.example.newsandlearn.Activity.ArticleDetailActivity;
 import com.example.newsandlearn.Activity.EnhancedArticleDetailActivity;
 import com.example.newsandlearn.Activity.SearchActivity;
 import com.example.newsandlearn.Activity.SettingsActivity;
+import com.example.newsandlearn.Adapter.FeaturedTodayAdapter;
 import com.example.newsandlearn.Adapter.HomeArticleAdapter;
 import com.example.newsandlearn.Adapter.SearchSuggestionAdapter;
 import com.example.newsandlearn.Adapter.VideoLessonsAdapter;
@@ -71,7 +72,7 @@ public class HomeFragment extends Fragment {
     private View notificationBadge;
     private View settingsBtn;
     private View voiceSearchBtn;
-    
+
     // UI Components - Stats
     private MaterialCardView streakCard;
     private MaterialCardView scoreCard;
@@ -80,11 +81,9 @@ public class HomeFragment extends Fragment {
     private TextView xpText;
     private TextView userRank;
     private ProgressBar xpProgressBar;
-    
+
     // UI Components - Content
-    private CardView heroCard;
-    private ImageView featuredImage;
-    private TextView featuredTitle, featuredReadTime, featuredSource;
+    private RecyclerView featuredTodayRecycler;
     private TextView seeAllVideosBtn;
     private TextView viewAllArticlesBtn;
     private SwipeRefreshLayout swipeRefresh;
@@ -92,7 +91,7 @@ public class HomeFragment extends Fragment {
     private RecyclerView articlesRecycler;
     private LottieAnimationView loadingIndicator;
     private ChipGroup levelChipGroup;
-    
+
     // Search Dropdown
     private EditText searchInputHome;
     private ImageView clearSearchBtn;
@@ -107,10 +106,11 @@ public class HomeFragment extends Fragment {
     // Data & Adapter
     private VideoLessonsAdapter videoLessonsAdapter;
     private HomeArticleAdapter articlesAdapter;
+    private FeaturedTodayAdapter featuredTodayAdapter;
     private List<Article> allArticles = new ArrayList<>();
     private List<Article> homeArticles = new ArrayList<>();
+    private List<Article> featuredTodayArticles = new ArrayList<>();
     private List<VideoLesson> videoLessons = new ArrayList<>();
-    private Article featuredArticle;
 
     // Firebase
     private FirebaseAuth mAuth;
@@ -138,6 +138,7 @@ public class HomeFragment extends Fragment {
 
         // Initialize views
         initializeViews(view);
+        setupFeaturedTodayRecyclerView();
         setupVideoLessonsRecyclerView();
         setupArticlesRecyclerView();
         setupSearchDropdown();
@@ -147,7 +148,6 @@ public class HomeFragment extends Fragment {
         loadUserInfo();
         loadArticles();
         loadVideoLessons();
-        loadHomeArticles();
 
         // Animate entrance
         animateEntrance();
@@ -166,11 +166,13 @@ public class HomeFragment extends Fragment {
         usernameText = view.findViewById(R.id.username);
         greetingText = view.findViewById(R.id.greeting_text);
         notificationBtn = view.findViewById(R.id.notification_btn);
-        // notificationBadge = view.findViewById(R.id.notification_badge); // Removed in new layout
+        // notificationBadge = view.findViewById(R.id.notification_badge); // Removed in
+        // new layout
         settingsBtn = view.findViewById(R.id.settings_btn);
 
         // Voice Search (part of search dropdown now)
-        // voiceSearchBtn = view.findViewById(R.id.voice_search_btn); // Removed in new layout
+        // voiceSearchBtn = view.findViewById(R.id.voice_search_btn); // Removed in new
+        // layout
 
         // Stats Cards
         streakCard = view.findViewById(R.id.streak_card);
@@ -182,15 +184,11 @@ public class HomeFragment extends Fragment {
         xpProgressBar = view.findViewById(R.id.xp_progress_bar);
 
         // Hero Section
-        heroCard = view.findViewById(R.id.hero_card);
-        featuredImage = view.findViewById(R.id.featured_image);
-        featuredTitle = view.findViewById(R.id.featured_title);
-        featuredReadTime = view.findViewById(R.id.featured_read_time);
-        featuredSource = view.findViewById(R.id.featured_source);
+        featuredTodayRecycler = view.findViewById(R.id.featured_today_recycler);
 
         // Filters
         levelChipGroup = view.findViewById(R.id.level_chip_group);
-        
+
         // Search Dropdown
         searchInputHome = view.findViewById(R.id.search_input_home);
         clearSearchBtn = view.findViewById(R.id.clear_search_btn);
@@ -207,15 +205,36 @@ public class HomeFragment extends Fragment {
         // RecyclerView
         videoLessonsRecycler = view.findViewById(R.id.video_lessons_recycler);
         articlesRecycler = view.findViewById(R.id.articles_recycler);
-        
+
         // Set initial greeting
         updateGreeting();
     }
-    
+
+    private void setupFeaturedTodayRecyclerView() {
+        if (featuredTodayRecycler == null)
+            return;
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL,
+                false);
+        featuredTodayRecycler.setLayoutManager(layoutManager);
+        featuredTodayRecycler.setItemAnimator(null);
+
+        featuredTodayAdapter = new FeaturedTodayAdapter(getContext(), article -> {
+            Intent intent = new Intent(getActivity(), EnhancedArticleDetailActivity.class);
+            intent.putExtra("article_id", article.getId());
+            startActivity(intent);
+        });
+        featuredTodayRecycler.setAdapter(featuredTodayAdapter);
+
+        // Snap one card per swipe
+        PagerSnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(featuredTodayRecycler);
+    }
+
     private void updateGreeting() {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        
+
         String greeting;
         if (hour < 12) {
             greeting = "Good Morning 👋";
@@ -224,16 +243,16 @@ public class HomeFragment extends Fragment {
         } else {
             greeting = "Good Evening 🌙";
         }
-        
+
         if (greetingText != null) {
             greetingText.setText(greeting);
         }
     }
-    
+
     private void updateGreetingWithLevel(int level, String levelTitle) {
         Calendar calendar = Calendar.getInstance();
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        
+
         String timeGreeting;
         String emoji;
         if (hour < 12) {
@@ -246,16 +265,17 @@ public class HomeFragment extends Fragment {
             timeGreeting = "Evening";
             emoji = "🌙";
         }
-        
+
         if (greetingText != null) {
             // Compact format: "Morning 👋 • Lv.5"
             greetingText.setText(timeGreeting + " " + emoji + " • Lv." + level);
         }
     }
-    
+
     private void setupVideoLessonsRecyclerView() {
-        if (videoLessonsRecycler == null) return;
-        
+        if (videoLessonsRecycler == null)
+            return;
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(),
                 LinearLayoutManager.HORIZONTAL, false);
         videoLessonsRecycler.setLayoutManager(layoutManager);
@@ -263,10 +283,11 @@ public class HomeFragment extends Fragment {
         videoLessonsAdapter = new VideoLessonsAdapter(getContext(), videoLessons);
         videoLessonsRecycler.setAdapter(videoLessonsAdapter);
     }
-    
+
     private void setupArticlesRecyclerView() {
-        if (articlesRecycler == null) return;
-        
+        if (articlesRecycler == null)
+            return;
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         articlesRecycler.setLayoutManager(layoutManager);
         articlesRecycler.setNestedScrollingEnabled(false);
@@ -274,7 +295,7 @@ public class HomeFragment extends Fragment {
         articlesAdapter = new HomeArticleAdapter(homeArticles, getContext());
         articlesRecycler.setAdapter(articlesAdapter);
     }
-    
+
     private void setupSearchDropdown() {
         // Setup RecyclerView
         searchSuggestionsRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -283,26 +304,27 @@ public class HomeFragment extends Fragment {
             searchSuggestionsCard.setVisibility(View.GONE);
             searchInputHome.clearFocus();
             searchInputHome.setText("");
-            
+
             // Open article detail
             Intent intent = new Intent(getActivity(), EnhancedArticleDetailActivity.class);
             intent.putExtra("article_id", article.getId());
             startActivity(intent);
         });
         searchSuggestionsRecycler.setAdapter(searchSuggestionAdapter);
-        
+
         // Text change listener
         searchInputHome.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String query = s.toString().trim();
-                
+
                 // Show/hide clear button
                 clearSearchBtn.setVisibility(query.isEmpty() ? View.GONE : View.VISIBLE);
-                
+
                 if (query.isEmpty()) {
                     searchSuggestionsCard.setVisibility(View.GONE);
                 } else {
@@ -311,15 +333,16 @@ public class HomeFragment extends Fragment {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {}
+            public void afterTextChanged(Editable s) {
+            }
         });
-        
+
         // Clear button
         clearSearchBtn.setOnClickListener(v -> {
             searchInputHome.setText("");
             searchSuggestionsCard.setVisibility(View.GONE);
         });
-        
+
         // Focus listener
         searchInputHome.setOnFocusChangeListener((v, hasFocus) -> {
             if (!hasFocus && searchInputHome.getText().toString().isEmpty()) {
@@ -332,26 +355,26 @@ public class HomeFragment extends Fragment {
         searchLoading.setVisibility(View.VISIBLE);
         noResultsText.setVisibility(View.GONE);
         searchSuggestionsCard.setVisibility(View.VISIBLE);
-        
+
         // Filter articles
         searchResults.clear();
         String lowerQuery = query.toLowerCase();
-        
+
         for (Article article : allArticles) {
-            boolean matches = 
-                (article.getTitle() != null && article.getTitle().toLowerCase().contains(lowerQuery)) ||
-                (article.getCategory() != null && article.getCategory().toLowerCase().contains(lowerQuery)) ||
-                (article.getSource() != null && article.getSource().toLowerCase().contains(lowerQuery)) ||
-                (article.getLevel() != null && article.getLevel().toLowerCase().contains(lowerQuery));
-            
+            boolean matches = (article.getTitle() != null && article.getTitle().toLowerCase().contains(lowerQuery)) ||
+                    (article.getCategory() != null && article.getCategory().toLowerCase().contains(lowerQuery)) ||
+                    (article.getSource() != null && article.getSource().toLowerCase().contains(lowerQuery)) ||
+                    (article.getLevel() != null && article.getLevel().toLowerCase().contains(lowerQuery));
+
             if (matches) {
                 searchResults.add(article);
-                if (searchResults.size() >= 5) break; // Limit to 5 suggestions
+                if (searchResults.size() >= 5)
+                    break; // Limit to 5 suggestions
             }
         }
-        
+
         searchLoading.setVisibility(View.GONE);
-        
+
         if (searchResults.isEmpty()) {
             noResultsText.setVisibility(View.VISIBLE);
             suggestionsHeader.setVisibility(View.GONE);
@@ -363,7 +386,6 @@ public class HomeFragment extends Fragment {
             searchSuggestionAdapter.setSuggestions(searchResults);
         }
     }
-
 
     private void setupListeners() {
         // Pull to Refresh
@@ -378,16 +400,16 @@ public class HomeFragment extends Fragment {
         // Search Bar - Now using dropdown (see setupSearchDropdown())
         // OLD CODE: Commented out because search now uses inline dropdown
         /*
-        searchBarHome.setOnClickListener(v -> {
-            animateSearchClick(v);
-            v.postDelayed(() -> {
-                Intent intent = new Intent(getActivity(), SearchActivity.class);
-                startActivity(intent);
-                requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }, 200);
-        });
-        */
-
+         * searchBarHome.setOnClickListener(v -> {
+         * animateSearchClick(v);
+         * v.postDelayed(() -> {
+         * Intent intent = new Intent(getActivity(), SearchActivity.class);
+         * startActivity(intent);
+         * requireActivity().overridePendingTransition(R.anim.slide_in_right,
+         * R.anim.slide_out_left);
+         * }, 200);
+         * });
+         */
 
         // Voice Search
         if (voiceSearchBtn != null) {
@@ -402,7 +424,7 @@ public class HomeFragment extends Fragment {
             animatePulse(v);
             Toast.makeText(getContext(), "📬 No new notifications", Toast.LENGTH_SHORT).show();
         });
-        
+
         settingsBtn.setOnClickListener(v -> {
             animatePulse(v);
             v.postDelayed(() -> {
@@ -439,7 +461,8 @@ public class HomeFragment extends Fragment {
                 animateStatsCard(v);
                 v.postDelayed(() -> {
                     // Navigate to LeaderboardActivity
-                    Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.LeaderboardActivity.class);
+                    Intent intent = new Intent(getActivity(),
+                            com.example.newsandlearn.Activity.LeaderboardActivity.class);
                     startActivity(intent);
                     requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }, 150);
@@ -451,13 +474,14 @@ public class HomeFragment extends Fragment {
             seeAllVideosBtn.setOnClickListener(v -> {
                 animatePulse(v);
                 v.postDelayed(() -> {
-                    Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.AllVideosActivity.class);
+                    Intent intent = new Intent(getActivity(),
+                            com.example.newsandlearn.Activity.AllVideosActivity.class);
                     startActivity(intent);
                     requireActivity().overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                 }, 150);
             });
         }
-        
+
         // View All Articles Button
         if (viewAllArticlesBtn != null) {
             viewAllArticlesBtn.setOnClickListener(v -> {
@@ -479,7 +503,19 @@ public class HomeFragment extends Fragment {
                         Chip chip = fragmentView.findViewById(checkedId);
                         if (chip != null) {
                             animatePulse(chip);
-                            // Filter logic can be added here if needed
+                            if (checkedId == R.id.chip_all) {
+                                currentLevel = "all";
+                            } else if (checkedId == R.id.chip_easy) {
+                                currentLevel = "easy";
+                            } else if (checkedId == R.id.chip_medium) {
+                                currentLevel = "medium";
+                            } else if (checkedId == R.id.chip_hard) {
+                                currentLevel = "hard";
+                            } else {
+                                currentLevel = "all";
+                            }
+
+                            applyLevelFilter();
                         }
                     }
                 }
@@ -504,24 +540,24 @@ public class HomeFragment extends Fragment {
                                 animateNumberCount(streakCount, 0, streak.intValue());
                             }
 
-
-
                             // Load XP with level progress
                             Long xp = document.getLong("totalXP");
                             if (xp != null && xpText != null) {
                                 int totalXP = xp.intValue();
-                                int currentProgress = com.example.newsandlearn.Utils.LevelSystem.getCurrentLevelProgress(totalXP);
-                                int xpNeeded = com.example.newsandlearn.Utils.LevelSystem.getXPNeededForNextLevel(totalXP);
-                                
+                                int currentProgress = com.example.newsandlearn.Utils.LevelSystem
+                                        .getCurrentLevelProgress(totalXP);
+                                int xpNeeded = com.example.newsandlearn.Utils.LevelSystem
+                                        .getXPNeededForNextLevel(totalXP);
+
                                 // Display: "150/500" (current progress / XP needed for next level)
                                 xpText.setText(currentProgress + "/" + xpNeeded);
-                                
+
                                 // Update progress bar
                                 if (xpProgressBar != null && xpNeeded > 0) {
                                     int progressPercentage = (int) ((currentProgress * 100.0) / xpNeeded);
                                     xpProgressBar.setProgress(progressPercentage);
                                 }
-                                
+
                                 // Update greeting with level
                                 int level = com.example.newsandlearn.Utils.LevelSystem.getLevelFromXP(totalXP);
                                 String levelTitle = com.example.newsandlearn.Utils.LevelSystem.getLevelTitle(level);
@@ -555,8 +591,7 @@ public class HomeFragment extends Fragment {
                         }
                         rank++;
                     }
-                })
-;
+                });
     }
 
     private void loadArticles() {
@@ -576,7 +611,7 @@ public class HomeFragment extends Fragment {
                         isLoading = false;
                         return;
                     }
-                    
+
                     allArticles.clear();
 
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
@@ -584,18 +619,11 @@ public class HomeFragment extends Fragment {
                         allArticles.add(article);
                     }
 
-                    // Set featured article (first one)
-                    if (!allArticles.isEmpty()) {
-                        featuredArticle = allArticles.get(0);
-                        updateHeroSection(featuredArticle);
-                    } else {
-                        Toast.makeText(getContext(),
-                                "Chưa có bài viết. Vui lòng seed dữ liệu.",
-                                Toast.LENGTH_LONG).show();
-                    }
+                    applyLevelFilter();
 
                     showLoading(false);
-                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                    if (swipeRefresh != null)
+                        swipeRefresh.setRefreshing(false);
                     isLoading = false;
                 })
                 .addOnFailureListener(e -> {
@@ -604,13 +632,14 @@ public class HomeFragment extends Fragment {
                         isLoading = false;
                         return;
                     }
-                    
+
                     allArticles.clear();
                     Toast.makeText(getContext(),
                             "Lỗi tải bài viết: " + e.getMessage(),
                             Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                    if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+                    if (swipeRefresh != null)
+                        swipeRefresh.setRefreshing(false);
                     isLoading = false;
                 });
     }
@@ -663,36 +692,41 @@ public class HomeFragment extends Fragment {
                 isFavorite != null ? isFavorite : false);
     }
 
-    private void updateHeroSection(Article article) {
-        // Check if fragment is attached before updating UI
-        if (!isAdded() || getActivity() == null) {
+    private void applyLevelFilter() {
+        if (!isAdded() || getContext() == null)
             return;
+
+        List<Article> filtered = new ArrayList<>();
+        for (Article article : allArticles) {
+            if (article == null)
+                continue;
+            if ("all".equalsIgnoreCase(currentLevel)) {
+                filtered.add(article);
+            } else if (article.getLevel() != null && article.getLevel().equalsIgnoreCase(currentLevel)) {
+                filtered.add(article);
+            }
         }
-        
-        if (article != null) {
-            if (featuredTitle != null) {
-                featuredTitle.setText(article.getTitle());
-            }
-            if (featuredReadTime != null) {
-                featuredReadTime.setText("⏱ " + article.getReadingTime() + " phút đọc");
-            }
-            if (featuredSource != null) {
-                featuredSource.setText(article.getSource());
-            }
-            // Load image with Glide
-            if (featuredImage != null && isAdded()) {
-                if (article.getImageUrl() != null && !article.getImageUrl().isEmpty()) {
-                    com.bumptech.glide.Glide.with(requireActivity())
-                        .load(article.getImageUrl())
-                        .placeholder(R.drawable.placeholder_article)
-                        .error(R.drawable.placeholder_article)
-                        .centerCrop()
-                        .into(featuredImage);
-                } else {
-                    // No image URL, show placeholder
-                    featuredImage.setImageResource(R.drawable.placeholder_article);
-                }
-            }
+
+        featuredTodayArticles.clear();
+        homeArticles.clear();
+
+        for (int i = 0; i < filtered.size() && featuredTodayArticles.size() < 3; i++) {
+            featuredTodayArticles.add(filtered.get(i));
+        }
+
+        for (int i = 0; i < filtered.size() && homeArticles.size() < 4; i++) {
+            homeArticles.add(filtered.get(i));
+        }
+
+        if (featuredTodayAdapter != null) {
+            featuredTodayAdapter.submitList(featuredTodayArticles);
+        }
+        if (articlesAdapter != null) {
+            articlesAdapter.updateArticles(homeArticles);
+        }
+
+        if (filtered.isEmpty()) {
+            Toast.makeText(getContext(), "Không có bài phù hợp level này.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -707,34 +741,37 @@ public class HomeFragment extends Fragment {
     }
 
     private void openArticleDetail(Article article) {
-        Intent intent = new Intent(getActivity(), ArticleDetailActivity.class);
+        Intent intent = new Intent(getActivity(), EnhancedArticleDetailActivity.class);
         intent.putExtra("article_id", article.getId());
         startActivity(intent);
     }
 
-
     // Animation Methods
     private void animateEntrance() {
-        if (getView() == null) return;
+        if (getView() == null)
+            return;
 
         // Animate stats cards
         animationHandler.postDelayed(() -> {
-            if (streakCard != null) animateCardEntrance(streakCard, 0);
+            if (streakCard != null)
+                animateCardEntrance(streakCard, 0);
         }, 100);
-        
+
         animationHandler.postDelayed(() -> {
-            if (scoreCard != null) animateCardEntrance(scoreCard, 100);
+            if (scoreCard != null)
+                animateCardEntrance(scoreCard, 100);
         }, 200);
-        
+
         animationHandler.postDelayed(() -> {
-            if (rankCard != null) animateCardEntrance(rankCard, 200);
+            if (rankCard != null)
+                animateCardEntrance(rankCard, 200);
         }, 300);
 
-        // Animate hero card
-        if (heroCard != null) {
-            heroCard.setAlpha(0f);
-            heroCard.setTranslationY(50f);
-            heroCard.animate()
+        // Animate featured list
+        if (featuredTodayRecycler != null) {
+            featuredTodayRecycler.setAlpha(0f);
+            featuredTodayRecycler.setTranslationY(50f);
+            featuredTodayRecycler.animate()
                     .alpha(1f)
                     .translationY(0f)
                     .setDuration(500)
@@ -839,7 +876,7 @@ public class HomeFragment extends Fragment {
         }
         updateGreeting();
     }
-    
+
     private void loadHomeArticles() {
         db.collection("articles")
                 .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING)
@@ -854,7 +891,7 @@ public class HomeFragment extends Fragment {
                             homeArticles.add(article);
                         }
                     }
-                    
+
                     // Update adapter and show/hide RecyclerView
                     if (articlesAdapter != null) {
                         articlesAdapter.updateArticles(homeArticles);
@@ -862,14 +899,15 @@ public class HomeFragment extends Fragment {
                             articlesRecycler.setVisibility(homeArticles.isEmpty() ? View.GONE : View.VISIBLE);
                         }
                     }
-                    
+
                     // Debug log
                     if (homeArticles.isEmpty()) {
                         Toast.makeText(getContext(), "No articles found. Please seed data.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error loading articles: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Error loading articles: " + e.getMessage(), Toast.LENGTH_SHORT)
+                            .show();
                     android.util.Log.e("HomeFragment", "Error loading articles", e);
                 });
     }
