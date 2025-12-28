@@ -82,24 +82,40 @@ public class ChangePasswordDialog extends DialogFragment {
             return;
         }
 
-        // Reauthenticate
-        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+        // Show loading feedback
+        btnChange.setEnabled(false);
+        btnChange.setText("Changing...");
 
-        user.reauthenticate(credential)
-            .addOnSuccessListener(aVoid -> {
-                // Update password
-                user.updatePassword(newPassword)
-                    .addOnSuccessListener(task -> {
-                        Toast.makeText(getContext(), "✅ Password changed successfully!", Toast.LENGTH_SHORT).show();
-                        dismiss();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(getContext(), "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-            })
-            .addOnFailureListener(e -> {
-                Toast.makeText(getContext(), "❌ Current password is incorrect", Toast.LENGTH_SHORT).show();
-            });
+        // Reauthenticate using EmailAuthProvider
+        try {
+            AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+
+            user.reauthenticate(credential)
+                .addOnSuccessListener(aVoid -> {
+                    // Update password
+                    user.updatePassword(newPassword)
+                        .addOnSuccessListener(task -> {
+                            Toast.makeText(getContext(), "✅ Password changed successfully!", Toast.LENGTH_SHORT).show();
+                            btnChange.setEnabled(true);
+                            btnChange.setText("Change Password");
+                            dismiss();
+                        })
+                        .addOnFailureListener(e -> {
+                            btnChange.setEnabled(true);
+                            btnChange.setText("Change Password");
+                            Toast.makeText(getContext(), "❌ Error updating password: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+                })
+                .addOnFailureListener(e -> {
+                    btnChange.setEnabled(true);
+                    btnChange.setText("Change Password");
+                    Toast.makeText(getContext(), "❌ Current password is incorrect", Toast.LENGTH_SHORT).show();
+                });
+        } catch (Exception e) {
+            btnChange.setEnabled(true);
+            btnChange.setText("Change Password");
+            Toast.makeText(getContext(), "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }
 

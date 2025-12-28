@@ -70,53 +70,66 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private void setupListeners() {
-        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"),
-                    Toast.LENGTH_SHORT).show();
-        });
+        if (notificationsSwitch != null) {
+            notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"),
+                        Toast.LENGTH_SHORT).show();
+            });
+        }
 
-        darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }
-        });
+        if (darkModeSwitch != null) {
+            darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (isChecked) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                }
+            });
+        }
 
-        editProfile.setOnClickListener(v -> {
-            FirebaseUser user = auth.getCurrentUser();
-            if (user != null) {
-                EditProfileDialog dialog = EditProfileDialog.newInstance(
-                    user.getDisplayName() != null ? user.getDisplayName() : "",
-                    user.getEmail() != null ? user.getEmail() : ""
-                );
-                dialog.show(getSupportFragmentManager(), "EditProfileDialog");
-            }
-        });
+        if (editProfile != null) {
+            editProfile.setOnClickListener(v -> {
+                FirebaseUser user = auth.getCurrentUser();
+                if (user != null) {
+                    EditProfileDialog dialog = EditProfileDialog.newInstance(
+                            user.getDisplayName() != null ? user.getDisplayName() : "",
+                            user.getEmail() != null ? user.getEmail() : ""
+                    );
+                    dialog.show(getSupportFragmentManager(), "EditProfileDialog");
+                }
+            });
+        }
 
-        changePassword.setOnClickListener(v -> {
-            ChangePasswordDialog dialog = new ChangePasswordDialog();
-            dialog.show(getSupportFragmentManager(), "ChangePasswordDialog");
-        });
+        if (changePassword != null) {
+            changePassword.setOnClickListener(v -> {
+                ChangePasswordDialog dialog = new ChangePasswordDialog();
+                dialog.show(getSupportFragmentManager(), "ChangePasswordDialog");
+            });
+        }
 
-        logoutButton.setOnClickListener(v -> logout());
+        if (logoutButton != null) {
+            logoutButton.setOnClickListener(v -> logout());
+        }
 
-        // Seed data button
-        seedDataButton.setOnClickListener(v -> seedData());
-        
-        // ... existing code ...
+        if (seedDataButton != null) {
+            seedDataButton.setOnClickListener(v -> seedData());
+        }
 
-        // Reseed videos button
-        reseedVideosButton.setOnClickListener(v -> reseedVideoLessons());
-        
-        // Admin Panel button
-        adminPanelButton.setOnClickListener(v -> openAdminPanel());
-        
-        // Seed Learn Modules button
-        seedLearnModulesButton.setOnClickListener(v -> seedLearnModules());
-        
-        // Add Audio to Speaking Lessons button
-        addAudioButton.setOnClickListener(v -> addAudioToSpeakingLessons());
+        if (reseedVideosButton != null) {
+            reseedVideosButton.setOnClickListener(v -> reseedVideoLessons());
+        }
+
+        if (adminPanelButton != null) {
+            adminPanelButton.setOnClickListener(v -> openAdminPanel());
+        }
+
+        if (seedLearnModulesButton != null) {
+            seedLearnModulesButton.setOnClickListener(v -> seedLearnModules());
+        }
+
+        if (addAudioButton != null) {
+            addAudioButton.setOnClickListener(v -> addAudioToSpeakingLessons());
+        }
     }
 
     private void loadUserData() {
@@ -130,6 +143,9 @@ public class SettingsActivity extends AppCompatActivity {
     private void logout() {
         auth.signOut();
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
         finish();
     }
 
@@ -174,7 +190,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     /**
      * Clear and reseed video lessons with direct MP4 URLs
      * This fixes the YouTube black screen issue
@@ -219,7 +235,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         }, true); // true = clear first
     }
-    
+
     /**
      * Open Admin Panel Activity
      */
@@ -227,7 +243,7 @@ public class SettingsActivity extends AppCompatActivity {
         Intent intent = new Intent(this, AdminActivity.class);
         startActivity(intent);
     }
-    
+
     /**
      * Seed Learn Modules data (Grammar, Listening, Speaking, Reading, Writing)
      */
@@ -271,7 +287,7 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     /**
      * Add sample audio URLs to all speaking lessons
      */
@@ -286,26 +302,26 @@ public class SettingsActivity extends AppCompatActivity {
         progressDialog.show();
 
         com.example.newsandlearn.Utils.SpeakingAudioUpdater.addAudioToSpeakingLessons(
-            new com.example.newsandlearn.Utils.SpeakingAudioUpdater.UpdateCallback() {
-                @Override
-                public void onSuccess(int updatedCount) {
-                    runOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        Toast.makeText(SettingsActivity.this,
-                                "✅ Added audio to " + updatedCount + " speaking lessons!",
-                                Toast.LENGTH_LONG).show();
-                    });
-                }
+                new com.example.newsandlearn.Utils.SpeakingAudioUpdater.UpdateCallback() {
+                    @Override
+                    public void onSuccess(int updatedCount) {
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(SettingsActivity.this,
+                                    "✅ Added audio to " + updatedCount + " speaking lessons!",
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
 
-                @Override
-                public void onFailure(Exception e) {
-                    runOnUiThread(() -> {
-                        progressDialog.dismiss();
-                        Toast.makeText(SettingsActivity.this,
-                                "❌ Error: " + e.getMessage(),
-                                Toast.LENGTH_LONG).show();
-                    });
-                }
-            });
+                    @Override
+                    public void onFailure(Exception e) {
+                        runOnUiThread(() -> {
+                            progressDialog.dismiss();
+                            Toast.makeText(SettingsActivity.this,
+                                    "❌ Error: " + e.getMessage(),
+                                    Toast.LENGTH_LONG).show();
+                        });
+                    }
+                });
     }
 }
