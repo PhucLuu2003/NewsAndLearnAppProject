@@ -241,4 +241,6 @@
     <color name="level_c1">#E74C3C</color>
     <color name="level_c2">#8E44AD</color>
 
+    <!-- Admin Panel - Missing Resources -->
+    <color name="background">@color/background_primary</color>  <!-- Alias for background -->
 </resources>
