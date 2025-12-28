@@ -34,12 +34,15 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.imageview.ShapeableImageView;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ListeningActivity extends AppCompatActivity {
@@ -57,6 +60,7 @@ public class ListeningActivity extends AppCompatActivity {
     private BottomSheetBehavior<View> bottomSheetBehavior;
 
     // Lesson Data
+    private String lessonId;
     private List<ListeningQuestion> allQuestions;
     private List<ListeningQuestion> reviewQueue;
     private int currentQuestionIndex = 0;
@@ -72,13 +76,15 @@ public class ListeningActivity extends AppCompatActivity {
     private int correctSoundId, incorrectSoundId;
     private Vibrator vibrator;
     private ProgressManager progressManager;
+    private FirebaseFirestore db;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listening);
 
-        String lessonId = getIntent().getStringExtra("lesson_id");
+        lessonId = getIntent().getStringExtra("lesson_id");
         if (lessonId == null) {
             Toast.makeText(this, "Error: No lesson ID", Toast.LENGTH_SHORT).show();
             finish();
@@ -89,8 +95,7 @@ public class ListeningActivity extends AppCompatActivity {
         initializeViews();
         setupListeners();
         loadLessonFromFirebase(lessonId);
-        
-        //uploadShoppingLessonToFirestore(); // NOTE: Uncomment to run ONCE to upload the new lesson
+        incrementTimesListened();
     }
 
     private void initializeServices() {
@@ -101,6 +106,9 @@ public class ListeningActivity extends AppCompatActivity {
         incorrectSoundId = soundPool.load(this, R.raw.incorrect_sound, 1);
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         progressManager = ProgressManager.getInstance();
+        db = FirebaseFirestore.getInstance();
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null ?
+                FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
 
         allQuestions = new ArrayList<>();
         reviewQueue = new ArrayList<>();
@@ -128,7 +136,7 @@ public class ListeningActivity extends AppCompatActivity {
     }
 
     private void loadLessonFromFirebase(String lessonId) {
-        FirebaseFirestore.getInstance().collection("listening_lessons").document(lessonId)
+        db.collection("listening_lessons").document(lessonId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
@@ -153,6 +161,30 @@ public class ListeningActivity extends AppCompatActivity {
                         Toast.makeText(this, "Lesson is empty or invalid.", Toast.LENGTH_SHORT).show();
                         finish();
                     }
+                });
+    }
+
+    private void incrementTimesListened() {
+        if (currentUserId == null || lessonId == null) return;
+
+        db.collection("users")
+                .document(currentUserId)
+                .collection("listening_progress")
+                .document(lessonId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    long currentCount = doc.exists() && doc.contains("timesListened") ?
+                            doc.getLong("timesListened") : 0;
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put("timesListened", currentCount + 1);
+                    updates.put("lastAccessed", System.currentTimeMillis());
+
+                    db.collection("users")
+                            .document(currentUserId)
+                            .collection("listening_progress")
+                            .document(lessonId)
+                            .set(updates, com.google.firebase.firestore.SetOptions.merge());
                 });
     }
 
@@ -346,17 +378,55 @@ public class ListeningActivity extends AppCompatActivity {
 
     private void finishLesson() {
         int correctAnswersOnFirstTry = allQuestions.size() - reviewQueue.size();
+        int totalQuestions = allQuestions.size();
+
+        // Calculate score as percentage
+        int scorePercentage = (int) ((correctAnswersOnFirstTry / (double) totalQuestions) * 100);
+
+        // Calculate XP
         int totalXP = correctAnswersOnFirstTry * 20;
-        progressManager.addXP(totalXP, new ProgressManager.ProgressCallback() {
-            @Override
-            public void onSuccess(UserProgress progress) {
-                String message = String.format("Lesson Complete! You earned %d XP.", totalXP);
-                Toast.makeText(ListeningActivity.this, message, Toast.LENGTH_LONG).show();
-                finish();
-            }
-            @Override
-            public void onFailure(Exception e) { finish(); }
+
+        // Save progress to Firestore
+        saveProgressToFirestore(scorePercentage, () -> {
+            progressManager.addXP(totalXP, new ProgressManager.ProgressCallback() {
+                @Override
+                public void onSuccess(UserProgress progress) {
+                    String message = String.format("Lesson Complete! You earned %d XP. Score: %d%%", totalXP, scorePercentage);
+                    Toast.makeText(ListeningActivity.this, message, Toast.LENGTH_LONG).show();
+                    finish();
+                }
+                @Override
+                public void onFailure(Exception e) {
+                    finish();
+                }
+            });
         });
+    }
+
+    private void saveProgressToFirestore(int score, Runnable onComplete) {
+        if (currentUserId == null || lessonId == null) {
+            onComplete.run();
+            return;
+        }
+
+        Map<String, Object> progressData = new HashMap<>();
+        progressData.put("completed", true);
+        progressData.put("userScore", score);
+        progressData.put("completedAt", System.currentTimeMillis());
+
+        db.collection("users")
+                .document(currentUserId)
+                .collection("listening_progress")
+                .document(lessonId)
+                .set(progressData, com.google.firebase.firestore.SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    Log.d(TAG, "Progress saved successfully");
+                    onComplete.run();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error saving progress", e);
+                    onComplete.run();
+                });
     }
 
     @Override
@@ -365,83 +435,5 @@ public class ListeningActivity extends AppCompatActivity {
         if (exoPlayer != null) exoPlayer.release();
         if (prefetchPlayer != null) prefetchPlayer.release();
         if (soundPool != null) soundPool.release();
-    }
-
-    /**
-     * Helper function to upload the 'Buying New Clothes' lesson to Firestore.
-     * This should only be run once.
-     */
-    private void uploadShoppingLessonToFirestore() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        List<ListeningQuestion> questions = new ArrayList<>();
-
-        // Question 1
-        ListeningQuestion q1 = new ListeningQuestion();
-        q1.setId("q1");
-        q1.setType(ListeningQuestion.QuestionType.SENTENCE_BUILDING);
-        q1.setQuestionText("Ask for a different size.");
-        q1.setCorrectAnswer("Do you have a larger size?");
-        q1.setOptions(Arrays.asList("does", "has", "large", "sizes"));
-        q1.setAudioUrl("https://github.com/PhucLuu2003/NewsAndLearnAppProject/raw/main/app/src/main/res/audio/lesson_a2_shopping_05/q1.mp3");
-        q1.setImageUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/q1.jpg");
-        questions.add(q1);
-
-        // Question 2
-        ListeningQuestion q2 = new ListeningQuestion();
-        q2.setId("q2");
-        q2.setType(ListeningQuestion.QuestionType.SENTENCE_BUILDING);
-        q2.setQuestionText("Ask about the price.");
-        q2.setCorrectAnswer("Is this on sale?");
-        q2.setOptions(Arrays.asList("are", "those", "shirts", "selling"));
-        q2.setAudioUrl("https://github.com/PhucLuu2003/NewsAndLearnAppProject/raw/main/app/src/main/res/audio/lesson_a2_shopping_05/q2.mp3");
-        q2.setImageUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/q2.jpg");
-        questions.add(q2);
-
-        // Question 3
-        ListeningQuestion q3 = new ListeningQuestion();
-        q3.setId("q3");
-        q3.setType(ListeningQuestion.QuestionType.SENTENCE_BUILDING);
-        q3.setQuestionText("What did the clerk say?");
-        q3.setCorrectAnswer("Is there someone in the fitting room?");
-        q3.setOptions(Arrays.asList("fittings", "rooms", "are", "their"));
-        q3.setAudioUrl("https://github.com/PhucLuu2003/NewsAndLearnAppProject/raw/main/app/src/main/res/audio/lesson_a2_shopping_05/q3.mp3");
-        q3.setImageUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/q3.jpg");
-        questions.add(q3);
-
-        // Question 4
-        ListeningQuestion q4 = new ListeningQuestion();
-        q4.setId("q4");
-        q4.setType(ListeningQuestion.QuestionType.SENTENCE_BUILDING);
-        q4.setQuestionText("How will Tom pay?");
-        q4.setCorrectAnswer("Tom will be paying by check.");
-        q4.setOptions(Arrays.asList("shall", "pays", "the", "cards."));
-        q4.setAudioUrl("https://github.com/PhucLuu2003/NewsAndLearnAppProject/raw/main/app/src/main/res/audio/lesson_a2_shopping_05/q4.mp3");
-        q4.setImageUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/q4.jpg");
-        questions.add(q4);
-
-        // Question 5
-        ListeningQuestion q5 = new ListeningQuestion();
-        q5.setId("q5");
-        q5.setType(ListeningQuestion.QuestionType.SENTENCE_BUILDING);
-        q5.setQuestionText("Ask for a bag.");
-        q5.setCorrectAnswer("Could you give me a bag, please?");
-        q5.setOptions(Arrays.asList("could", "has", "bags", "pleased"));
-        q5.setAudioUrl("https://github.com/PhucLuu2003/NewsAndLearnAppProject/raw/main/app/src/main/res/audio/lesson_a2_shopping_05/q5.mp3");
-        q5.setImageUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/q5.jpg");
-        questions.add(q5);
-
-        ListeningLesson lesson = new ListeningLesson();
-        lesson.setId("lesson_a2_shopping_05");
-        lesson.setTitle("Buying New Clothes");
-        lesson.setLevel("A2");
-        lesson.setThumbnailUrl("https://raw.githubusercontent.com/PhucLuu2003/NewsAndLearnAppProject/b92665cd679065c71317b56f2e70da766cee86a6/app/src/main/res/audio/lesson_a2_shopping_05/thumbnail.jpg");
-        lesson.setCategory("Shopping, Fashion");
-        lesson.setTotalStages(5);
-        lesson.setQuestions(questions);
-
-        db.collection("listening_lessons").document(lesson.getId()).set(lesson)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "Lesson '" + lesson.getTitle() + "' uploaded successfully!"))
-                .addOnFailureListener(e -> Log.e(TAG, "Error uploading lesson", e));
     }
 }
