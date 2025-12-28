@@ -35,6 +35,7 @@ public class AIReadingCoach {
     private static AIReadingCoach instance;
     private GenerativeModelFutures model;
     private Executor executor;
+    private boolean isAIAvailable = false;
 
     private String currentArticle = "";
     private String userLevel = "intermediate"; // beginner, intermediate, advanced
@@ -54,19 +55,35 @@ public class AIReadingCoach {
     }
 
     private void initializeModel() {
+        String apiKey = null;
         try {
-            if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-                throw new IllegalStateException(
-                        "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
-            }
-            GenerativeModel gm = new GenerativeModel(
-                    "gemini-2.5-flash",
-                    BuildConfig.GEMINI_API_KEY);
-            model = GenerativeModelFutures.from(gm);
-            Log.d(TAG, "AI Reading Coach initialized");
+            apiKey = BuildConfig.GEMINI_API_KEY;
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing model: " + e.getMessage());
+            // Field might not exist
         }
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            Log.w(TAG, "GEMINI_API_KEY not set. AI Reading Coach will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel(
+                        "gemini-2.5-flash",
+                        apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+                Log.d(TAG, "AI Reading Coach initialized");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing model: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
+    }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
     }
 
     public void setArticleContext(String article) {
@@ -82,6 +99,12 @@ public class AIReadingCoach {
      * Analyze a sentence in real-time
      */
     public void analyzeSentence(String sentence, AnalysisCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         // Check cache first
         if (analysisCache.containsKey(sentence)) {
             callback.onSuccess(analysisCache.get(sentence));
@@ -120,6 +143,12 @@ public class AIReadingCoach {
      * Get vocabulary insights from entire article
      */
     public void getVocabularyInsights(VocabularyCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         String prompt = "Analyze this article and extract:\n" +
                 "1. Top 10 most important vocabulary words\n" +
                 "2. Their difficulty level (easy/medium/hard)\n" +
@@ -157,6 +186,12 @@ public class AIReadingCoach {
      * Assess article difficulty for user
      */
     public void assessDifficulty(DifficultyCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         String prompt = "Analyze this article for a " + userLevel + " English learner.\n" +
                 "Provide:\n" +
                 "1. Overall difficulty (1-10)\n" +
@@ -197,6 +232,12 @@ public class AIReadingCoach {
      * Get personalized reading tips
      */
     public void getReadingTips(TipsCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         String prompt = "As an English reading coach, provide 5 personalized tips for a " +
                 userLevel + " learner reading this article:\n\n" +
                 currentArticle.substring(0, Math.min(500, currentArticle.length())) + "...\n\n" +

@@ -64,38 +64,40 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private boolean isGameRunning = false;
     private float currentBeat = 0;
 
+    private boolean pendingStartAfterPermission = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         android.util.Log.d("PronunciationGame", "📱 onCreate started");
-        
+
         setContentView(R.layout.activity_pronunciation_game);
         android.util.Log.d("PronunciationGame", "✅ Layout set");
 
         // Load song
         String songId = getIntent().getStringExtra("SONG_ID");
         android.util.Log.d("PronunciationGame", "🎵 Song ID from intent: " + songId);
-        
+
         song = PronunciationSongLibrary.getSongById(songId);
-        
+
         if (song == null) {
             android.util.Log.e("PronunciationGame", "❌ Song not found for ID: " + songId);
             Toast.makeText(this, "Song not found!", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        
+
         android.util.Log.d("PronunciationGame", "✅ Song loaded: " + song.getTitle());
 
         initializeViews();
         checkPermissions();
-        
+
         android.util.Log.d("PronunciationGame", "✅ onCreate completed");
     }
 
     private void initializeViews() {
         android.util.Log.d("PronunciationGame", "🎨 Initializing views...");
-        
+
         scoreText = findViewById(R.id.score_text);
         comboText = findViewById(R.id.combo_text);
         accuracyText = findViewById(R.id.accuracy_text);
@@ -108,51 +110,80 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
         startButton.setOnClickListener(v -> {
             android.util.Log.d("PronunciationGame", "🎮 Start button clicked!");
+            if (!hasAudioPermission()) {
+                pendingStartAfterPermission = true;
+                ActivityCompat.requestPermissions(this,
+                        new String[] { Manifest.permission.RECORD_AUDIO },
+                        REQUEST_RECORD_AUDIO);
+                Toast.makeText(this, "Please allow microphone permission to play", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             startGame();
         });
-        
+
         // Set song info
         TextView songTitle = findViewById(R.id.song_title);
         songTitle.setText(song.getTitle());
-        
+
         android.util.Log.d("PronunciationGame", "✅ Views initialized");
     }
 
+    private boolean hasAudioPermission() {
+        return ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
     private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (!hasAudioPermission()) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    new String[] { Manifest.permission.RECORD_AUDIO },
                     REQUEST_RECORD_AUDIO);
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_RECORD_AUDIO) {
-            if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+            boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+            if (!granted) {
                 Toast.makeText(this, "Microphone permission required!", Toast.LENGTH_SHORT).show();
                 finish();
+                return;
+            }
+
+            if (pendingStartAfterPermission) {
+                pendingStartAfterPermission = false;
+                startGame();
             }
         }
     }
 
     private void startGame() {
         android.util.Log.d("PronunciationGame", "🚀 startGame() called");
-        
+
+        if (!hasAudioPermission()) {
+            pendingStartAfterPermission = true;
+            ActivityCompat.requestPermissions(this,
+                    new String[] { Manifest.permission.RECORD_AUDIO },
+                    REQUEST_RECORD_AUDIO);
+            return;
+        }
+
         // Check if speech recognition is available
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
             android.util.Log.e("PronunciationGame", "❌ Speech recognition NOT available!");
-            Toast.makeText(this, "Speech recognition not available on this device!", 
-                Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Speech recognition not available on this device!",
+                    Toast.LENGTH_LONG).show();
             finish();
             return;
         }
-        
+
         android.util.Log.d("PronunciationGame", "✅ Speech recognition is available");
-        
+
         startButton.setVisibility(View.GONE);
         session = new GameSession(song.getId());
         gameStartTime = System.currentTimeMillis();
@@ -161,10 +192,10 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
         android.util.Log.d("PronunciationGame", "📊 Session created, setting up speech recognizer...");
         setupSpeechRecognizer();
-        
+
         android.util.Log.d("PronunciationGame", "🎮 Starting game loop...");
         startGameLoop();
-        
+
         Toast.makeText(this, "🎤 Start speaking when words appear!", Toast.LENGTH_SHORT).show();
         android.util.Log.d("PronunciationGame", "✅ Game started successfully!");
     }
@@ -172,14 +203,14 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private void setupSpeechRecognizer() {
         try {
             speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
-            
+
             if (speechRecognizer == null) {
                 android.util.Log.e("PronunciationGame", "❌ Failed to create SpeechRecognizer!");
                 Toast.makeText(this, "Speech recognition failed to initialize", Toast.LENGTH_LONG).show();
                 finish();
                 return;
             }
-            
+
             recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
             recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                     RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -188,7 +219,8 @@ public class PronunciationGameActivity extends AppCompatActivity {
             recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
             // Increase timeout to 5 seconds
             recognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000);
-            recognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 5000);
+            recognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS,
+                    5000);
             recognizerIntent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 10000);
 
             speechRecognizer.setRecognitionListener(new RecognitionListener() {
@@ -200,8 +232,8 @@ public class PronunciationGameActivity extends AppCompatActivity {
                         feedbackText.setText("🎤 LISTENING...\nSpeak now!");
                         feedbackText.setTextColor(Color.GREEN);
                         feedbackText.setVisibility(View.VISIBLE);
-                        Toast.makeText(PronunciationGameActivity.this, 
-                            "🎤 Listening...", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(PronunciationGameActivity.this,
+                                "🎤 Listening...", Toast.LENGTH_SHORT).show();
                     });
                 }
 
@@ -223,7 +255,8 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onBufferReceived(byte[] buffer) {}
+                public void onBufferReceived(byte[] buffer) {
+                }
 
                 @Override
                 public void onEndOfSpeech() {
@@ -237,28 +270,35 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 @Override
                 public void onError(int error) {
                     String errorMessage = getErrorText(error);
-                    android.util.Log.e("PronunciationGame", "❌ Speech Error: " + errorMessage + " (code: " + error + ")");
-                    
+                    android.util.Log.e("PronunciationGame",
+                            "❌ Speech Error: " + errorMessage + " (code: " + error + ")");
+
                     runOnUiThread(() -> {
                         // Show error briefly
                         if (error != SpeechRecognizer.ERROR_NO_MATCH) {
-                            Toast.makeText(PronunciationGameActivity.this, 
-                                "Speech Error: " + errorMessage, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(PronunciationGameActivity.this,
+                                    "Speech Error: " + errorMessage, Toast.LENGTH_SHORT).show();
                         }
                     });
-                    
+
                     // Restart listening
                     if (isGameRunning && speechRecognizer != null) {
+                        long delayMs = (error == SpeechRecognizer.ERROR_RECOGNIZER_BUSY) ? 600 : 200;
                         new Handler().postDelayed(() -> {
                             try {
                                 if (speechRecognizer != null && isGameRunning) {
                                     android.util.Log.d("PronunciationGame", "🔄 Restarting speech recognition...");
+                                    try {
+                                        speechRecognizer.cancel();
+                                    } catch (Exception ignored) {
+                                    }
                                     speechRecognizer.startListening(recognizerIntent);
                                 }
                             } catch (Exception e) {
-                                android.util.Log.e("PronunciationGame", "Error restarting recognition: " + e.getMessage());
+                                android.util.Log.e("PronunciationGame",
+                                        "Error restarting recognition: " + e.getMessage());
                             }
-                        }, 100);
+                        }, delayMs);
                     }
                 }
 
@@ -266,9 +306,9 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 public void onResults(Bundle results) {
                     ArrayList<String> matches = results.getStringArrayList(
                             SpeechRecognizer.RESULTS_RECOGNITION);
-                    
+
                     android.util.Log.d("PronunciationGame", "📝 Results received: " + matches);
-                    
+
                     if (matches != null && !matches.isEmpty()) {
                         // Try all matches, not just the first one
                         for (String match : matches) {
@@ -279,16 +319,21 @@ public class PronunciationGameActivity extends AppCompatActivity {
                             }
                         }
                     }
-                    
+
                     // Restart listening
                     if (isGameRunning && speechRecognizer != null) {
                         new Handler().postDelayed(() -> {
                             try {
                                 if (speechRecognizer != null && isGameRunning) {
+                                    try {
+                                        speechRecognizer.cancel();
+                                    } catch (Exception ignored) {
+                                    }
                                     speechRecognizer.startListening(recognizerIntent);
                                 }
                             } catch (Exception e) {
-                                android.util.Log.e("PronunciationGame", "Error restarting recognition: " + e.getMessage());
+                                android.util.Log.e("PronunciationGame",
+                                        "Error restarting recognition: " + e.getMessage());
                             }
                         }, 100);
                     }
@@ -299,7 +344,7 @@ public class PronunciationGameActivity extends AppCompatActivity {
                     // Handle partial results for faster response
                     ArrayList<String> matches = partialResults.getStringArrayList(
                             SpeechRecognizer.RESULTS_RECOGNITION);
-                    
+
                     if (matches != null && !matches.isEmpty()) {
                         android.util.Log.d("PronunciationGame", "👂 Hearing: " + matches.get(0));
                         // Show what user is saying in real-time
@@ -311,20 +356,21 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onEvent(int eventType, Bundle params) {}
+                public void onEvent(int eventType, Bundle params) {
+                }
             });
 
             android.util.Log.d("PronunciationGame", "🎙️ Starting speech recognition...");
             speechRecognizer.startListening(recognizerIntent);
-            
+
         } catch (Exception e) {
             android.util.Log.e("PronunciationGame", "❌ Exception in setupSpeechRecognizer: " + e.getMessage());
-            Toast.makeText(this, "Error setting up speech recognition: " + e.getMessage(), 
-                Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error setting up speech recognition: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
             finish();
         }
     }
-    
+
     private String getErrorText(int errorCode) {
         switch (errorCode) {
             case SpeechRecognizer.ERROR_AUDIO:
@@ -349,45 +395,43 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 return "Unknown error";
         }
     }
-    
+
     private boolean tryMatchWord(String spokenWord) {
-        if (currentNoteIndex >= song.getTotalWords()) return false;
+        if (currentNoteIndex >= song.getTotalWords())
+            return false;
 
         PronunciationSong.SongNote currentNote = song.getNotes().get(currentNoteIndex);
-        
+
         // More forgiving matching - check if spoken word contains target or vice versa
         String spoken = spokenWord.toLowerCase().trim();
         String target = currentNote.getWord().toLowerCase().trim();
-        
+
         // Check exact match or contains
         if (!spoken.equals(target) && !spoken.contains(target) && !target.contains(spoken)) {
             return false; // Not a match
         }
-        
+
         // Calculate timing - more forgiving window
         long expectedTime = gameStartTime + (long) (currentNote.getBeatPosition() * (60000f / song.getBpm()));
         long actualTime = System.currentTimeMillis();
         long timingDiff = Math.abs(actualTime - expectedTime);
 
         // Calculate score
-        PronunciationScoreCalculator.ScoreResult result = 
-            PronunciationScoreCalculator.calculateScore(
+        PronunciationScoreCalculator.ScoreResult result = PronunciationScoreCalculator.calculateScore(
                 currentNote.getWord(),
                 spokenWord,
                 timingDiff,
                 session.getCurrentCombo(),
-                currentNote.getDifficulty()
-            );
+                currentNote.getDifficulty());
 
         // Update session
         GameSession.HitResult hitResult = new GameSession.HitResult(
-            currentNote.getWord(),
-            spokenWord,
-            result.getPronunciationAccuracy(),
-            result.getTimingAccuracy(),
-            result.getScore(),
-            result.getRating()
-        );
+                currentNote.getWord(),
+                spokenWord,
+                result.getPronunciationAccuracy(),
+                result.getTimingAccuracy(),
+                result.getScore(),
+                result.getRating());
         session.addHitResult(hitResult);
 
         // Show feedback
@@ -398,7 +442,7 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
         // Move to next note
         currentNoteIndex++;
-        
+
         return true; // Match found
     }
 
@@ -407,7 +451,8 @@ public class PronunciationGameActivity extends AppCompatActivity {
         gameLoop = new Runnable() {
             @Override
             public void run() {
-                if (!isGameRunning) return;
+                if (!isGameRunning)
+                    return;
 
                 updateGame();
                 gameHandler.postDelayed(this, 16); // 60 FPS
@@ -438,10 +483,10 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
     private void spawnNotesIfNeeded() {
         List<PronunciationSong.SongNote> notes = song.getNotes();
-        
+
         for (int i = currentNoteIndex; i < notes.size(); i++) {
             PronunciationSong.SongNote note = notes.get(i);
-            
+
             // Spawn if within 5 beats
             if (!note.isSpawned() && note.getBeatPosition() <= currentBeat + 5) {
                 spawnNote(note);
@@ -455,8 +500,7 @@ public class PronunciationGameActivity extends AppCompatActivity {
         // Create note view
         MaterialCardView noteCard = new MaterialCardView(this);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                300, 150
-        );
+                300, 150);
         noteCard.setLayoutParams(params);
         noteCard.setCardElevation(8f);
         noteCard.setRadius(16f);
@@ -482,14 +526,14 @@ public class PronunciationGameActivity extends AppCompatActivity {
         TranslateAnimation animation = new TranslateAnimation(
                 gameContainer.getWidth(), // Start X
                 hitZone.getX(), // End X
-                0, 0
-        );
+                0, 0);
         animation.setDuration(Math.max(1000, duration));
         animation.setFillAfter(true);
-        
+
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
-            public void onAnimationStart(Animation animation) {}
+            public void onAnimationStart(Animation animation) {
+            }
 
             @Override
             public void onAnimationEnd(Animation animation) {
@@ -501,20 +545,19 @@ public class PronunciationGameActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onAnimationRepeat(Animation animation) {}
+            public void onAnimationRepeat(Animation animation) {
+            }
         });
 
         noteCard.startAnimation(animation);
     }
 
-
     private void onMiss(PronunciationSong.SongNote note) {
         GameSession.HitResult hitResult = new GameSession.HitResult(
-            note.getWord(), "", 0, 0, 0, "MISS"
-        );
+                note.getWord(), "", 0, 0, 0, "MISS");
         session.addHitResult(hitResult);
         session.setCurrentCombo(0);
-        
+
         showFeedback("MISS", 0);
         updateScoreUI();
         currentNoteIndex++;
@@ -544,12 +587,12 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private void updateScoreUI() {
         scoreText.setText("Score: " + session.getScore());
         comboText.setText("Combo: x" + session.getCurrentCombo());
-        
-        int totalHits = session.getPerfectCount() + session.getGreatCount() + 
-                       session.getGoodCount() + session.getMissCount();
+
+        int totalHits = session.getPerfectCount() + session.getGreatCount() +
+                session.getGoodCount() + session.getMissCount();
         if (totalHits > 0) {
-            float accuracy = ((session.getPerfectCount() + session.getGreatCount() + 
-                             session.getGoodCount()) * 100.0f) / totalHits;
+            float accuracy = ((session.getPerfectCount() + session.getGreatCount() +
+                    session.getGoodCount()) * 100.0f) / totalHits;
             accuracyText.setText("Accuracy: " + String.format("%.0f%%", accuracy));
         }
     }
@@ -557,11 +600,11 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private void endGame() {
         isGameRunning = false;
         session.endSession();
-        
+
         if (speechRecognizer != null) {
             speechRecognizer.destroy();
         }
-        
+
         if (gameHandler != null) {
             gameHandler.removeCallbacks(gameLoop);
         }
@@ -583,12 +626,12 @@ public class PronunciationGameActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        
+
         android.util.Log.d("PronunciationGame", "🛑 onDestroy called");
-        
+
         // Stop game first
         isGameRunning = false;
-        
+
         // Clean up speech recognizer
         if (speechRecognizer != null) {
             try {
@@ -601,7 +644,7 @@ public class PronunciationGameActivity extends AppCompatActivity {
             }
             speechRecognizer = null;
         }
-        
+
         // Clean up game loop
         if (gameHandler != null && gameLoop != null) {
             gameHandler.removeCallbacks(gameLoop);

@@ -153,26 +153,27 @@ public class User {
         this.saved = saved;
     }
 
+
     // Calculate XP needed for next level
     public int getXpForNextLevel() {
         return getXpRequiredForLevel(getCurrentLevel() + 1);
     }
 
-    // Get current level based on XP
+    // Get current level based on XP (matches XPManager)
     public int getCurrentLevel() {
-        return xp / 100; // Every 100 XP = 1 level
+        return (xp / 500) + 1; // 500 XP = 1 level
     }
 
     // Get XP required for a specific level
     private int getXpRequiredForLevel(int level) {
-        return level * 100;
+        return level * 500;
     }
 
     // Get progress percentage to next level
     public int getProgressPercentage() {
         int currentLevel = getCurrentLevel();
-        int xpForCurrentLevel = getXpRequiredForLevel(currentLevel);
-        int xpForNextLevel = getXpForNextLevel();
+        int xpForCurrentLevel = (currentLevel - 1) * 500;
+        int xpForNextLevel = currentLevel * 500;
         int xpInCurrentLevel = xp - xpForCurrentLevel;
         int xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
 

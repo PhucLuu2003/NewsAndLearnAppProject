@@ -32,17 +32,35 @@ import java.util.concurrent.Executors;
  */
 public class SceneVisualizationManager {
 
+    private static final String TAG = "SceneVisualizationManager";
     private static SceneVisualizationManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
+    private boolean isAIAvailable = false;
 
     private SceneVisualizationManager() {
-        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Scene visualization will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -52,12 +70,21 @@ public class SceneVisualizationManager {
         }
         return instance;
     }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
+    }
 
     /**
      * Phân tích đoạn văn và tạo scene visualization
      */
     public void visualizeScene(Context context, String textPassage, ImageView targetImageView,
             VisualizationCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available - GEMINI_API_KEY not configured");
+            return;
+        }
 
         // Bước 1: Phân tích văn bản để tạo image prompt
         String analysisPrompt = "Analyze this text passage and create a detailed image generation prompt:\n\n" +
@@ -206,6 +233,12 @@ public class SceneVisualizationManager {
      * Phân tích toàn bộ bài viết và tìm các đoạn có thể visualize
      */
     public void findVisualizableScenes(String articleContent, SceneAnalysisCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available - GEMINI_API_KEY not configured");
+            return;
+        }
+        
         String prompt = "Analyze this article and identify 3-5 passages that would benefit most from visual illustration:\n\n"
                 +
                 "Article: " + articleContent + "\n\n" +

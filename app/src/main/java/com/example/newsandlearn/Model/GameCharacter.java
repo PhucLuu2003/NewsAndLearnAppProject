@@ -17,6 +17,7 @@ public class GameCharacter implements Serializable {
     private int attack;
     private int defense;
     private String characterClass; // "warrior", "mage", "archer"
+    private int highestCompletedLevel; // Track highest level completed
 
     public GameCharacter() {
         // Default constructor for Firebase
@@ -99,4 +100,16 @@ public class GameCharacter implements Serializable {
 
     public String getCharacterClass() { return characterClass; }
     public void setCharacterClass(String characterClass) { this.characterClass = characterClass; }
+
+    public int getHighestCompletedLevel() { return highestCompletedLevel; }
+    public void setHighestCompletedLevel(int highestCompletedLevel) { 
+        this.highestCompletedLevel = highestCompletedLevel; 
+    }
+
+    // Update highest completed level when completing a level
+    public void completeLevel(int levelNumber) {
+        if (levelNumber > highestCompletedLevel) {
+            highestCompletedLevel = levelNumber;
+        }
+    }
 }

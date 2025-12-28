@@ -21,23 +21,38 @@ import java.util.concurrent.Executors;
 public class GeminiReadingAssistant {
     private static final String TAG = "GeminiAssistant";
 
-    private static final String API_KEY = BuildConfig.GEMINI_API_KEY;
-
     private static GeminiReadingAssistant instance;
     private GenerativeModelFutures model;
     private Executor executor;
+    private boolean isAIAvailable = false;
 
     private String currentArticleContent = "";
     private String currentArticleTitle = "";
 
     private GeminiReadingAssistant() {
-        if (API_KEY == null || API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        // Initialize Gemini model
-        GenerativeModel gm = new GenerativeModel("gemini-pro", API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Reading assistant will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                // Initialize Gemini model
+                GenerativeModel gm = new GenerativeModel("gemini-pro", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
     }
 
@@ -46,6 +61,10 @@ public class GeminiReadingAssistant {
             instance = new GeminiReadingAssistant();
         }
         return instance;
+    }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
     }
 
     // Callback interfaces
@@ -283,6 +302,12 @@ public class GeminiReadingAssistant {
      * Generate response from Gemini
      */
     private void generateResponse(String prompt, AICallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         Content content = new Content.Builder()
                 .addText(prompt)
                 .build();

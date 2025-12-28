@@ -10,6 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.newsandlearn.Model.ReadingArticle;
 import com.example.newsandlearn.R;
 
@@ -46,7 +47,7 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.ReadingV
     public void onBindViewHolder(@NonNull ReadingViewHolder holder, int position) {
         ReadingArticle article = articleList.get(position);
         holder.bind(article);
-        
+
         // Add animation
         com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(context, holder.itemView, position);
     }
@@ -58,51 +59,84 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.ReadingV
 
     class ReadingViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView articleImage, bookmarkButton; // Added bookmarkButton
-        TextView articleTitle, articleSummary, levelText, wordCount, readTime;
+        ImageView articleImage;
+        TextView categoryBadge, levelBadge, readingTime;
+        TextView articleTitle, articleExcerpt, articleSummary, wordCount, completionStatus;
 
         public ReadingViewHolder(@NonNull View itemView) {
             super(itemView);
 
             articleImage = itemView.findViewById(R.id.article_image);
+            categoryBadge = itemView.findViewById(R.id.category_badge);
+            levelBadge = itemView.findViewById(R.id.level_badge);
+            readingTime = itemView.findViewById(R.id.reading_time);
             articleTitle = itemView.findViewById(R.id.article_title);
+            articleExcerpt = itemView.findViewById(R.id.article_excerpt);
             articleSummary = itemView.findViewById(R.id.article_summary);
-            levelText = itemView.findViewById(R.id.level_text);
             wordCount = itemView.findViewById(R.id.word_count);
-            readTime = itemView.findViewById(R.id.read_time);
-            bookmarkButton = itemView.findViewById(R.id.bookmark_button); // Bind new view
+            completionStatus = itemView.findViewById(R.id.completion_status);
         }
 
         public void bind(ReadingArticle article) {
             if (articleTitle != null) {
                 articleTitle.setText(article.getTitle());
             }
-            
+
+            if (categoryBadge != null) {
+                String category = article.getCategory() != null ? article.getCategory() : "all";
+                categoryBadge.setText(category.toUpperCase());
+            }
+
+            if (levelBadge != null) {
+                String level = article.getLevel() != null ? article.getLevel() : "B1";
+                levelBadge.setText(level);
+            }
+
             if (articleSummary != null) {
                 articleSummary.setText(article.getSummary());
             }
-            
-            // Format level text with category if available
-            if (levelText != null) {
-                String levelStr = article.getLevel() != null ? article.getLevel() : "B1";
-                if (article.getCategory() != null && !article.getCategory().isEmpty()) {
-                    levelStr += " • " + article.getCategory();
-                }
-                levelText.setText(levelStr);
-            }
-            
-            if (wordCount != null) {
-                wordCount.setText(article.getWordCount() + " words");
-            }
-            
-            if (readTime != null) {
-                readTime.setText(article.getEstimatedMinutes() + " min read");
+
+            if (articleExcerpt != null) {
+                String body = article.getPassage() != null ? article.getPassage() : article.getContent();
+                articleExcerpt.setText(buildExcerpt(body));
             }
 
-            // TODO: Load image from Firebase Storage URL
-            // if (articleImage != null) {
-            //     Glide.with(context).load(article.getImageUrl()).into(articleImage);
-            // }
+            if (wordCount != null) {
+                int wc = article.getWordCount();
+                wordCount.setText(wc > 0 ? (wc + " words") : "");
+            }
+
+            if (readingTime != null) {
+                int minutes = article.getEstimatedMinutes();
+                if (minutes <= 0 && article.getWordCount() > 0) {
+                    minutes = Math.max(1, article.getWordCount() / 200);
+                }
+                readingTime.setText((minutes > 0 ? minutes : 5) + " min read");
+            }
+
+            if (completionStatus != null) {
+                if (article.isCompleted()) {
+                    completionStatus.setVisibility(View.VISIBLE);
+                    String scorePart = article.getUserScore() > 0 ? (" • " + article.getUserScore() + "%") : "";
+                    completionStatus.setText("✓ Completed" + scorePart);
+                } else {
+                    completionStatus.setVisibility(View.GONE);
+                }
+            }
+
+            if (articleImage != null) {
+                String imageUrl = article.getImageUrl();
+                if (imageUrl == null || imageUrl.trim().isEmpty()) {
+                    articleImage.setImageResource(R.drawable.placeholder_article);
+                } else {
+                    Glide.with(context)
+                            .load(imageUrl)
+                            .placeholder(R.drawable.placeholder_article)
+                            .error(R.drawable.placeholder_article)
+                            .centerCrop()
+                            .into(articleImage);
+                }
+            }
 
             itemView.setOnClickListener(v -> {
                 com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, itemView);
@@ -110,14 +144,19 @@ public class ReadingAdapter extends RecyclerView.Adapter<ReadingAdapter.ReadingV
                     listener.onArticleClick(article);
                 }
             });
-            
-            if (bookmarkButton != null) {
-                bookmarkButton.setOnClickListener(v -> {
-                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
-                    android.widget.Toast.makeText(context, "Bookmark coming soon!", android.widget.Toast.LENGTH_SHORT).show();
-                });
-            }
         }
+    }
+
+    private static String buildExcerpt(String body) {
+        if (body == null)
+            return "";
+        String normalized = body.replaceAll("\\s+", " ").trim();
+        if (normalized.isEmpty())
+            return "";
+        int max = 140;
+        if (normalized.length() <= max)
+            return normalized;
+        return normalized.substring(0, max).trim() + "…";
     }
 
     public void updateData(List<ReadingArticle> newArticleList) {

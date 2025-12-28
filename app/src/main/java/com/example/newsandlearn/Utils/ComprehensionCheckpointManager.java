@@ -37,20 +37,39 @@ import java.util.concurrent.Executors;
  */
 public class ComprehensionCheckpointManager {
 
+    private static final String TAG = "ComprehensionCheckpointManager";
     private static ComprehensionCheckpointManager instance;
     private GenerativeModelFutures model;
     private Executor executor;
     private List<Checkpoint> checkpoints;
     private int currentCheckpointIndex = 0;
+    private boolean isAIAvailable = false;
 
     private ComprehensionCheckpointManager() {
-        // Initialize Gemini AI
-        if (BuildConfig.GEMINI_API_KEY == null || BuildConfig.GEMINI_API_KEY.isEmpty()) {
-            throw new IllegalStateException(
-                    "Missing GEMINI_API_KEY. Set it in local.properties (GEMINI_API_KEY=...) or env var GEMINI_API_KEY.");
+        // Initialize Gemini AI - fail gracefully if key is missing
+        String apiKey = null;
+        try {
+            apiKey = BuildConfig.GEMINI_API_KEY;
+        } catch (Exception e) {
+            // Field might not exist
         }
-        GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", BuildConfig.GEMINI_API_KEY);
-        model = GenerativeModelFutures.from(gm);
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            android.util.Log.w(TAG, "GEMINI_API_KEY not set. Comprehension checkpoints will be disabled. " +
+                    "To enable, add GEMINI_API_KEY=your_key to local.properties");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel("gemini-2.5-flash", apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+            } catch (Exception e) {
+                android.util.Log.e(TAG, "Failed to initialize Gemini AI: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
         executor = Executors.newSingleThreadExecutor();
         checkpoints = new ArrayList<>();
     }
@@ -61,11 +80,24 @@ public class ComprehensionCheckpointManager {
         }
         return instance;
     }
+    
+    /**
+     * Check if AI features are available
+     */
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
+    }
 
     /**
      * Phân tích bài viết và tạo checkpoints tự động
      */
     public void generateCheckpoints(String articleContent, CheckpointCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onError("AI features not available - GEMINI_API_KEY not configured");
+            return;
+        }
+        
         checkpoints.clear();
         currentCheckpointIndex = 0;
 
@@ -250,6 +282,9 @@ public class ComprehensionCheckpointManager {
      * Kiểm tra xem có nên hiển thị checkpoint không dựa trên vị trí đọc
      */
     public boolean shouldShowCheckpoint(String fullText, int currentScrollPosition, int totalHeight) {
+        // Return false if AI is not available
+        if (!isAIAvailable())
+            return false;
         if (checkpoints.isEmpty())
             return false;
         if (currentCheckpointIndex >= checkpoints.size())

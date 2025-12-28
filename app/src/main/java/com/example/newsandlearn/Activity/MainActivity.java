@@ -6,7 +6,7 @@ import android.util.Log;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.example.newsandlearn.Fragment.ArticleFragment;
+import com.example.newsandlearn.Fragment.ArticlesHostFragment;
 import com.example.newsandlearn.Fragment.GamesFragment;
 import com.example.newsandlearn.Fragment.HomeFragment;
 import com.example.newsandlearn.Fragment.LearnFragment;
@@ -45,10 +45,8 @@ public class MainActivity extends AppCompatActivity {
         if (!dataUploaded) {
             Log.d("MainActivity", "Uploading sample data to Firebase...");
 
-
             // Upload lessons
             // Removed: addDirectionsLesson() and addRestaurantLesson()
-
 
             SampleDataHelper sampleHelper = new SampleDataHelper();
             sampleHelper.generateAllSampleData(new SampleDataHelper.OnCompleteListener() {
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_games) {
                 selected = new GamesFragment();
             } else if (itemId == R.id.nav_article) {
-                selected = new ArticleFragment();
+                selected = new ArticlesHostFragment();
             } else if (itemId == R.id.nav_profile) {
                 selected = new ProfileFragment();
             }
@@ -101,11 +99,13 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Navigate to a specific tab programmatically
+     * 
      * @param tabIndex 0=Home, 1=Articles, 2=Learn, 3=Games, 4=Profile
      */
     public void navigateToTab(int tabIndex) {
-        if (bottomNav == null) return;
-        
+        if (bottomNav == null)
+            return;
+
         switch (tabIndex) {
             case 0:
                 bottomNav.setSelectedItemId(R.id.nav_home);

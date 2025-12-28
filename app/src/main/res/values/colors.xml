@@ -221,4 +221,7 @@
     
     <!-- Game Colors -->
     <color name="orange">#F59E0B</color>  <!-- Amber 500 for game UI -->
+    
+    <!-- Admin Panel - Missing Resources -->
+    <color name="background">@color/background_primary</color>  <!-- Alias for background -->
 </resources>
