@@ -5,10 +5,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,9 +16,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.example.newsandlearn.Activity.ListeningActivity;
 import com.example.newsandlearn.Adapter.ListeningAdapter;
 import com.example.newsandlearn.Model.ListeningLesson;
 import com.example.newsandlearn.R;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -27,254 +28,264 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
-/**
- * ListeningFragment - Displays listening lessons from Firebase
- * All data loaded dynamically, NO hard-coded content
- */
 public class ListeningFragment extends Fragment {
 
-    private static final String TAG = "ListeningFragment";
-
-    // UI Components
-    private SwipeRefreshLayout swipeRefresh;
-    private RecyclerView listeningRecyclerView;
-    private ProgressBar loadingIndicator;
-    private LinearLayout emptyState;
-    private TextView completedCount, hoursListened, avgScore;
-    private ChipGroup categoryChipGroup;
-
-    // Data
+    private RecyclerView recyclerView;
+    private ListeningAdapter adapter;
     private List<ListeningLesson> allLessons;
     private List<ListeningLesson> filteredLessons;
-    private ListeningAdapter adapter;
-    private String currentCategory = "all";
 
-    // Services
+    private SwipeRefreshLayout swipeRefresh;
+    private ProgressBar loadingIndicator;
+    private LinearLayout emptyState;
+    private ChipGroup categoryChipGroup;
+
+    // Stats TextViews
+    private TextView completedCountText;
+    private TextView hoursListenedText;
+    private TextView avgScoreText;
+    private ProgressBar scoreProgressRing;
+
     private FirebaseFirestore db;
-    private FirebaseAuth auth;
+    private String currentUserId;
 
-    public ListeningFragment() {
-        // Required empty constructor
-    }
+    private String selectedFilter = "All";
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_listening, container, false);
 
-        initializeServices();
+        db = FirebaseFirestore.getInstance();
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null ?
+                FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
+
         initializeViews(view);
         setupRecyclerView();
-        setupListeners();
-        loadListeningLessons();
+        setupChipFilters();
+        loadLessons();
 
         return view;
     }
 
-    private void initializeServices() {
-        db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
+    private void initializeViews(View view) {
+        recyclerView = view.findViewById(R.id.listening_recycler_view);
+        swipeRefresh = view.findViewById(R.id.swipe_refresh);
+        loadingIndicator = view.findViewById(R.id.loading_indicator);
+        emptyState = view.findViewById(R.id.empty_state);
+        categoryChipGroup = view.findViewById(R.id.category_chip_group);
+
+        completedCountText = view.findViewById(R.id.completed_count);
+        hoursListenedText = view.findViewById(R.id.hours_listened);
+        avgScoreText = view.findViewById(R.id.avg_score);
+        scoreProgressRing = view.findViewById(R.id.score_progress_ring);
+
+        swipeRefresh.setOnRefreshListener(this::loadLessons);
+
         allLessons = new ArrayList<>();
         filteredLessons = new ArrayList<>();
     }
 
-    private void initializeViews(View view) {
-        // Stats
-        completedCount = view.findViewById(R.id.completed_count);
-        hoursListened = view.findViewById(R.id.hours_listened);
-        avgScore = view.findViewById(R.id.avg_score);
-
-        // Filter
-        categoryChipGroup = view.findViewById(R.id.category_chip_group);
-
-        // List
-        swipeRefresh = view.findViewById(R.id.swipe_refresh);
-        listeningRecyclerView = view.findViewById(R.id.listening_recycler_view);
-        loadingIndicator = view.findViewById(R.id.loading_indicator);
-        emptyState = view.findViewById(R.id.empty_state);
-        
-        emptyState = view.findViewById(R.id.empty_state);
-        View completedCard = view.findViewById(R.id.completed_card);
-        View hoursCard = view.findViewById(R.id.hours_card);
-        View scoreCard = view.findViewById(R.id.score_card);
-        
-        // Staggered Entrance Animation
-        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(view.getContext(), completedCard, 0);
-        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(view.getContext(), hoursCard, 1);
-        com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(view.getContext(), scoreCard, 2);
-    }
-
     private void setupRecyclerView() {
-        listeningRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ListeningAdapter(getContext(), filteredLessons, lesson -> {
-            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.ListeningActivity.class);
+            Intent intent = new Intent(getContext(), ListeningActivity.class);
             intent.putExtra("lesson_id", lesson.getId());
             startActivity(intent);
         });
-        listeningRecyclerView.setAdapter(adapter);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setAdapter(adapter);
     }
 
-    private void setupListeners() {
-        swipeRefresh.setOnRefreshListener(this::loadListeningLessons);
+    private void setupChipFilters() {
+        categoryChipGroup.removeAllViews();
 
-        categoryChipGroup.setOnCheckedChangeListener((group, checkedId) -> {
-            if (checkedId == R.id.chip_all) {
-                currentCategory = "all";
-            } else if (checkedId == R.id.chip_conversation) {
-                currentCategory = "conversation";
-            } else if (checkedId == R.id.chip_news) {
-                currentCategory = "news";
-            } else if (checkedId == R.id.chip_story) {
-                currentCategory = "story";
+        // Add "All" chip
+        addFilterChip("All", true);
+
+        // Add level chips
+        String[] levels = {"A1", "A2", "B1", "B2"};
+        for (String level : levels) {
+            addFilterChip(level, false);
+        }
+
+        // Add category chips
+        String[] categories = {"Social", "Greetings", "Food", "Daily Life",
+                "Travel", "Transport", "Routine", "Habits",
+                "Shopping", "Fashion"};
+        for (String category : categories) {
+            addFilterChip(category, false);
+        }
+    }
+
+    private void addFilterChip(String text, boolean isChecked) {
+        Chip chip = new Chip(getContext());
+        chip.setText(text);
+        chip.setCheckable(true);
+        chip.setChecked(isChecked);
+        chip.setChipBackgroundColorResource(R.color.chip_background_selector);
+        chip.setChipStrokeColorResource(R.color.primary);
+        chip.setChipStrokeWidth(1);
+
+        chip.setOnCheckedChangeListener((buttonView, checked) -> {
+            if (checked) {
+                selectedFilter = text;
+                filterLessons();
             }
-            filterLessons();
         });
+
+        categoryChipGroup.addView(chip);
     }
 
-    /**
-     * Load listening lessons from Firebase - DYNAMIC
-     */
-    private void loadListeningLessons() {
+    private void loadLessons() {
         showLoading(true);
 
-        // Load from public listening_lessons collection
         db.collection("listening_lessons")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     allLessons.clear();
 
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        ListeningLesson lesson = document.toObject(ListeningLesson.class);
-                        if (lesson != null) {
-                            lesson.setId(document.getId()); // <-- THE FIX: Set the actual document ID
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        ListeningLesson lesson = doc.toObject(ListeningLesson.class);
+
+                        // Load user-specific progress if available
+                        if (currentUserId != null) {
+                            loadUserProgress(lesson);
+                        } else {
                             allLessons.add(lesson);
                         }
                     }
 
-                    // Load user progress
-                    if (auth.getCurrentUser() != null) {
-                        loadUserProgress();
+                    // Wait a bit for user progress to load
+                    if (currentUserId != null) {
+                        recyclerView.postDelayed(() -> {
+                            filterLessons();
+                            updateStats();
+                            showLoading(false);
+                        }, 500);
                     } else {
-                        updateStats();
                         filterLessons();
+                        updateStats();
                         showLoading(false);
-                        swipeRefresh.setRefreshing(false);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Error loading lessons: " + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
                     showLoading(false);
-                    swipeRefresh.setRefreshing(false);
+                    showEmptyState(true);
                 });
     }
 
-    /**
-     * Load user's progress from Firebase
-     */
-    private void loadUserProgress() {
-        String userId = auth.getCurrentUser().getUid();
+    private void loadUserProgress(ListeningLesson lesson) {
+        if (currentUserId == null) {
+            allLessons.add(lesson);
+            return;
+        }
 
-        db.collection("users").document(userId)
+        db.collection("users")
+                .document(currentUserId)
                 .collection("listening_progress")
+                .document(lesson.getId())
                 .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        String lessonId = document.getString("lessonId");
-                        Boolean completed = document.getBoolean("completed");
-                        Long score = document.getLong("userScore");
-                        Long listened = document.getLong("timesListened");
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        Boolean completed = doc.getBoolean("completed");
+                        Long userScore = doc.getLong("userScore");
+                        Long timesListened = doc.getLong("timesListened");
 
-                        for (ListeningLesson lesson : allLessons) {
-                            if (lesson.getId().equals(lessonId)) {
-                                if (completed != null) lesson.setCompleted(completed);
-                                if (score != null) lesson.setUserScore(score.intValue());
-                                if (listened != null) lesson.setTimesListened(listened.intValue());
-                                break;
-                            }
-                        }
+                        if (completed != null) lesson.setCompleted(completed);
+                        if (userScore != null) lesson.setUserScore(userScore.intValue());
+                        if (timesListened != null) lesson.setTimesListened(timesListened.intValue());
                     }
-
-                    updateStats();
-                    filterLessons();
-                    showLoading(false);
-                    swipeRefresh.setRefreshing(false);
-                });
+                    allLessons.add(lesson);
+                })
+                .addOnFailureListener(e -> allLessons.add(lesson));
     }
 
     private void filterLessons() {
         filteredLessons.clear();
 
-        for (ListeningLesson lesson : allLessons) {
-            if (currentCategory.equals("all") || 
-                (lesson.getCategory() != null && lesson.getCategory().equals(currentCategory))) {
-                filteredLessons.add(lesson);
+        if ("All".equals(selectedFilter)) {
+            filteredLessons.addAll(allLessons);
+        } else {
+            for (ListeningLesson lesson : allLessons) {
+                // Check if filter matches level
+                if (selectedFilter.equals(lesson.getLevel())) {
+                    filteredLessons.add(lesson);
+                    continue;
+                }
+
+                // Check if filter matches category
+                if (lesson.getCategory() != null &&
+                        lesson.getCategory().toLowerCase().contains(selectedFilter.toLowerCase())) {
+                    filteredLessons.add(lesson);
+                }
             }
         }
 
-        adapter.notifyDataSetChanged();
-
-        if (filteredLessons.isEmpty()) {
-            showEmptyState();
-        } else {
-            hideEmptyState();
+        if (adapter != null) {
+            adapter.updateData(filteredLessons);
         }
+        showEmptyState(filteredLessons.isEmpty());
     }
 
     private void updateStats() {
-        int completed = 0;
+        int completedCount = 0;
         int totalScore = 0;
-        int scoredCount = 0;
-        int totalSeconds = 0;
+        int lessonsWithScores = 0;
+        int totalMinutes = 0;
 
         for (ListeningLesson lesson : allLessons) {
             if (lesson.isCompleted()) {
-                completed++;
+                completedCount++;
             }
+
             if (lesson.getUserScore() > 0) {
                 totalScore += lesson.getUserScore();
-                scoredCount++;
+                lessonsWithScores++;
             }
-            totalSeconds += lesson.getDurationSeconds() * lesson.getTimesListened();
+
+            // Estimate time: assume 30 seconds per question on average
+            if (lesson.getTimesListened() > 0) {
+                int estimatedSeconds = lesson.getQuestionCount() * 30 * lesson.getTimesListened();
+                totalMinutes += estimatedSeconds / 60;
+            }
         }
 
-        completedCount.setText(String.valueOf(completed));
+        // Update completed count
+        completedCountText.setText(String.valueOf(completedCount));
 
-        int hours = totalSeconds / 3600;
-        hoursListened.setText(hours + "h");
-
-        if (scoredCount > 0) {
-            avgScore.setText((totalScore / scoredCount) + "%");
+        // Update hours listened
+        int hours = totalMinutes / 60;
+        int minutes = totalMinutes % 60;
+        if (hours > 0) {
+            hoursListenedText.setText(String.format(Locale.getDefault(), "%dh %dm", hours, minutes));
         } else {
-            avgScore.setText("0%");
+            hoursListenedText.setText(String.format(Locale.getDefault(), "%dm", minutes));
         }
+
+        // Update average score
+        int avgScore = lessonsWithScores > 0 ? totalScore / lessonsWithScores : 0;
+        avgScoreText.setText(String.format(Locale.getDefault(), "%d%%", avgScore));
+        scoreProgressRing.setProgress(avgScore);
     }
 
     private void showLoading(boolean show) {
-        if (show) {
-            loadingIndicator.setVisibility(View.VISIBLE);
-            listeningRecyclerView.setVisibility(View.GONE);
-            emptyState.setVisibility(View.GONE);
-        } else {
-            loadingIndicator.setVisibility(View.GONE);
-        }
+        loadingIndicator.setVisibility(show ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
+        swipeRefresh.setRefreshing(false);
     }
 
-    private void showEmptyState() {
-        emptyState.setVisibility(View.VISIBLE);
-        listeningRecyclerView.setVisibility(View.GONE);
-    }
-
-    private void hideEmptyState() {
-        emptyState.setVisibility(View.GONE);
-        listeningRecyclerView.setVisibility(View.VISIBLE);
+    private void showEmptyState(boolean show) {
+        emptyState.setVisibility(show ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadListeningLessons();
+        // Reload lessons when returning to fragment to update stats
+        loadLessons();
     }
 }

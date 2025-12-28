@@ -214,4 +214,6 @@
 
     <color name="green_correct">#2E7D32</color>
     <color name="red_incorrect">#B71C1C</color>
-    </resources>
+    <color name="success_green">#4CAF50</color>
+
+</resources>
