@@ -53,6 +53,8 @@ public class FlashcardActivity extends AppCompatActivity {
     private static final int MAX_SWIPE_OFF_PATH = 250;
     private static final int SWIPE_THRESHOLD_VELOCITY = 200;
 
+    public static final String EXTRA_VOCAB_IDS = "vocab_ids";
+
     // UI Components
     private ImageView backButton, speakerIcon;
     private TextView progressText, knownCount, learningCount, remainingCount;
@@ -142,6 +144,7 @@ public class FlashcardActivity extends AppCompatActivity {
         // Get vocabulary to review from intent or load from Firebase
         String setId = getIntent().getStringExtra("set_id");
         boolean reviewOnly = getIntent().getBooleanExtra("review_only", false);
+        ArrayList<String> selectedIds = getIntent().getStringArrayListExtra(EXTRA_VOCAB_IDS);
 
         if (auth.getCurrentUser() == null) {
             Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
@@ -158,14 +161,21 @@ public class FlashcardActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(userVocabSnapshot -> {
                     vocabularyList.clear();
-                    
+
                     // Collect vocabulary IDs and progress
                     List<String> vocabIds = new ArrayList<>();
                     java.util.Map<String, UserVocabulary> progressMap = new java.util.HashMap<>();
-                    
+
+                    final java.util.Set<String> selectedSet = (selectedIds != null && !selectedIds.isEmpty())
+                            ? new java.util.HashSet<>(selectedIds)
+                            : null;
+
                     userVocabSnapshot.forEach(doc -> {
                         UserVocabulary userVocab = doc.toObject(UserVocabulary.class);
                         if (userVocab != null && userVocab.getVocabularyId() != null) {
+                            if (selectedSet != null && !selectedSet.contains(userVocab.getVocabularyId())) {
+                                return;
+                            }
                             // Filter based on review_only flag
                             if (!reviewOnly || userVocab.needsReview()) {
                                 vocabIds.add(userVocab.getVocabularyId());
@@ -173,13 +183,13 @@ public class FlashcardActivity extends AppCompatActivity {
                             }
                         }
                     });
-                    
+
                     if (vocabIds.isEmpty()) {
                         Toast.makeText(this, "No vocabulary to review", Toast.LENGTH_SHORT).show();
                         finish();
                         return;
                     }
-                    
+
                     // Load vocabulary details in batches
                     loadVocabularyDetails(vocabIds, progressMap);
 
@@ -190,16 +200,16 @@ public class FlashcardActivity extends AppCompatActivity {
                     finish();
                 });
     }
-    
+
     private void loadVocabularyDetails(List<String> vocabIds, java.util.Map<String, UserVocabulary> progressMap) {
         // Split into batches of 10 (Firestore limit)
         List<List<String>> batches = new ArrayList<>();
         for (int i = 0; i < vocabIds.size(); i += 10) {
             batches.add(vocabIds.subList(i, Math.min(i + 10, vocabIds.size())));
         }
-        
-        final int[] completedBatches = {0};
-        
+
+        final int[] completedBatches = { 0 };
+
         for (List<String> batch : batches) {
             db.collection("vocabularies")
                     .whereIn(com.google.firebase.firestore.FieldPath.documentId(), batch)
@@ -210,14 +220,14 @@ public class FlashcardActivity extends AppCompatActivity {
                             if (vocab != null) {
                                 vocab.setId(doc.getId());
                                 UserVocabulary progress = progressMap.get(vocab.getId());
-                                
+
                                 VocabularyWithProgress item = new VocabularyWithProgress();
                                 item.setVocabulary(vocab);
                                 item.setUserProgress(progress);
                                 vocabularyList.add(item);
                             }
                         });
-                        
+
                         completedBatches[0]++;
                         if (completedBatches[0] == batches.size()) {
                             // All batches loaded
@@ -226,10 +236,10 @@ public class FlashcardActivity extends AppCompatActivity {
                                 finish();
                                 return;
                             }
-                            
+
                             // Shuffle for variety
                             Collections.shuffle(vocabularyList);
-                            
+
                             // Show first card
                             showCard(0);
                             updateProgress();
@@ -341,8 +351,6 @@ public class FlashcardActivity extends AppCompatActivity {
                 .start();
     }
 
-
-
     private void flipCard() {
         // 3D flip animation
         AnimatorSet flipOut = (AnimatorSet) AnimatorInflater.loadAnimator(this,
@@ -356,7 +364,8 @@ public class FlashcardActivity extends AppCompatActivity {
 
             flipOut.addListener(new Animator.AnimatorListener() {
                 @Override
-                public void onAnimationStart(Animator animation) {}
+                public void onAnimationStart(Animator animation) {
+                }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -366,10 +375,12 @@ public class FlashcardActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onAnimationCancel(Animator animation) {}
+                public void onAnimationCancel(Animator animation) {
+                }
 
                 @Override
-                public void onAnimationRepeat(Animator animation) {}
+                public void onAnimationRepeat(Animator animation) {
+                }
             });
 
             flipOut.start();
@@ -380,7 +391,8 @@ public class FlashcardActivity extends AppCompatActivity {
 
             flipOut.addListener(new Animator.AnimatorListener() {
                 @Override
-                public void onAnimationStart(Animator animation) {}
+                public void onAnimationStart(Animator animation) {
+                }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -390,10 +402,12 @@ public class FlashcardActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onAnimationCancel(Animator animation) {}
+                public void onAnimationCancel(Animator animation) {
+                }
 
                 @Override
-                public void onAnimationRepeat(Animator animation) {}
+                public void onAnimationRepeat(Animator animation) {
+                }
             });
 
             flipOut.start();
@@ -409,12 +423,14 @@ public class FlashcardActivity extends AppCompatActivity {
     }
 
     private void handleAnswer(boolean knowIt) {
-        if (currentIndex >= vocabularyList.size()) return;
+        if (currentIndex >= vocabularyList.size())
+            return;
 
         VocabularyWithProgress vocab = vocabularyList.get(currentIndex);
         UserVocabulary userProgress = vocab.getUserProgress();
-        
-        if (userProgress == null) return;
+
+        if (userProgress == null)
+            return;
 
         // Update mastery
         if (knowIt) {
@@ -470,8 +486,6 @@ public class FlashcardActivity extends AppCompatActivity {
         remainingCount.setText("⋯ " + (vocabularyList.size() - currentIndex - 1));
     }
 
-
-
     private void updateProgress() {
         int total = vocabularyList.size();
         int current = Math.min(currentIndex + 1, total);
@@ -479,7 +493,7 @@ public class FlashcardActivity extends AppCompatActivity {
         progressText.setText(current + "/" + total);
         flashcardProgress.setMax(total);
         flashcardProgress.setProgress(current);
-        
+
         // Update counts
         knownCount.setText("✓ " + correctCount);
         learningCount.setText("⟳ " + incorrectCount);

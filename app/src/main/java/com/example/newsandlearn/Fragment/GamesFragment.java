@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.newsandlearn.Activity.VocabularyRPGActivity;
+import com.example.newsandlearn.Activity.MillionaireGameActivity;
 import com.example.newsandlearn.R;
 import com.google.android.material.card.MaterialCardView;
 
@@ -24,7 +25,7 @@ public class GamesFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
+            @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_games, container, false);
 
         // Setup game cards
@@ -48,8 +49,25 @@ public class GamesFragment extends Fragment {
             startActivity(intent);
         });
 
+        // Story-Based Learning Card
+        MaterialCardView storyLearningCard = view.findViewById(R.id.card_story_learning);
+        storyLearningCard.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), com.example.newsandlearn.Activity.StoryGameActivity.class);
+            startActivity(intent);
+        });
+
+        // English Millionaire Card
+        MaterialCardView millionaireCard = view.findViewById(R.id.card_english_millionaire);
+        if (millionaireCard != null) {
+            millionaireCard.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), MillionaireGameActivity.class);
+                startActivity(intent);
+            });
+        }
+
         // TODO: Thêm các game khác ở đây
         // MaterialCardView grammarQuizCard = view.findViewById(R.id.card_grammar_quiz);
-        // MaterialCardView listeningGameCard = view.findViewById(R.id.card_listening_game);
+        // MaterialCardView listeningGameCard =
+        // view.findViewById(R.id.card_listening_game);
     }
 }

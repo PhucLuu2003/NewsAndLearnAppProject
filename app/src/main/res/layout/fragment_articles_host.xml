@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7FA">
+
+    <!-- Header with Gradient - Now in Host -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="12dp"
+        android:background="@drawable/gradient_header_bg">
+
+        <TextView
+            android:id="@+id/articles_header_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📰 Discover Articles"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/articles_header_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Read, learn, and improve your English"
+            android:textSize="14sp"
+            android:textColor="@android:color/white"
+            android:alpha="0.9"
+            android:layout_marginTop="4dp" />
+
+    </LinearLayout>
+
+    <!-- Tab Layout - Now BELOW the header -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/articles_tab_layout"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="@drawable/gradient_header_bg"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
+        app:tabIndicatorColor="@android:color/white"
+        app:tabIndicatorHeight="3dp"
+        app:tabIndicatorFullWidth="false"
+        app:tabSelectedTextColor="@android:color/white"
+        app:tabTextColor="#CCFFFFFF"
+        app:tabTextAppearance="@style/TabTextAppearance"
+        app:tabRippleColor="#33FFFFFF" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/articles_view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

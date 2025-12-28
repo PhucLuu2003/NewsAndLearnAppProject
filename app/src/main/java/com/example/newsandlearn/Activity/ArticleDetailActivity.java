@@ -107,18 +107,18 @@ public class ArticleDetailActivity extends AppCompatActivity {
     }
 
     private void setupScrollListener() {
-        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) 
-                (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
-            // Calculate reading progress
-            int contentHeight = v.getChildAt(0).getHeight();
-            int scrollViewHeight = v.getHeight();
-            int maxScroll = contentHeight - scrollViewHeight;
+        scrollView.setOnScrollChangeListener(
+                (NestedScrollView.OnScrollChangeListener) (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+                    // Calculate reading progress
+                    int contentHeight = v.getChildAt(0).getHeight();
+                    int scrollViewHeight = v.getHeight();
+                    int maxScroll = contentHeight - scrollViewHeight;
 
-            if (maxScroll > 0) {
-                int progress = (int) ((scrollY / (float) maxScroll) * 100);
-                updateProgress(progress);
-            }
-        });
+                    if (maxScroll > 0) {
+                        int progress = (int) ((scrollY / (float) maxScroll) * 100);
+                        updateProgress(progress);
+                    }
+                });
     }
 
     private void setupTextSelection() {
@@ -146,12 +146,12 @@ public class ArticleDetailActivity extends AppCompatActivity {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 int start = articleContent.getSelectionStart();
                 int end = articleContent.getSelectionEnd();
-                
+
                 if (start >= 0 && end > start) {
                     selectedText = articleContent.getText().toString().substring(start, end);
                     selectionStart = start;
                     selectionEnd = end;
-                    
+
                     switch (item.getItemId()) {
                         case 1: // Highlight
                             highlightText(start, end);
@@ -178,9 +178,9 @@ public class ArticleDetailActivity extends AppCompatActivity {
         BackgroundColorSpan highlightSpan = new BackgroundColorSpan(Color.YELLOW);
         spannableString.setSpan(highlightSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         articleContent.setText(spannableString);
-        
+
         Toast.makeText(this, "Text highlighted!", Toast.LENGTH_SHORT).show();
-        
+
         // TODO: Save highlight to Firebase
     }
 
@@ -190,8 +190,7 @@ public class ArticleDetailActivity extends AppCompatActivity {
         dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         dialog.getWindow().setLayout(
                 (int) (getResources().getDisplayMetrics().widthPixels * 0.9),
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-        );
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
 
         EditText editWord = dialog.findViewById(R.id.edit_word);
         EditText editMeaning = dialog.findViewById(R.id.edit_meaning);
@@ -244,13 +243,17 @@ public class ArticleDetailActivity extends AppCompatActivity {
     private String extractSentence(String text, int position) {
         // Find sentence boundaries
         int start = text.lastIndexOf('.', position);
-        if (start == -1) start = 0;
-        else start++;
-        
+        if (start == -1)
+            start = 0;
+        else
+            start++;
+
         int end = text.indexOf('.', position);
-        if (end == -1) end = text.length();
-        else end++;
-        
+        if (end == -1)
+            end = text.length();
+        else
+            end++;
+
         return text.substring(start, end).trim();
     }
 
@@ -303,12 +306,17 @@ public class ArticleDetailActivity extends AppCompatActivity {
                             articleTitle.setText(title);
                             collapsingToolbar.setTitle(title);
                         }
-                        if (content != null) articleContent.setText(content);
-                        if (category != null) categoryBadge.setText(category);
-                        if (level != null) levelBadge.setText(level);
-                        if (readTime != null) readingTime.setText(readTime + " min read");
+                        if (content != null)
+                            articleContent.setText(content);
+                        if (category != null)
+                            categoryBadge.setText(category);
+                        if (level != null)
+                            levelBadge.setText(level);
+                        if (readTime != null)
+                            readingTime.setText(readTime + " min read");
                         if (timestamp != null) {
-                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault());
+                            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM dd, yyyy",
+                                    java.util.Locale.getDefault());
                             publishDate.setText(sdf.format(timestamp.toDate()));
                         }
 
@@ -356,7 +364,7 @@ public class ArticleDetailActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        
+
         // Track reading time
         long endTime = System.currentTimeMillis();
         int minutes = (int) ((endTime - startTime) / 60000);
@@ -366,7 +374,8 @@ public class ArticleDetailActivity extends AppCompatActivity {
 
         // Save final progress
         if (currentProgress > 0) {
-            ProgressHelper.updateReadingProgress(articleId, currentProgress);
+            Integer scrollY = scrollView != null ? scrollView.getScrollY() : null;
+            ProgressHelper.updateReadingProgress(articleId, currentProgress, scrollY);
         }
     }
 }

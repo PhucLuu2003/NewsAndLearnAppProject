@@ -8,7 +8,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,7 +27,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordInput;
     private MaterialButton loginButton;
     private TextView registerLink, forgotPasswordLink;
-    private ProgressBar progressBar;
+    private LottieAnimationView progressBar;
     private FirebaseAuth mAuth;
     private CardView logoCard; // login_card contains all inputs now
     private View emailContainer, passwordContainer; // Changed from CardView to View/ViewGroup

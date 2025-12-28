@@ -127,7 +127,7 @@
             android:paddingVertical="4dp"
             android:layout_marginEnd="8dp" />
 
-        <ProgressBar
+        <com.example.newsandlearn.View.QuestionMarkerProgressBar
             android:id="@+id/lesson_progress"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="0dp"

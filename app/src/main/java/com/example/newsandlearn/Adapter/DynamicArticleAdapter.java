@@ -31,13 +31,22 @@ import java.util.concurrent.TimeUnit;
  */
 public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAdapter.ArticleViewHolder> {
 
+    private static final int VIEW_TYPE_ARTICLE = 0;
+    private static final int VIEW_TYPE_SKELETON = 1;
+    private static final int INITIAL_SKELETON_COUNT = 6;
+    private static final int LOAD_MORE_SKELETON_COUNT = 2;
+
     private Context context;
     private List<Article> articles;
     private OnArticleClickListener listener;
     private int lastPosition = -1;
 
+    private boolean loadingInitial = false;
+    private boolean loadingMore = false;
+
     public interface OnArticleClickListener {
         void onArticleClick(Article article);
+
         void onFavoriteClick(Article article);
     }
 
@@ -45,6 +54,16 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
         this.context = context;
         this.articles = new ArrayList<>();
         this.listener = listener;
+    }
+
+    public void setLoadingInitial(boolean loading) {
+        this.loadingInitial = loading;
+        notifyDataSetChanged();
+    }
+
+    public void setLoadingMore(boolean loading) {
+        this.loadingMore = loading;
+        notifyDataSetChanged();
     }
 
     public void setArticles(List<Article> articles) {
@@ -62,22 +81,52 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
     @NonNull
     @Override
     public ArticleViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_SKELETON) {
+            View view = LayoutInflater.from(context).inflate(R.layout.item_article_skeleton, parent, false);
+            return new SkeletonViewHolder(view);
+        }
+
         View view = LayoutInflater.from(context).inflate(R.layout.item_article_dynamic, parent, false);
-        return new ArticleViewHolder(view);
+        return new ArticleItemViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ArticleViewHolder holder, int position) {
+        if (getItemViewType(position) == VIEW_TYPE_SKELETON) {
+            return;
+        }
+
         Article article = articles.get(position);
-        holder.bind(article);
-        
+        ((ArticleItemViewHolder) holder).bind(article);
+
         // Apply animation
         setAnimation(holder.itemView, position);
     }
 
     @Override
     public int getItemCount() {
-        return articles.size();
+        if (loadingInitial && articles.isEmpty()) {
+            return INITIAL_SKELETON_COUNT;
+        }
+
+        int count = articles.size();
+        if (loadingMore) {
+            count += LOAD_MORE_SKELETON_COUNT;
+        }
+        return count;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        if (loadingInitial && articles.isEmpty()) {
+            return VIEW_TYPE_SKELETON;
+        }
+
+        if (position < articles.size()) {
+            return VIEW_TYPE_ARTICLE;
+        }
+
+        return VIEW_TYPE_SKELETON;
     }
 
     /**
@@ -98,6 +147,22 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
     }
 
     class ArticleViewHolder extends RecyclerView.ViewHolder {
+        public ArticleViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+
+        public void bind(Article article) {
+            // No-op for base holder
+        }
+    }
+
+    class SkeletonViewHolder extends ArticleViewHolder {
+        public SkeletonViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    class ArticleItemViewHolder extends ArticleViewHolder {
         MaterialCardView articleCard;
         ImageView articleImage, favoriteButton;
         TextView categoryBadge, levelBadge, articleTitle;
@@ -105,7 +170,7 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
         MaterialCardView progressBadge;
         Chip tag1, tag2;
 
-        public ArticleViewHolder(@NonNull View itemView) {
+        public ArticleItemViewHolder(@NonNull View itemView) {
             super(itemView);
             articleCard = itemView.findViewById(R.id.article_card);
             articleImage = itemView.findViewById(R.id.article_image);
@@ -122,6 +187,7 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
             tag2 = itemView.findViewById(R.id.tag2);
         }
 
+        @Override
         public void bind(Article article) {
             // Set title
             articleTitle.setText(article.getTitle());
@@ -222,7 +288,7 @@ public class DynamicArticleAdapter extends RecyclerView.Adapter<DynamicArticleAd
                         .rotationBy(360f)
                         .setDuration(300)
                         .start();
-                
+
                 if (listener != null) {
                     listener.onFavoriteClick(article);
                 }

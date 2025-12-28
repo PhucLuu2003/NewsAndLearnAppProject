@@ -6,20 +6,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.newsandlearn.Model.ListeningLesson;
 import com.example.newsandlearn.R;
 
 import java.util.List;
+import java.util.Locale;
 
-/**
- * ListeningAdapter - RecyclerView adapter for listening lessons
- * Displays data loaded from Firebase dynamically
- */
 public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.ListeningViewHolder> {
 
     private Context context;
@@ -47,21 +46,21 @@ public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.List
     public void onBindViewHolder(@NonNull ListeningViewHolder holder, int position) {
         ListeningLesson lesson = lessonList.get(position);
         holder.bind(lesson);
-        
-        // Add animation
+
         com.example.newsandlearn.Utils.AnimationHelper.itemFallDown(context, holder.itemView, position);
     }
 
     @Override
     public int getItemCount() {
-        return lessonList.size();
+        return lessonList != null ? lessonList.size() : 0;
     }
 
     class ListeningViewHolder extends RecyclerView.ViewHolder {
 
         ImageView thumbnail;
-        TextView lessonTitle, durationText, levelText, questionsText;
+        TextView lessonTitle, levelText, questionsText;
         LinearLayout progressLayout;
+        ProgressBar progressBar;
         TextView scoreText;
 
         public ListeningViewHolder(@NonNull View itemView) {
@@ -69,41 +68,81 @@ public class ListeningAdapter extends RecyclerView.Adapter<ListeningAdapter.List
 
             thumbnail = itemView.findViewById(R.id.thumbnail);
             lessonTitle = itemView.findViewById(R.id.lesson_title);
-            durationText = itemView.findViewById(R.id.duration_text);
             levelText = itemView.findViewById(R.id.level_text);
             questionsText = itemView.findViewById(R.id.questions_text);
             progressLayout = itemView.findViewById(R.id.progress_layout);
+            progressBar = itemView.findViewById(R.id.score_progress_bar);
             scoreText = itemView.findViewById(R.id.score_text);
         }
 
         public void bind(ListeningLesson lesson) {
-            // Title
-            lessonTitle.setText(lesson.getTitle());
+            if (lesson == null) return;
 
-            // Duration
-            durationText.setText(lesson.getFormattedDuration());
-
-            // Level
-            levelText.setText(lesson.getLevel() != null ? lesson.getLevel() : "B1");
-
-            // Questions count
-            int qCount = lesson.getQuestionCount();
-            questionsText.setText(qCount + (qCount == 1 ? " question" : " questions"));
-
-            // Progress (if completed)
-            if (lesson.isCompleted() && lesson.getUserScore() > 0) {
-                progressLayout.setVisibility(View.VISIBLE);
-                scoreText.setText(lesson.getUserScore() + "%");
-            } else {
-                progressLayout.setVisibility(View.GONE);
+            // Set title
+            if (lessonTitle != null && lesson.getTitle() != null) {
+                lessonTitle.setText(lesson.getTitle());
             }
 
-            // TODO: Load thumbnail from Firebase Storage URL
-            // Glide.with(context).load(lesson.getThumbnailUrl()).into(thumbnail);
+            // Set level badge
+            if (levelText != null) {
+                levelText.setText(lesson.getLevel() != null ? lesson.getLevel() : "A1");
+            }
+
+            // Set question count (no more duration)
+            if (questionsText != null) {
+                int qCount = lesson.getQuestionCount();
+                questionsText.setText(String.format(Locale.getDefault(), "%d %s",
+                        qCount, qCount == 1 ? "question" : "questions"));
+            }
+
+            // Handle completed vs in-progress vs not started
+            if (progressLayout != null) {
+                if (lesson.isCompleted() && lesson.getUserScore() > 0) {
+                    // Completed lesson - show score
+                    progressLayout.setVisibility(View.VISIBLE);
+                    if (progressBar != null) {
+                        progressBar.setProgress(lesson.getUserScore());
+                    }
+                    if (scoreText != null) {
+                        scoreText.setText(String.format(Locale.getDefault(), "%d%%", lesson.getUserScore()));
+                        try {
+                            scoreText.setTextColor(context.getColor(R.color.success_green));
+                        } catch (Exception e) {
+                            scoreText.setTextColor(0xFF4CAF50); // Fallback green color
+                        }
+                    }
+                } else if (lesson.getTimesListened() > 0 && !lesson.isCompleted()) {
+                    // In progress - show estimated progress
+                    progressLayout.setVisibility(View.VISIBLE);
+                    if (progressBar != null) {
+                        int estimatedProgress = Math.min(lesson.getTimesListened() * 20, 80);
+                        progressBar.setProgress(estimatedProgress);
+                    }
+                    if (scoreText != null) {
+                        scoreText.setText("In Progress");
+                        try {
+                            scoreText.setTextColor(context.getColor(R.color.primary));
+                        } catch (Exception e) {
+                            scoreText.setTextColor(0xFF6200EE); // Fallback primary color
+                        }
+                    }
+                } else {
+                    // Not started - hide progress
+                    progressLayout.setVisibility(View.GONE);
+                }
+            }
+
+            // Load thumbnail
+            if (thumbnail != null && lesson.getThumbnailUrl() != null && !lesson.getThumbnailUrl().isEmpty()) {
+                Glide.with(context)
+                        .load(lesson.getThumbnailUrl())
+                        .placeholder(R.color.surface_secondary)
+                        .error(R.color.surface_secondary)
+                        .into(thumbnail);
+            }
 
             // Click listener
             itemView.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.scaleUp(context, itemView); // Scale animation
                 if (listener != null) {
                     listener.onLessonClick(lesson);
                 }

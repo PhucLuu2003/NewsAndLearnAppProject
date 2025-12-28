@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="#6C63FF" android:state_checked="true" />
-    <item android:color="#F5F5F5" />
+    <!-- Checked state - Gradient purple color -->
+    <item android:color="#7C4DFF" android:state_checked="true" />
+    <!-- Default state - Light gray -->
+    <item android:color="#FFFFFF" />
 </selector>

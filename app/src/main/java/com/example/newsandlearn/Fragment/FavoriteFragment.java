@@ -14,12 +14,14 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.newsandlearn.Activity.ArticleDetailActivity;
+import com.example.newsandlearn.Activity.EnhancedArticleDetailActivity;
 import com.example.newsandlearn.Adapter.ArticleAdapter;
 import com.example.newsandlearn.Model.Article;
 import com.example.newsandlearn.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,13 +77,38 @@ public class FavoriteFragment extends Fragment {
     }
 
     private void loadFavorites() {
-        // TODO: Load from Firebase
-        // For now, show empty state
-        if (favoriteArticles.isEmpty()) {
+        if (mAuth.getCurrentUser() == null) {
+            favoriteArticles.clear();
             showEmptyState();
-        } else {
-            showFavorites();
+            Toast.makeText(getContext(), "⚠️ Please login to view favorites", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        String userId = mAuth.getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("favorites")
+                .orderBy("publishedDate", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    favoriteArticles.clear();
+                    for (QueryDocumentSnapshot doc : snapshot) {
+                        Article a = doc.toObject(Article.class);
+                        a.setId(doc.getId());
+                        a.setFavorite(true);
+                        favoriteArticles.add(a);
+                    }
+
+                    if (favoriteArticles.isEmpty()) {
+                        showEmptyState();
+                    } else {
+                        showFavorites();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    showEmptyState();
+                });
     }
 
     private void showEmptyState() {
@@ -96,20 +123,44 @@ public class FavoriteFragment extends Fragment {
     }
 
     private void openArticleDetail(Article article) {
-        Intent intent = new Intent(getActivity(), ArticleDetailActivity.class);
+        Intent intent = new Intent(getActivity(), EnhancedArticleDetailActivity.class);
         // Pass article ID to load from Firebase
         intent.putExtra("article_id", article.getId());
         startActivity(intent);
     }
 
     private void removeFavorite(Article article) {
-        favoriteArticles.remove(article);
-        adapter.setArticles(favoriteArticles);
-
-        if (favoriteArticles.isEmpty()) {
-            showEmptyState();
+        if (mAuth.getCurrentUser() == null) {
+            Toast.makeText(getContext(), "⚠️ Please login", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        Toast.makeText(getContext(), "Đã xóa khỏi yêu thích", Toast.LENGTH_SHORT).show();
+        if (article.getId() == null || article.getId().isEmpty()) {
+            Toast.makeText(getContext(), "❌ Missing article id", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String userId = mAuth.getCurrentUser().getUid();
+        db.collection("users")
+                .document(userId)
+                .collection("favorites")
+                .document(article.getId())
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    favoriteArticles.remove(article);
+                    adapter.setArticles(favoriteArticles);
+                    if (favoriteArticles.isEmpty()) {
+                        showEmptyState();
+                    }
+                    Toast.makeText(getContext(), "💔 Removed from favorites", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(
+                        e -> Toast.makeText(getContext(), "❌ Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadFavorites();
     }
 }

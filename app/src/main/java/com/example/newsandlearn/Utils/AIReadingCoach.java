@@ -2,6 +2,7 @@ package com.example.newsandlearn.Utils;
 
 import android.util.Log;
 
+import com.example.newsandlearn.BuildConfig;
 import com.google.ai.client.generativeai.GenerativeModel;
 import com.google.ai.client.generativeai.java.GenerativeModelFutures;
 import com.google.ai.client.generativeai.type.Content;
@@ -34,7 +35,8 @@ public class AIReadingCoach {
     private static AIReadingCoach instance;
     private GenerativeModelFutures model;
     private Executor executor;
-    
+    private boolean isAIAvailable = false;
+
     private String currentArticle = "";
     private String userLevel = "intermediate"; // beginner, intermediate, advanced
     private Map<String, SentenceAnalysis> analysisCache;
@@ -53,16 +55,35 @@ public class AIReadingCoach {
     }
 
     private void initializeModel() {
+        String apiKey = null;
         try {
-            GenerativeModel gm = new GenerativeModel(
-                "gemini-2.5-flash",
-                "AIzaSyAXGYeWoZ9y3aerzHUatkdcAXhXWd5EzA8"
-            );
-            model = GenerativeModelFutures.from(gm);
-            Log.d(TAG, "AI Reading Coach initialized");
+            apiKey = BuildConfig.GEMINI_API_KEY;
         } catch (Exception e) {
-            Log.e(TAG, "Error initializing model: " + e.getMessage());
+            // Field might not exist
         }
+        
+        if (apiKey == null || apiKey.isEmpty() || apiKey.equals("null")) {
+            Log.w(TAG, "GEMINI_API_KEY not set. AI Reading Coach will be disabled.");
+            model = null;
+            isAIAvailable = false;
+        } else {
+            try {
+                GenerativeModel gm = new GenerativeModel(
+                        "gemini-2.5-flash",
+                        apiKey);
+                model = GenerativeModelFutures.from(gm);
+                isAIAvailable = true;
+                Log.d(TAG, "AI Reading Coach initialized");
+            } catch (Exception e) {
+                Log.e(TAG, "Error initializing model: " + e.getMessage());
+                model = null;
+                isAIAvailable = false;
+            }
+        }
+    }
+    
+    public boolean isAIAvailable() {
+        return isAIAvailable && model != null;
     }
 
     public void setArticleContext(String article) {
@@ -78,6 +99,12 @@ public class AIReadingCoach {
      * Analyze a sentence in real-time
      */
     public void analyzeSentence(String sentence, AnalysisCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         // Check cache first
         if (analysisCache.containsKey(sentence)) {
             callback.onSuccess(analysisCache.get(sentence));
@@ -85,13 +112,13 @@ public class AIReadingCoach {
         }
 
         String prompt = buildAnalysisPrompt(sentence);
-        
+
         Content content = new Content.Builder()
-            .addText(prompt)
-            .build();
+                .addText(prompt)
+                .build();
 
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-        
+
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
@@ -116,20 +143,26 @@ public class AIReadingCoach {
      * Get vocabulary insights from entire article
      */
     public void getVocabularyInsights(VocabularyCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         String prompt = "Analyze this article and extract:\n" +
-            "1. Top 10 most important vocabulary words\n" +
-            "2. Their difficulty level (easy/medium/hard)\n" +
-            "3. Brief definition\n" +
-            "4. Example usage\n\n" +
-            "Article: " + currentArticle + "\n\n" +
-            "Return as JSON array: [{\"word\": \"...\", \"level\": \"...\", \"definition\": \"...\", \"example\": \"...\"}]";
+                "1. Top 10 most important vocabulary words\n" +
+                "2. Their difficulty level (easy/medium/hard)\n" +
+                "3. Brief definition\n" +
+                "4. Example usage\n\n" +
+                "Article: " + currentArticle + "\n\n" +
+                "Return as JSON array: [{\"word\": \"...\", \"level\": \"...\", \"definition\": \"...\", \"example\": \"...\"}]";
 
         Content content = new Content.Builder()
-            .addText(prompt)
-            .build();
+                .addText(prompt)
+                .build();
 
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-        
+
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
@@ -153,23 +186,29 @@ public class AIReadingCoach {
      * Assess article difficulty for user
      */
     public void assessDifficulty(DifficultyCallback callback) {
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
         String prompt = "Analyze this article for a " + userLevel + " English learner.\n" +
-            "Provide:\n" +
-            "1. Overall difficulty (1-10)\n" +
-            "2. Vocabulary difficulty (1-10)\n" +
-            "3. Grammar complexity (1-10)\n" +
-            "4. Recommended reading time (minutes)\n" +
-            "5. Key challenges\n" +
-            "6. Learning tips\n\n" +
-            "Article: " + currentArticle + "\n\n" +
-            "Return as JSON: {\"overall\": 7, \"vocabulary\": 8, \"grammar\": 6, \"readingTime\": 15, \"challenges\": [...], \"tips\": [...]}";
+                "Provide:\n" +
+                "1. Overall difficulty (1-10)\n" +
+                "2. Vocabulary difficulty (1-10)\n" +
+                "3. Grammar complexity (1-10)\n" +
+                "4. Recommended reading time (minutes)\n" +
+                "5. Key challenges\n" +
+                "6. Learning tips\n\n" +
+                "Article: " + currentArticle + "\n\n" +
+                "Return as JSON: {\"overall\": 7, \"vocabulary\": 8, \"grammar\": 6, \"readingTime\": 15, \"challenges\": [...], \"tips\": [...]}";
 
         Content content = new Content.Builder()
-            .addText(prompt)
-            .build();
+                .addText(prompt)
+                .build();
 
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-        
+
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
@@ -193,22 +232,28 @@ public class AIReadingCoach {
      * Get personalized reading tips
      */
     public void getReadingTips(TipsCallback callback) {
-        String prompt = "As an English reading coach, provide 5 personalized tips for a " + 
-            userLevel + " learner reading this article:\n\n" +
-            currentArticle.substring(0, Math.min(500, currentArticle.length())) + "...\n\n" +
-            "Focus on:\n" +
-            "- Reading strategies\n" +
-            "- Vocabulary building\n" +
-            "- Comprehension techniques\n" +
-            "- Time management\n\n" +
-            "Return as JSON array: [{\"title\": \"...\", \"description\": \"...\", \"icon\": \"💡\"}]";
+        // Check if AI is available first
+        if (!isAIAvailable()) {
+            callback.onFailure(new Exception("AI features not available - GEMINI_API_KEY not configured"));
+            return;
+        }
+        
+        String prompt = "As an English reading coach, provide 5 personalized tips for a " +
+                userLevel + " learner reading this article:\n\n" +
+                currentArticle.substring(0, Math.min(500, currentArticle.length())) + "...\n\n" +
+                "Focus on:\n" +
+                "- Reading strategies\n" +
+                "- Vocabulary building\n" +
+                "- Comprehension techniques\n" +
+                "- Time management\n\n" +
+                "Return as JSON array: [{\"title\": \"...\", \"description\": \"...\", \"icon\": \"💡\"}]";
 
         Content content = new Content.Builder()
-            .addText(prompt)
-            .build();
+                .addText(prompt)
+                .build();
 
         ListenableFuture<GenerateContentResponse> response = model.generateContent(content);
-        
+
         Futures.addCallback(response, new FutureCallback<GenerateContentResponse>() {
             @Override
             public void onSuccess(GenerateContentResponse result) {
@@ -232,14 +277,14 @@ public class AIReadingCoach {
 
     private String buildAnalysisPrompt(String sentence) {
         return "Analyze this sentence for an English learner (" + userLevel + " level):\n\n" +
-            "\"" + sentence + "\"\n\n" +
-            "Provide:\n" +
-            "1. Key vocabulary words (with definitions)\n" +
-            "2. Grammar structures used\n" +
-            "3. Difficulty level (1-10)\n" +
-            "4. Learning tip\n\n" +
-            "Return as JSON: {\"vocabulary\": [{\"word\": \"...\", \"definition\": \"...\"}], " +
-            "\"grammar\": [...], \"difficulty\": 7, \"tip\": \"...\"}";
+                "\"" + sentence + "\"\n\n" +
+                "Provide:\n" +
+                "1. Key vocabulary words (with definitions)\n" +
+                "2. Grammar structures used\n" +
+                "3. Difficulty level (1-10)\n" +
+                "4. Learning tip\n\n" +
+                "Return as JSON: {\"vocabulary\": [{\"word\": \"...\", \"definition\": \"...\"}], " +
+                "\"grammar\": [...], \"difficulty\": 7, \"tip\": \"...\"}";
     }
 
     private SentenceAnalysis parseAnalysis(String jsonText, String sentence) {
@@ -258,12 +303,12 @@ public class AIReadingCoach {
             cleanJson = cleanJson.trim();
 
             JSONObject json = new JSONObject(cleanJson);
-            
+
             SentenceAnalysis analysis = new SentenceAnalysis();
             analysis.sentence = sentence;
             analysis.difficulty = json.optInt("difficulty", 5);
             analysis.tip = json.optString("tip", "");
-            
+
             // Parse vocabulary
             JSONArray vocabArray = json.optJSONArray("vocabulary");
             if (vocabArray != null) {
@@ -275,7 +320,7 @@ public class AIReadingCoach {
                     analysis.vocabulary.add(word);
                 }
             }
-            
+
             // Parse grammar
             JSONArray grammarArray = json.optJSONArray("grammar");
             if (grammarArray != null) {
@@ -283,7 +328,7 @@ public class AIReadingCoach {
                     analysis.grammar.add(grammarArray.getString(i));
                 }
             }
-            
+
             return analysis;
         } catch (Exception e) {
             Log.e(TAG, "Error parsing analysis: " + e.getMessage());
@@ -296,7 +341,7 @@ public class AIReadingCoach {
         try {
             String cleanJson = cleanJsonText(jsonText);
             JSONArray array = new JSONArray(cleanJson);
-            
+
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
                 VocabularyItem item = new VocabularyItem();
@@ -316,27 +361,27 @@ public class AIReadingCoach {
         try {
             String cleanJson = cleanJsonText(jsonText);
             JSONObject json = new JSONObject(cleanJson);
-            
+
             DifficultyAssessment assessment = new DifficultyAssessment();
             assessment.overall = json.optInt("overall", 5);
             assessment.vocabulary = json.optInt("vocabulary", 5);
             assessment.grammar = json.optInt("grammar", 5);
             assessment.readingTime = json.optInt("readingTime", 10);
-            
+
             JSONArray challenges = json.optJSONArray("challenges");
             if (challenges != null) {
                 for (int i = 0; i < challenges.length(); i++) {
                     assessment.challenges.add(challenges.getString(i));
                 }
             }
-            
+
             JSONArray tips = json.optJSONArray("tips");
             if (tips != null) {
                 for (int i = 0; i < tips.length(); i++) {
                     assessment.tips.add(tips.getString(i));
                 }
             }
-            
+
             return assessment;
         } catch (Exception e) {
             Log.e(TAG, "Error parsing difficulty: " + e.getMessage());
@@ -349,7 +394,7 @@ public class AIReadingCoach {
         try {
             String cleanJson = cleanJsonText(jsonText);
             JSONArray array = new JSONArray(cleanJson);
-            
+
             for (int i = 0; i < array.length(); i++) {
                 JSONObject obj = array.getJSONObject(i);
                 ReadingTip tip = new ReadingTip();
@@ -366,9 +411,12 @@ public class AIReadingCoach {
 
     private String cleanJsonText(String text) {
         String clean = text.trim();
-        if (clean.startsWith("```json")) clean = clean.substring(7);
-        if (clean.startsWith("```")) clean = clean.substring(3);
-        if (clean.endsWith("```")) clean = clean.substring(0, clean.length() - 3);
+        if (clean.startsWith("```json"))
+            clean = clean.substring(7);
+        if (clean.startsWith("```"))
+            clean = clean.substring(3);
+        if (clean.endsWith("```"))
+            clean = clean.substring(0, clean.length() - 3);
         return clean.trim();
     }
 
@@ -421,21 +469,25 @@ public class AIReadingCoach {
 
     public interface AnalysisCallback {
         void onSuccess(SentenceAnalysis analysis);
+
         void onFailure(Exception e);
     }
 
     public interface VocabularyCallback {
         void onSuccess(List<VocabularyItem> items);
+
         void onFailure(Exception e);
     }
 
     public interface DifficultyCallback {
         void onSuccess(DifficultyAssessment assessment);
+
         void onFailure(Exception e);
     }
 
     public interface TipsCallback {
         void onSuccess(List<ReadingTip> tips);
+
         void onFailure(Exception e);
     }
 }

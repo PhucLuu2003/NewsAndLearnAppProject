@@ -178,6 +178,7 @@ public class VocabularyRPGActivity extends AppCompatActivity implements GameLeve
         defenseValue.setText(String.valueOf(playerCharacter.getDefense()));
     }
 
+
     private void loadLevels() {
         db.collection("game_levels")
                 .orderBy("levelNumber")
@@ -187,10 +188,16 @@ public class VocabularyRPGActivity extends AppCompatActivity implements GameLeve
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
                         GameLevel level = document.toObject(GameLevel.class);
                         
-                        // Check if level should be unlocked based on player level
-                        if (playerCharacter != null && 
-                            playerCharacter.getLevel() >= level.getRequiredLevel()) {
+                        // Level 1 is always unlocked
+                        // Other levels unlock when previous level is completed OR player level is high enough
+                        if (level.getLevelNumber() == 1) {
                             level.setUnlocked(true);
+                        } else if (playerCharacter != null) {
+                            // Unlock if player level is high enough OR highest completed level >= this level - 1
+                            int highestCompleted = playerCharacter.getHighestCompletedLevel();
+                            boolean playerLevelOK = playerCharacter.getLevel() >= level.getRequiredLevel();
+                            boolean previousLevelCompleted = highestCompleted >= level.getLevelNumber() - 1;
+                            level.setUnlocked(playerLevelOK || previousLevelCompleted);
                         }
                         
                         levels.add(level);

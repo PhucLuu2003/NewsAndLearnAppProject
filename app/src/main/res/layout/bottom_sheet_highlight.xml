@@ -142,7 +142,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        app:boxBackgroundMode="outline">
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:boxStrokeColor="@color/primary"
+        app:hintTextColor="@color/text_secondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/edit_note"
@@ -151,7 +157,9 @@
             android:hint="Add a note..."
             android:inputType="textMultiLine"
             android:maxLines="3"
-            android:minLines="2" />
+            android:minLines="2"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_tertiary" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Buttons -->

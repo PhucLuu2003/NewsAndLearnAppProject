@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_bionic"
+        android:title="Bionic reading"
+        android:checkable="true"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_vocab_preview"
+        android:title="Vocabulary preview"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_text_smaller"
+        android:title="Smaller text"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_text_larger"
+        android:title="Larger text"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_bookmark"
+        android:title="Bookmark"
+        app:showAsAction="never" />
+
+</menu>

@@ -8,4 +8,10 @@
     <string name="user_profile">User Profile</string>
     <string name="notifications">Notifications</string>
     <string name="dark_mode">Dark Mode</string>
+    <string name="articles_tab_discover">Discover</string>
+    <string name="articles_tab_practice">Practice</string>
+
+    <string name="practice_selected">Practice selected</string>
+    <string name="no_saved_words_yet">No saved words yet</string>
+    <string name="select_words_to_practice">Select words to practice</string>
 </resources>

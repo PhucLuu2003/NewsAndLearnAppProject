@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ladder_item_container"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:paddingHorizontal="10dp"
+    android:paddingVertical="8dp"
+    android:background="@drawable/bg_millionaire_ladder_normal">
+
+    <TextView
+        android:id="@+id/tv_ladder_tier"
+        android:layout_width="26dp"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textStyle="bold"
+        android:textSize="13sp"
+        android:textColor="@color/text_primary" />
+
+    <TextView
+        android:id="@+id/tv_ladder_prize"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:text="$100"
+        android:textSize="13sp"
+        android:textColor="@color/text_secondary" />
+
+    <TextView
+        android:id="@+id/tv_ladder_safe"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SAFE"
+        android:textStyle="bold"
+        android:textSize="11sp"
+        android:textColor="@color/success_dark"
+        android:visibility="gone" />
+
+</LinearLayout>

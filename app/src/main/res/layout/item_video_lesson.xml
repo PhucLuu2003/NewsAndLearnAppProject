@@ -4,20 +4,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/video_lesson_card"
-    android:layout_width="300dp"
-    android:layout_height="wrap_content"
+    android:layout_width="280dp"
+    android:layout_height="340dp"
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="8dp"
     app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="24dp"
-    app:cardElevation="8dp"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="6dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
         <!-- Video Thumbnail Container -->
         <FrameLayout

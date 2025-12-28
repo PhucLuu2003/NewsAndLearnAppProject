@@ -9,6 +9,7 @@ public class User {
     private String name;
     private String email;
     private String avatarUrl;
+    private String role; // "admin" or "user"
     private String level; // Beginner, Intermediate, Advanced
     private int xp;
     private int dailyGoal; // in minutes
@@ -27,6 +28,7 @@ public class User {
         this.userId = userId;
         this.name = name;
         this.email = email;
+        this.role = "user"; // Default role
         this.level = "Beginner";
         this.xp = 0;
         this.dailyGoal = 30;
@@ -69,6 +71,14 @@ public class User {
 
     public void setAvatarUrl(String avatarUrl) {
         this.avatarUrl = avatarUrl;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getLevel() {
@@ -143,26 +153,27 @@ public class User {
         this.saved = saved;
     }
 
+
     // Calculate XP needed for next level
     public int getXpForNextLevel() {
         return getXpRequiredForLevel(getCurrentLevel() + 1);
     }
 
-    // Get current level based on XP
+    // Get current level based on XP (matches XPManager)
     public int getCurrentLevel() {
-        return xp / 100; // Every 100 XP = 1 level
+        return (xp / 500) + 1; // 500 XP = 1 level
     }
 
     // Get XP required for a specific level
     private int getXpRequiredForLevel(int level) {
-        return level * 100;
+        return level * 500;
     }
 
     // Get progress percentage to next level
     public int getProgressPercentage() {
         int currentLevel = getCurrentLevel();
-        int xpForCurrentLevel = getXpRequiredForLevel(currentLevel);
-        int xpForNextLevel = getXpForNextLevel();
+        int xpForCurrentLevel = (currentLevel - 1) * 500;
+        int xpForNextLevel = currentLevel * 500;
         int xpInCurrentLevel = xp - xpForCurrentLevel;
         int xpNeededForNextLevel = xpForNextLevel - xpForCurrentLevel;
 
@@ -176,6 +187,7 @@ public class User {
         map.put("name", name);
         map.put("email", email);
         map.put("avatarUrl", avatarUrl);
+        map.put("role", role);
         map.put("level", level);
         map.put("xp", xp);
         map.put("dailyGoal", dailyGoal);

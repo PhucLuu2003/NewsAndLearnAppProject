@@ -76,17 +76,30 @@
                             app:strokeWidth="4dp"
                             app:strokeColor="#FFFFFF"
                             app:cardElevation="12dp">
+
+                            <com.airbnb.lottie.LottieAnimationView
+                                android:id="@+id/avatar_animation"
+                                android:layout_width="210dp"
+                                android:layout_height="195dp"
+                                android:layout_gravity="center"
+                                android:visibility="visible"
+                                app:lottie_autoPlay="true"
+                                app:lottie_loop="true"
+                                app:lottie_rawRes="@raw/profile_avatar_boy" />
                         </com.google.android.material.card.MaterialCardView>
 
-                        <!-- Avatar Image -->
+                        <!-- Avatar Image (Hidden - using animation instead) -->
                         <de.hdodenhof.circleimageview.CircleImageView
                             android:id="@+id/profile_avatar"
                             android:layout_width="128dp"
                             android:layout_height="128dp"
                             android:layout_gravity="center"
                             android:src="@drawable/default_avatar"
+                            android:visibility="gone"
                             app:civ_border_color="#FFFFFF"
                             app:civ_border_width="6dp" />
+
+                        <!-- Animated Avatar - Always visible -->
 
                         <!-- Edit Button -->
                         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -370,17 +383,21 @@
                         android:gravity="center"
                         android:padding="20dp">
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🔥"
-                            android:textSize="36sp" />
+                        <!-- Animated Fire Icon -->
+                        <com.airbnb.lottie.LottieAnimationView
+                            android:id="@+id/fire_animation_profile"
+                            android:layout_width="52dp"
+                            android:layout_height="52dp"
+                            app:lottie_rawRes="@raw/fire_icon"
+                            app:lottie_autoPlay="true"
+                            app:lottie_loop="true"
+                            app:lottie_speed="1.0" />
 
                         <TextView
                             android:id="@+id/current_streak"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="12dp"
+                            android:layout_marginTop="8dp"
                             android:text="0"
                             android:textColor="#EF4444"
                             android:textSize="32sp"

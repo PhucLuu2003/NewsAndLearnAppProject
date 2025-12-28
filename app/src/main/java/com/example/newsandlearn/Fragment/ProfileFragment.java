@@ -126,7 +126,8 @@ public class ProfileFragment extends Fragment {
         
         // Cards
         xpCard = view.findViewById(R.id.xp_card);
-        view.findViewById(R.id.stats_card); // stats_card is a LinearLayout, not used for animation
+        // view.findViewById(R.id.stats_card); // stats_card is a LinearLayout, not used for animation (avata-update)
+        // statsCard = view.findViewById(R.id.stats_card); // Not in fragment_profile layout (main)
         actionsCard = view.findViewById(R.id.actions_card);
         settingsCard = view.findViewById(R.id.settings_card);
         

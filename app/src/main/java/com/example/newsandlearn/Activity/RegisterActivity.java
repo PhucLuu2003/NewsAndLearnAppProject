@@ -8,7 +8,7 @@ import android.text.method.PasswordTransformationMethod;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import com.airbnb.lottie.LottieAnimationView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,11 +32,12 @@ public class RegisterActivity extends AppCompatActivity {
     private MaterialButton registerButton;
     private TextView loginLink;
     private ImageView backButton, passwordToggle;
-    private ProgressBar progressBar;
+    private LottieAnimationView progressBar;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private CardView logoCard; // register_card wraps all
-    private View usernameContainer, emailContainer, passwordContainer, confirmContainer; // Changed from CardView to View
+    private View usernameContainer, emailContainer, passwordContainer, confirmContainer; // Changed from CardView to
+                                                                                         // View
     private boolean isPasswordVisible = false;
 
     @Override
@@ -64,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity {
         backButton = findViewById(R.id.back_button);
         progressBar = findViewById(R.id.register_progress); // Updated ID
         passwordToggle = findViewById(R.id.password_toggle);
-        
+
         logoCard = findViewById(R.id.logo_card);
         usernameContainer = findViewById(R.id.username_container); // Updated ID
         emailContainer = findViewById(R.id.email_container); // Updated ID
@@ -208,7 +209,7 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Success animation
                         AnimationHelper.zoomInBounce(this, logoCard);
-                        
+
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             saveUserToFirestore(user.getUid(), username, email);
@@ -218,7 +219,7 @@ public class RegisterActivity extends AppCompatActivity {
                         AnimationHelper.shake(emailContainer);
                         AnimationHelper.shake(passwordContainer);
                         AnimationHelper.wiggle(this, logoCard);
-                        
+
                         String errorMsg = task.getException() != null ? task.getException().getMessage()
                                 : "Lỗi không xác định";
                         Toast.makeText(this, "Đăng ký thất bại: " + errorMsg, Toast.LENGTH_LONG).show();
@@ -231,10 +232,14 @@ public class RegisterActivity extends AppCompatActivity {
         Map<String, Object> user = new HashMap<>();
         user.put("email", email);
         user.put("username", username);
+        user.put("role", "user"); // Default role
         user.put("level", "A1");
         user.put("streak", 0);
+        user.put("currentStreak", 0); // For HomeFragment
+        user.put("totalXP", 0); // For HomeFragment leaderboard
         user.put("totalDays", 0);
         user.put("createdAt", System.currentTimeMillis());
+        user.put("lastLoginDate", System.currentTimeMillis());
 
         db.collection("users").document(userId)
                 .set(user)
