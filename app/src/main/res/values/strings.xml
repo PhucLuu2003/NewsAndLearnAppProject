@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">NewsAndLearn</string>
 
+    <!-- Settings Screen -->
+    <string name="edit_profile">Edit Profile</string>
+    <string name="change_password">Change Password</string>
+    <string name="logout">Logout</string>
+    <string name="user_profile">User Profile</string>
+    <string name="notifications">Notifications</string>
+    <string name="dark_mode">Dark Mode</string>
     <string name="articles_tab_discover">Discover</string>
     <string name="articles_tab_practice">Practice</string>
 
