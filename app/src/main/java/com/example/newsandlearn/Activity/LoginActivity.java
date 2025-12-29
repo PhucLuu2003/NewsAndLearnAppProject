@@ -45,10 +45,10 @@ public class LoginActivity extends AppCompatActivity {
 
         // Initialize views
         initializeViews();
-        
+
         // Setup listeners
         setupListeners();
-        
+
         // Animate entrance
         animateEntrance();
     }
@@ -61,11 +61,12 @@ public class LoginActivity extends AppCompatActivity {
         forgotPasswordLink = findViewById(R.id.forgot_password_link);
         progressBar = findViewById(R.id.login_progress); // Changed ID to match XML
         passwordToggle = findViewById(R.id.password_toggle);
-        
+
         logoCard = findViewById(R.id.logo_card);
         emailContainer = findViewById(R.id.email_container); // Updated ID
         passwordContainer = findViewById(R.id.password_container); // Updated ID
-        // login_card is the main container, we might want to animate it too, but individual inputs are better for focus
+        // login_card is the main container, we might want to animate it too, but
+        // individual inputs are better for focus
         googleLoginBtn = findViewById(R.id.google_login_btn);
         facebookLoginBtn = findViewById(R.id.facebook_login_btn);
     }
@@ -90,7 +91,9 @@ public class LoginActivity extends AppCompatActivity {
         // Forgot password
         forgotPasswordLink.setOnClickListener(v -> {
             AnimationHelper.pulse(this, v);
-            Toast.makeText(this, "Tính năng đang phát triển", Toast.LENGTH_SHORT).show();
+            AnimationHelper.fadeOut(this, findViewById(android.R.id.content));
+            startActivity(new Intent(LoginActivity.this, ForgotPasswordActivity.class));
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
 
         // Password toggle
@@ -183,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         // Success animation
                         AnimationHelper.zoomInBounce(this, logoCard);
-                        
+
                         Toast.makeText(this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
 
                         // Navigate to MainActivity with animation
@@ -197,7 +200,7 @@ public class LoginActivity extends AppCompatActivity {
                         AnimationHelper.shake(emailContainer);
                         AnimationHelper.shake(passwordContainer);
                         AnimationHelper.wiggle(this, logoCard);
-                        
+
                         String errorMsg = task.getException() != null ? task.getException().getMessage()
                                 : "Lỗi không xác định";
                         Toast.makeText(this, "Đăng nhập thất bại: " + errorMsg, Toast.LENGTH_LONG).show();
