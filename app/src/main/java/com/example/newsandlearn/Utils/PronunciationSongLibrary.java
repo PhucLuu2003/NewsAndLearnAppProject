@@ -26,27 +26,20 @@ public class PronunciationSongLibrary {
             "Happy Vibes",
             "Emotions",
             1, // Easy
-            120 // BPM
+            80 // BPM - Slower for easier gameplay
         );
         
-        song.setDurationSeconds(150); // 2:30
+        song.setDurationSeconds(90); // 1:30 - shorter!
         
-        // Add notes (words with timing)
-        song.addNote(new PronunciationSong.SongNote("happy", "/ˈhæpi/", 8.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("smile", "/smaɪl/", 12.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("joy", "/dʒɔɪ/", 16.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("laugh", "/læf/", 20.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("friend", "/frend/", 24.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("love", "/lʌv/", 28.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("peace", "/piːs/", 32.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("kind", "/kaɪnd/", 36.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("bright", "/braɪt/", 40.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("cheerful", "/ˈtʃɪrfəl/", 44.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("wonderful", "/ˈwʌndərfəl/", 48.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("amazing", "/əˈmeɪzɪŋ/", 52.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("fantastic", "/fænˈtæstɪk/", 56.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("delightful", "/dɪˈlaɪtfəl/", 60.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("joyful", "/ˈdʒɔɪfəl/", 64.0f, 2));
+        // CHỈ 8 TỪ - spacing: 8 beats between words
+        song.addNote(new PronunciationSong.SongNote("happy", "/ˈhæpi/", 8.0f, 1));      // 1 - AUTO
+        song.addNote(new PronunciationSong.SongNote("smile", "/smaɪl/", 16.0f, 1));     // 2 - AUTO
+        song.addNote(new PronunciationSong.SongNote("joy", "/dʒɔɪ/", 24.0f, 1));        // 3 - PLAY
+        song.addNote(new PronunciationSong.SongNote("laugh", "/læf/", 32.0f, 1));       // 4 - AUTO
+        song.addNote(new PronunciationSong.SongNote("friend", "/frend/", 40.0f, 1));    // 5 - PLAY
+        song.addNote(new PronunciationSong.SongNote("love", "/lʌv/", 48.0f, 1));        // 6 - PLAY
+        song.addNote(new PronunciationSong.SongNote("peace", "/piːs/", 56.0f, 1));      // 7 - AUTO
+        song.addNote(new PronunciationSong.SongNote("kind", "/kaɪnd/", 64.0f, 1));      // 8 - AUTO
         
         return song;
     }
@@ -57,23 +50,24 @@ public class PronunciationSongLibrary {
             "Daily Routine",
             "Daily Life",
             2, // Medium
-            100 // BPM
+            70 // BPM - Slower for easier gameplay
         );
         
         song.setDurationSeconds(180); // 3:00
         
+        // Increased spacing: 8 beats between words (4.8 seconds at 100 BPM)
         song.addNote(new PronunciationSong.SongNote("wake", "/weɪk/", 8.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("breakfast", "/ˈbrekfəst/", 12.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("shower", "/ˈʃaʊər/", 16.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("dress", "/dres/", 20.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("commute", "/kəˈmjuːt/", 24.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("work", "/wɜːrk/", 28.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("lunch", "/lʌntʃ/", 32.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("meeting", "/ˈmiːtɪŋ/", 36.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("exercise", "/ˈeksərsaɪz/", 40.0f, 2));
-        song.addNote(new PronunciationSong.SongNote("dinner", "/ˈdɪnər/", 44.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("relax", "/rɪˈlæks/", 48.0f, 1));
-        song.addNote(new PronunciationSong.SongNote("sleep", "/sliːp/", 52.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("breakfast", "/ˈbrekfəst/", 16.0f, 2));
+        song.addNote(new PronunciationSong.SongNote("shower", "/ˈʃaʊər/", 24.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("dress", "/dres/", 32.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("commute", "/kəˈmjuːt/", 40.0f, 2));
+        song.addNote(new PronunciationSong.SongNote("work", "/wɜːrk/", 48.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("lunch", "/lʌntʃ/", 56.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("meeting", "/ˈmiːtɪŋ/", 64.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("exercise", "/ˈeksərsaɪz/", 72.0f, 2));
+        song.addNote(new PronunciationSong.SongNote("dinner", "/ˈdɪnər/", 80.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("relax", "/rɪˈlæks/", 88.0f, 1));
+        song.addNote(new PronunciationSong.SongNote("sleep", "/sliːp/", 96.0f, 1));
         
         return song;
     }

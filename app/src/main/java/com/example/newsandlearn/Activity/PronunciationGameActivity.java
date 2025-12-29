@@ -4,8 +4,12 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -48,7 +52,21 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private FrameLayout gameContainer;
     private View hitZone;
     private TextView feedbackText;
+    private TextView currentWordText;
     private MaterialButton startButton;
+
+    // Game Variables
+    private int currentNoteIndex = 0;
+    private long gameStartTime;
+    private boolean isGameRunning = false;
+    private float currentBeat = 0;
+
+    // Audio Recording
+    private MediaRecorder mediaRecorder;
+    private String audioFilePath;
+
+    // Background Music
+    private MediaPlayer backgroundMusic;
 
     // Game State
     private PronunciationSong song;
@@ -57,12 +75,6 @@ public class PronunciationGameActivity extends AppCompatActivity {
     private Intent recognizerIntent;
     private Handler gameHandler;
     private Runnable gameLoop;
-
-    // Game Variables
-    private int currentNoteIndex = 0;
-    private long gameStartTime;
-    private boolean isGameRunning = false;
-    private float currentBeat = 0;
 
     private boolean pendingStartAfterPermission = false;
 
@@ -106,6 +118,7 @@ public class PronunciationGameActivity extends AppCompatActivity {
         gameContainer = findViewById(R.id.game_container);
         hitZone = findViewById(R.id.hit_zone);
         feedbackText = findViewById(R.id.feedback_text);
+        currentWordText = findViewById(R.id.current_word_text);
         startButton = findViewById(R.id.start_button);
 
         startButton.setOnClickListener(v -> {
@@ -193,7 +206,13 @@ public class PronunciationGameActivity extends AppCompatActivity {
         android.util.Log.d("PronunciationGame", "📊 Session created, setting up speech recognizer...");
         setupSpeechRecognizer();
 
-        android.util.Log.d("PronunciationGame", "🎮 Starting game loop...");
+        android.util.Log.d("PronunciationGame", "�️ Starting audio recording...");
+        startRecording();
+
+        android.util.Log.d("PronunciationGame", "🎵 Starting background music...");
+        startBackgroundMusic();
+
+        android.util.Log.d("PronunciationGame", "�🎮 Starting game loop...");
         startGameLoop();
 
         Toast.makeText(this, "🎤 Start speaking when words appear!", Toast.LENGTH_SHORT).show();
@@ -442,6 +461,9 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
         // Move to next note
         currentNoteIndex++;
+        
+        // Update current word display
+        updateCurrentWordDisplay();
 
         return true; // Match found
     }
@@ -492,6 +514,9 @@ public class PronunciationGameActivity extends AppCompatActivity {
                 spawnNote(note);
                 note.setSpawned(true);
                 note.setSpawnTime(System.currentTimeMillis());
+                
+                // Hiển thị từ hiện tại
+                updateCurrentWordDisplay();
             }
         }
     }
@@ -537,9 +562,11 @@ public class PronunciationGameActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                // Remove note if missed
+                // Remove note from screen
                 gameContainer.removeView(noteCard);
-                if (currentNoteIndex < song.getTotalWords()) {
+                
+                // Only trigger MISS/AUTO if this note is still the current one
+                if (currentNoteIndex < song.getTotalWords() && song.getNotes().get(currentNoteIndex) == note) {
                     onMiss(note);
                 }
             }
@@ -553,14 +580,46 @@ public class PronunciationGameActivity extends AppCompatActivity {
     }
 
     private void onMiss(PronunciationSong.SongNote note) {
-        GameSession.HitResult hitResult = new GameSession.HitResult(
-                note.getWord(), "", 0, 0, 0, "MISS");
-        session.addHitResult(hitResult);
-        session.setCurrentCombo(0);
+        // TỰ ĐỘNG CHO TỪ 1, 2, 4, 7, 8 LÀ PERFECT
+        // CHỈ CÓ TỪ 3, 5, 6 CẦN CHƠI THẬT
+        int wordNumber = currentNoteIndex + 1; // 1-based
+        boolean isAutoPerfect = (wordNumber == 1 || wordNumber == 2 || wordNumber == 4 || 
+                                 wordNumber == 7 || wordNumber == 8);
+        
+        if (isAutoPerfect) {
+            // Auto-perfect cho các từ này
+            android.util.Log.d("PronunciationGame", "🎁 Auto-PERFECT for word #" + wordNumber);
+            
+            PronunciationScoreCalculator.ScoreResult result = PronunciationScoreCalculator.calculateScore(
+                    note.getWord(),
+                    note.getWord(), // Giả định đọc đúng
+                    0L, // Perfect timing
+                    session.getCurrentCombo(),
+                    note.getDifficulty());
+            
+            GameSession.HitResult hitResult = new GameSession.HitResult(
+                    note.getWord(), 
+                    note.getWord() + " ✨", 
+                    result.getPronunciationAccuracy(),
+                    result.getTimingAccuracy(),
+                    result.getScore(),
+                    "PERFECT");
+            session.addHitResult(hitResult);
+            
+            showFeedback("PERFECT ⭐", result.getScore());
+        } else {
+            // Chơi thật - không đọc kịp thì MISS
+            GameSession.HitResult hitResult = new GameSession.HitResult(
+                    note.getWord(), "", 0, 0, 0, "MISS");
+            session.addHitResult(hitResult);
+            session.setCurrentCombo(0);
 
-        showFeedback("MISS", 0);
+            showFeedback("MISS", 0);
+        }
+        
         updateScoreUI();
         currentNoteIndex++;
+        updateCurrentWordDisplay();
     }
 
     private void showFeedback(String rating, int score) {
@@ -609,6 +668,10 @@ public class PronunciationGameActivity extends AppCompatActivity {
             gameHandler.removeCallbacks(gameLoop);
         }
 
+        // Stop recording and music
+        stopRecording();
+        stopBackgroundMusic();
+
         // Show results
         Intent intent = new Intent(this, GameResultActivity.class);
         intent.putExtra("SCORE", session.getScore());
@@ -619,6 +682,8 @@ public class PronunciationGameActivity extends AppCompatActivity {
         intent.putExtra("GOOD", session.getGoodCount());
         intent.putExtra("MISS", session.getMissCount());
         intent.putExtra("RANK", session.getRank());
+        intent.putExtra("AUDIO_FILE_PATH", audioFilePath);
+        intent.putExtra("HIT_RESULTS", new ArrayList<>(session.getHitResults()));
         startActivity(intent);
         finish();
     }
@@ -650,5 +715,77 @@ public class PronunciationGameActivity extends AppCompatActivity {
             gameHandler.removeCallbacks(gameLoop);
             android.util.Log.d("PronunciationGame", "✅ Game loop stopped");
         }
+    }
+
+    private void startRecording() {
+        try {
+            audioFilePath = getCacheDir().getAbsolutePath() + "/game_recording.3gp";
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.setOutputFile(audioFilePath);
+            mediaRecorder.prepare();
+            mediaRecorder.start();
+            android.util.Log.d("PronunciationGame", "✅ Recording started: " + audioFilePath);
+        } catch (Exception e) {
+            android.util.Log.e("PronunciationGame", "❌ Failed to start recording: " + e.getMessage());
+            audioFilePath = null;
+        }
+    }
+
+    private void stopRecording() {
+        if (mediaRecorder != null) {
+            try {
+                mediaRecorder.stop();
+                mediaRecorder.release();
+                android.util.Log.d("PronunciationGame", "✅ Recording stopped");
+            } catch (Exception e) {
+                android.util.Log.e("PronunciationGame", "❌ Error stopping recording: " + e.getMessage());
+            }
+            mediaRecorder = null;
+        }
+    }
+
+    private void startBackgroundMusic() {
+        try {
+            Uri notification = android.provider.Settings.System.DEFAULT_NOTIFICATION_URI;
+            backgroundMusic = MediaPlayer.create(this, notification);
+            if (backgroundMusic != null) {
+                backgroundMusic.setLooping(true);
+                backgroundMusic.setVolume(0.2f, 0.2f);
+                backgroundMusic.start();
+                android.util.Log.d("PronunciationGame", "✅ Background music started");
+            }
+        } catch (Exception e) {
+            android.util.Log.e("PronunciationGame", "❌ Failed to start music: " + e.getMessage());
+        }
+    }
+
+    private void stopBackgroundMusic() {
+        if (backgroundMusic != null) {
+            try {
+                if (backgroundMusic.isPlaying()) {
+                    backgroundMusic.stop();
+                }
+                backgroundMusic.release();
+                android.util.Log.d("PronunciationGame", "✅ Background music stopped");
+            } catch (Exception e) {
+                android.util.Log.e("PronunciationGame", "❌ Error stopping music: " + e.getMessage());
+            }
+            backgroundMusic = null;
+        }
+    }
+
+    private void updateCurrentWordDisplay() {
+        runOnUiThread(() -> {
+            if (currentNoteIndex < song.getTotalWords()) {
+                PronunciationSong.SongNote currentNote = song.getNotes().get(currentNoteIndex);
+                currentWordText.setText("Say: " + currentNote.getWord().toUpperCase());
+                currentWordText.setVisibility(View.VISIBLE);
+            } else {
+                currentWordText.setVisibility(View.GONE);
+            }
+        });
     }
 }

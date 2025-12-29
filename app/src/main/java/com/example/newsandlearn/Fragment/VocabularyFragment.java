@@ -31,6 +31,7 @@ import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressManager;
 import com.example.newsandlearn.Utils.SampleDataHelper;
 import com.example.newsandlearn.Utils.FirebaseDataSeeder;
+import com.example.newsandlearn.Utils.TTSManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -78,8 +79,6 @@ public class VocabularyFragment extends Fragment {
 
     // Services
     private FirebaseFirestore db;
-    private FirebaseAuth auth;
-    private TextToSpeech tts;
     private ProgressManager progressManager;
 
     public VocabularyFragment() {
@@ -93,10 +92,24 @@ public class VocabularyFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_vocabulary_enhanced, container, false);
 
         initializeServices();
+
         initializeViews(view);
         setupRecyclerView();
         setupListeners();
-        setupTextToSpeech();
+
+        // Initialize TTSManager with callback
+        if (getContext() != null) {
+            Log.d(TAG, "Initializing TTS...");
+            TTSManager.getInstance().initialize(getContext(), () -> {
+                Log.d(TAG, "TTS initialized successfully!");
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Voice ready! 🔊", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        }
+
         loadVocabulary();
 
         return view;
@@ -104,7 +117,6 @@ public class VocabularyFragment extends Fragment {
 
     private void initializeServices() {
         db = FirebaseFirestore.getInstance();
-        auth = FirebaseAuth.getInstance();
         progressManager = ProgressManager.getInstance();
         allVocabulary = new ArrayList<>();
         filteredVocabulary = new ArrayList<>();
@@ -132,10 +144,10 @@ public class VocabularyFragment extends Fragment {
         // Buttons - Updated for enhanced layout
         practiceButton = view.findViewById(R.id.practice_fab); // ExtendedFAB
         addWordButton = view.findViewById(R.id.add_word_fab); // Regular FAB
-        
+
         // Quick action cards
         setsButton = view.findViewById(R.id.browse_sets_card); // MaterialCardView
-        
+
         // Note: swipeRefresh removed in enhanced layout (uses NestedScrollView)
         swipeRefresh = null;
     }
@@ -146,7 +158,8 @@ public class VocabularyFragment extends Fragment {
             @Override
             public void onVocabularyClick(VocabularyWithProgress vocabulary) {
                 // Open vocabulary detail activity
-                Intent intent = new Intent(getActivity(), com.example.newsandlearn.Activity.VocabularyDetailActivity.class);
+                Intent intent = new Intent(getActivity(),
+                        com.example.newsandlearn.Activity.VocabularyDetailActivity.class);
                 intent.putExtra("vocabulary_id", vocabulary.getId());
                 startActivity(intent);
             }
@@ -258,20 +271,13 @@ public class VocabularyFragment extends Fragment {
         }
     }
 
-    private void setupTextToSpeech() {
-        tts = new TextToSpeech(getContext(), status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                tts.setLanguage(Locale.US);
-            }
-        });
-    }
-
     /**
      * Load vocabulary using new two-collection structure
      * Step 1: Load user's vocabulary progress from user_vocabulary
      * Step 2: Load actual vocabulary data from vocabularies collection
      */
     private void loadVocabulary() {
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() == null) {
             showEmptyState();
             return;
@@ -447,9 +453,30 @@ public class VocabularyFragment extends Fragment {
     }
 
     private void speakWord(String word) {
-        if (tts != null) {
-            tts.speak(word, TextToSpeech.QUEUE_FLUSH, null, null);
+        Log.d(TAG, "speakWord() called with word: " + word);
+        
+        if (getContext() == null) {
+            Log.e(TAG, "Context is null, cannot speak");
+            return;
         }
+
+        TTSManager ttsManager = TTSManager.getInstance();
+        Log.d(TAG, "TTSManager initialized: " + ttsManager.isInitialized());
+        
+        if (!ttsManager.isInitialized()) {
+            Log.w(TAG, "TTS not initialized, initializing now...");
+            Toast.makeText(getContext(), "Preparing voice... 🎤", Toast.LENGTH_SHORT).show();
+            ttsManager.initialize(getContext(), () -> {
+                Log.d(TAG, "TTS initialized in callback, now speaking: " + word);
+                Toast.makeText(getContext(), "Speaking: " + word + " 🔊", Toast.LENGTH_SHORT).show();
+                ttsManager.speakWord(word);
+            });
+            return;
+        }
+
+        Log.d(TAG, "TTS is ready, speaking: " + word);
+        Toast.makeText(getContext(), "🔊 " + word, Toast.LENGTH_SHORT).show();
+        ttsManager.speakWord(word);
     }
 
     private void toggleFavorite(VocabularyWithProgress vocabulary) {
@@ -461,6 +488,7 @@ public class VocabularyFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         // Save to Firebase
+        FirebaseAuth auth = FirebaseAuth.getInstance();
         if (auth.getCurrentUser() != null) {
             String userId = auth.getCurrentUser().getUid();
             db.collection("users").document(userId)
@@ -509,9 +537,7 @@ public class VocabularyFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
+        // Note: We don't shutdown TTSManager here because it's a singleton
+        // that might be used by other parts of the app.
     }
 }

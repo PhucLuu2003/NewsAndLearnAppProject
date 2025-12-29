@@ -89,14 +89,31 @@
         android:layout_below="@id/top_hud"
         android:layout_above="@id/bottom_controls">
 
-        <!-- Hit Zone -->
+        <!-- Hit Zone - Positioned at left (words move right to left) -->
         <View
             android:id="@+id/hit_zone"
             android:layout_width="4dp"
             android:layout_height="match_parent"
             android:background="#FFD700"
-            android:layout_gravity="center_horizontal"
+            android:layout_gravity="start"
+            android:layout_marginStart="100dp"
             android:alpha="0.7" />
+
+        <!-- Current Word Display -->
+        <TextView
+            android:id="@+id/current_word_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Say: HAPPY"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#FFD700"
+            android:layout_gravity="center|top"
+            android:layout_marginTop="50dp"
+            android:padding="16dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="#2D2D44"
+            android:visibility="gone" />
 
         <!-- Feedback Text -->
         <TextView
@@ -104,7 +121,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="PERFECT!"
-            android:textSize="48sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="#FFD700"
             android:layout_gravity="center"

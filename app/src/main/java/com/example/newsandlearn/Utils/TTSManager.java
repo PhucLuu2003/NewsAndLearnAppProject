@@ -18,7 +18,9 @@ public class TTSManager {
 
     public interface TTSCallback {
         void onStart();
+
         void onDone();
+
         void onError();
     }
 
@@ -32,82 +34,150 @@ public class TTSManager {
         return instance;
     }
 
+    private boolean isInitializing = false;
+    private String pendingText;
+    private TTSCallback pendingCallback;
+
     public void initialize(Context context, Runnable onReady) {
-        if (tts != null) {
-            tts.shutdown();
+        Log.d(TAG, "🎤 initialize() called. isInitialized=" + isInitialized + ", isInitializing=" + isInitializing);
+
+        if (isInitialized) {
+            Log.d(TAG, "✅ TTS already initialized, running onReady callback");
+            if (onReady != null)
+                onReady.run();
+            return;
         }
 
+        if (isInitializing) {
+            Log.w(TAG, "⏳ TTS initialization already in progress, skipping duplicate init");
+            return;
+        }
+        isInitializing = true;
+
+        if (tts != null) {
+            try {
+                tts.shutdown();
+            } catch (Exception ignored) {
+            }
+        }
+
+        // Try to initialize with Google engine if available for better quality
+        String googleTtsPackage = "com.google.android.tts";
+        Log.d(TAG, "🚀 Creating TextToSpeech with engine: " + googleTtsPackage);
+
         tts = new TextToSpeech(context.getApplicationContext(), status -> {
+            isInitializing = false;
+            Log.d(TAG, "📨 TTS init callback: status=" + status + " (SUCCESS=" + TextToSpeech.SUCCESS + ")");
+
             if (status == TextToSpeech.SUCCESS) {
                 int result = tts.setLanguage(Locale.US);
-                if (result == TextToSpeech.LANG_MISSING_DATA || 
-                    result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e(TAG, "Language not supported");
-                    isInitialized = false;
-                } else {
-                    isInitialized = true;
-                    tts.setSpeechRate(speechRate);
-                    
-                    // Set utterance progress listener
-                    tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
-                        @Override
-                        public void onStart(String utteranceId) {
-                            if (currentCallback != null) {
-                                android.os.Handler mainHandler = new android.os.Handler(
-                                    android.os.Looper.getMainLooper()
-                                );
-                                mainHandler.post(() -> currentCallback.onStart());
-                            }
-                        }
+                Log.d(TAG,
+                        "🇺🇸 setLanguage(US) result: " + result + " (LANG_MISSING_DATA="
+                                + TextToSpeech.LANG_MISSING_DATA + ", LANG_NOT_SUPPORTED="
+                                + TextToSpeech.LANG_NOT_SUPPORTED + ")");
 
-                        @Override
-                        public void onDone(String utteranceId) {
-                            if (currentCallback != null) {
-                                android.os.Handler mainHandler = new android.os.Handler(
-                                    android.os.Looper.getMainLooper()
-                                );
-                                mainHandler.post(() -> currentCallback.onDone());
-                            }
-                        }
+                if (result == TextToSpeech.LANG_MISSING_DATA ||
+                        result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                    Log.e(TAG, "❌ English language not supported, trying default locale");
+                    tts.setLanguage(Locale.getDefault());
+                }
 
-                        @Override
-                        public void onError(String utteranceId) {
-                            if (currentCallback != null) {
-                                android.os.Handler mainHandler = new android.os.Handler(
-                                    android.os.Looper.getMainLooper()
-                                );
-                                mainHandler.post(() -> currentCallback.onError());
-                            }
+                isInitialized = true;
+                tts.setSpeechRate(speechRate);
+
+                Log.i(TAG, "✅ TTS initialized successfully! isInitialized=true");
+
+                // Set utterance progress listener
+                tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                    @Override
+                    public void onStart(String utteranceId) {
+                        if (currentCallback != null) {
+                            android.os.Handler mainHandler = new android.os.Handler(
+                                    android.os.Looper.getMainLooper());
+                            mainHandler.post(() -> currentCallback.onStart());
                         }
-                    });
-                    
-                    if (onReady != null) {
-                        onReady.run();
                     }
+
+                    @Override
+                    public void onDone(String utteranceId) {
+                        if (currentCallback != null) {
+                            android.os.Handler mainHandler = new android.os.Handler(
+                                    android.os.Looper.getMainLooper());
+                            mainHandler.post(() -> currentCallback.onDone());
+                        }
+                    }
+
+                    @Override
+                    public void onError(String utteranceId) {
+                        if (currentCallback != null) {
+                            android.os.Handler mainHandler = new android.os.Handler(
+                                    android.os.Looper.getMainLooper());
+                            mainHandler.post(() -> currentCallback.onError());
+                        }
+                    }
+                });
+
+                if (onReady != null) {
+                    onReady.run();
+                }
+
+                // Speak pending text if any
+                if (pendingText != null) {
+                    speak(pendingText, pendingCallback);
+                    pendingText = null;
+                    pendingCallback = null;
                 }
             } else {
-                Log.e(TAG, "TTS initialization failed");
+                Log.e(TAG, "TTS initialization failed with status: " + status);
                 isInitialized = false;
+                // Try fallback to default engine
+                fallbackInitialize(context, onReady);
+            }
+        }, googleTtsPackage);
+    }
+
+    private void fallbackInitialize(Context context, Runnable onReady) {
+        tts = new TextToSpeech(context.getApplicationContext(), status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                tts.setLanguage(Locale.US);
+                isInitialized = true;
+                if (onReady != null)
+                    onReady.run();
+                if (pendingText != null) {
+                    speak(pendingText, pendingCallback);
+                    pendingText = null;
+                    pendingCallback = null;
+                }
             }
         });
     }
 
     public void speak(String text, TTSCallback callback) {
-        if (!isInitialized || tts == null) {
-            Log.e(TAG, "TTS not initialized");
-            if (callback != null) {
-                callback.onError();
-            }
+        Log.d(TAG, "🗣️ speak() called: text=" + text + ", isInitialized=" + isInitialized);
+
+        if (!isInitialized) {
+            Log.w(TAG, "⚠️ TTS not initialized yet, queuing text: " + text);
+            pendingText = text;
+            pendingCallback = callback;
             return;
         }
 
+        if (tts == null) {
+            Log.e(TAG, "❌ TTS object is null!");
+            if (callback != null)
+                callback.onError();
+            return;
+        }
+
+        Log.d(TAG, "▶️ Calling tts.speak() with text: " + text);
         currentCallback = callback;
         HashMap<String, String> params = new HashMap<>();
-        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "utteranceId");
+        params.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "utteranceId_" + System.currentTimeMillis());
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, params);
     }
 
     public void speakWord(String word) {
+        Log.d(TAG, "🔊 speakWord() called: word=" + word + ", isInitialized=" + isInitialized);
         speak(word, null);
     }
 

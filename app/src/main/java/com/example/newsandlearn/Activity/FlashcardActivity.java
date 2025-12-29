@@ -27,6 +27,7 @@ import com.example.newsandlearn.Model.Vocabulary;
 import com.example.newsandlearn.Model.VocabularyWithProgress;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.ProgressManager;
+import com.example.newsandlearn.Utils.TTSManager;
 import com.example.newsandlearn.Utils.VocabularyHelper;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
@@ -79,7 +80,6 @@ public class FlashcardActivity extends AppCompatActivity {
     // Services
     private FirebaseFirestore db;
     private FirebaseAuth auth;
-    private TextToSpeech tts;
     private GestureDetector gestureDetector;
     private ProgressManager progressManager;
 
@@ -93,7 +93,9 @@ public class FlashcardActivity extends AppCompatActivity {
         loadVocabulary();
         setupListeners();
         setupGestures();
-        setupTextToSpeech();
+
+        // Initialize TTSManager if not already done
+        TTSManager.getInstance().initialize(this, null);
     }
 
     private void initializeServices() {
@@ -302,18 +304,6 @@ public class FlashcardActivity extends AppCompatActivity {
         flashcardContainer.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
-    private void setupTextToSpeech() {
-        tts = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                int result = tts.setLanguage(Locale.US);
-                if (result == TextToSpeech.LANG_MISSING_DATA ||
-                        result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Toast.makeText(this, "Text-to-Speech not supported", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
     private void showCard(int index) {
         if (index >= vocabularyList.size()) {
             showCompletionDialog();
@@ -416,10 +406,26 @@ public class FlashcardActivity extends AppCompatActivity {
     }
 
     private void speakWord() {
-        if (tts != null && currentIndex < vocabularyList.size()) {
-            String word = vocabularyList.get(currentIndex).getWord();
-            tts.speak(word, TextToSpeech.QUEUE_FLUSH, null, null);
+        if (currentIndex >= vocabularyList.size()) {
+            return;
         }
+
+        String word = vocabularyList.get(currentIndex).getWord();
+        android.util.Log.d(TAG, "🔊 Speaker clicked for word: " + word);
+
+        TTSManager ttsManager = TTSManager.getInstance();
+        if (!ttsManager.isInitialized()) {
+            android.util.Log.w(TAG, "⚠️ TTSManager not initialized, initializing now...");
+            Toast.makeText(this, "Preparing voice...", Toast.LENGTH_SHORT).show();
+            ttsManager.initialize(this, () -> {
+                android.util.Log.d(TAG, "✅ TTS ready, speaking: " + word);
+                ttsManager.speakWord(word);
+            });
+            return;
+        }
+
+        android.util.Log.d(TAG, "✅ Speaking word: " + word);
+        ttsManager.speakWord(word);
     }
 
     private void handleAnswer(boolean knowIt) {
@@ -521,10 +527,8 @@ public class FlashcardActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
+        // Note: We don't shutdown TTSManager here as it's a singleton
+        // that might be used by other parts of the app
     }
 
     @Override

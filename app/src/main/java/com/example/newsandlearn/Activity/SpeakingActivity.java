@@ -65,6 +65,7 @@ public class SpeakingActivity extends AppCompatActivity {
     private MediaPlayer samplePlayer;
     private MediaRecorder mediaRecorder;
     private boolean isRecording = false;
+    private boolean isSpeechRecognitionAvailable = true;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -93,7 +94,6 @@ public class SpeakingActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
         progressManager = ProgressManager.getInstance();
-        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
     }
 
     private void initializeViews() {
@@ -124,14 +124,75 @@ public class SpeakingActivity extends AppCompatActivity {
             recordButton.setVisibility(View.VISIBLE);
         });
 
-        setupSpeechRecognizer();
+        initSpeechRecognizer();
+    }
+
+    private String getSpeechNotAvailableMessage() {
+        return "Speech recognition not available on this device.\n" +
+                "Try: install/update Speech Services by Google (Voice input) or the Google app.";
+    }
+
+    private void initSpeechRecognizer() {
+        // Some OEM ROMs can report a false negative here; don't block initialization solely on this.
+        boolean reportedUnavailable = !SpeechRecognizer.isRecognitionAvailable(this);
+        if (reportedUnavailable) {
+            android.util.Log.w("SpeakingActivity", "SpeechRecognizer.isRecognitionAvailable() returned false; attempting init anyway");
+        }
+
+        try {
+            // Check for Google recognition service specifically
+            android.content.ComponentName googleService = new android.content.ComponentName(
+                "com.google.android.googlequicksearchbox",
+                "com.google.android.voicesearch.serviceapi.GoogleRecognitionService"
+            );
+
+            if (isGoogleSpeechServiceInstalled()) {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this, googleService);
+            } else {
+                speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+            }
+
+            if (speechRecognizer == null) {
+                isSpeechRecognitionAvailable = false;
+                Toast.makeText(this, getSpeechNotAvailableMessage(), Toast.LENGTH_LONG).show();
+                if (recordButton != null) {
+                    recordButton.setEnabled(false);
+                    recordButton.setAlpha(0.5f);
+                }
+                return;
+            }
+            isSpeechRecognitionAvailable = true;
+            setupSpeechRecognizer();
+        } catch (Exception e) {
+            isSpeechRecognitionAvailable = false;
+            android.util.Log.e("SpeakingActivity", "Speech recognition init error", e);
+            Toast.makeText(this, getSpeechNotAvailableMessage(), Toast.LENGTH_LONG).show();
+            if (recordButton != null) {
+                recordButton.setEnabled(false);
+                recordButton.setAlpha(0.5f);
+            }
+        }
+    }
+
+    private boolean isGoogleSpeechServiceInstalled() {
+        try {
+            getPackageManager().getPackageInfo("com.google.android.tts", 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            try {
+                getPackageManager().getPackageInfo("com.google.android.googlequicksearchbox", 0);
+                return true;
+            } catch (PackageManager.NameNotFoundException e2) {
+                return false;
+            }
+        }
     }
 
     private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO},
+                    new String[] { Manifest.permission.RECORD_AUDIO },
                     PERMISSION_REQUEST_CODE);
         }
     }
@@ -141,7 +202,7 @@ public class SpeakingActivity extends AppCompatActivity {
      */
     private void loadLessonFromFirebase() {
         android.util.Log.d("SpeakingActivity", "Loading lesson: " + lessonId);
-        
+
         db.collection("speaking_lessons").document(lessonId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -157,20 +218,23 @@ public class SpeakingActivity extends AppCompatActivity {
                         if (lesson.getId() == null || lesson.getId().isEmpty()) {
                             lesson.setId(lessonId);
                         }
-                        
+
                         android.util.Log.d("SpeakingActivity", "Lesson loaded: " + lesson.getTitle());
-                        android.util.Log.d("SpeakingActivity", "Content: " + (lesson.getContent() != null ? "Yes" : "No"));
-                        android.util.Log.d("SpeakingActivity", "Prompts: " + (lesson.getPrompts() != null ? lesson.getPrompts().size() : 0));
-                        
+                        android.util.Log.d("SpeakingActivity",
+                                "Content: " + (lesson.getContent() != null ? "Yes" : "No"));
+                        android.util.Log.d("SpeakingActivity",
+                                "Prompts: " + (lesson.getPrompts() != null ? lesson.getPrompts().size() : 0));
+
                         displayLesson();
-                        
+
                         // Check if we have prompts or just content
                         if (lesson.getPrompts() != null && !lesson.getPrompts().isEmpty()) {
                             loadPrompt(0);
                         } else if (lesson.getContent() != null) {
                             // Show content as prompt
                             promptText.setText(lesson.getContent());
-                            playSampleButton.setVisibility(lesson.getSampleAudioUrl() != null ? View.VISIBLE : View.GONE);
+                            playSampleButton
+                                    .setVisibility(lesson.getSampleAudioUrl() != null ? View.VISIBLE : View.GONE);
                         } else {
                             Toast.makeText(this, "No content available for this lesson", Toast.LENGTH_SHORT).show();
                         }
@@ -206,14 +270,14 @@ public class SpeakingActivity extends AppCompatActivity {
      */
     private void playSampleAudio() {
         String audioUrl = null;
-        
+
         // Try to get audio URL from current prompt first, then from lesson
         if (currentPrompt != null && currentPrompt.getSampleAudioUrl() != null) {
             audioUrl = currentPrompt.getSampleAudioUrl();
         } else if (lesson != null && lesson.getSampleAudioUrl() != null) {
             audioUrl = lesson.getSampleAudioUrl();
         }
-        
+
         if (audioUrl == null || audioUrl.isEmpty()) {
             Toast.makeText(this, "No sample audio available", Toast.LENGTH_SHORT).show();
             return;
@@ -270,11 +334,25 @@ public class SpeakingActivity extends AppCompatActivity {
                 Toast.makeText(SpeakingActivity.this, "Error recognizing speech", Toast.LENGTH_SHORT).show();
             }
 
-            @Override public void onRmsChanged(float rmsdB) {}
-            @Override public void onBufferReceived(byte[] buffer) {}
-            @Override public void onEndOfSpeech() {}
-            @Override public void onPartialResults(Bundle partialResults) {}
-            @Override public void onEvent(int eventType, Bundle params) {}
+            @Override
+            public void onRmsChanged(float rmsdB) {
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
         });
     }
 
@@ -287,10 +365,14 @@ public class SpeakingActivity extends AppCompatActivity {
     }
 
     private void startRecording() {
+        if (!isSpeechRecognitionAvailable || speechRecognizer == null) {
+            Toast.makeText(this, getSpeechNotAvailableMessage(), Toast.LENGTH_LONG).show();
+            return;
+        }
         statusCard.setVisibility(View.VISIBLE);
         // recordButton.setVisibility(View.GONE); // Keep button for stop
         statusText.setText("Listening...");
-        
+
         // Start Pulse Animation
         pulseView.setVisibility(View.VISIBLE);
         pulseAnimator = ObjectAnimator.ofPropertyValuesHolder(
@@ -313,8 +395,10 @@ public class SpeakingActivity extends AppCompatActivity {
 
     private void stopRecording() {
         isRecording = false;
-        speechRecognizer.stopListening();
-        
+        if (speechRecognizer != null) {
+            speechRecognizer.stopListening();
+        }
+
         // Stop Pulse
         if (pulseAnimator != null) {
             pulseAnimator.cancel();
@@ -374,10 +458,12 @@ public class SpeakingActivity extends AppCompatActivity {
         int xp = (pronScore + fluScore) / 2;
         progressManager.addXP(xp, new ProgressManager.ProgressCallback() {
             @Override
-            public void onSuccess(UserProgress progress) {}
-            
+            public void onSuccess(UserProgress progress) {
+            }
+
             @Override
-            public void onFailure(Exception e) {}
+            public void onFailure(Exception e) {
+            }
         });
     }
 
@@ -392,7 +478,8 @@ public class SpeakingActivity extends AppCompatActivity {
      * Save progress to Firebase
      */
     private void saveProgress() {
-        if (auth.getCurrentUser() == null) return;
+        if (auth.getCurrentUser() == null)
+            return;
 
         String userId = auth.getCurrentUser().getUid();
         db.collection("users").document(userId)
@@ -415,7 +502,8 @@ public class SpeakingActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == PERMISSION_REQUEST_CODE) {
             if (grantResults.length == 0 || grantResults[0] != PackageManager.PERMISSION_GRANTED) {

@@ -2,6 +2,7 @@ package com.example.newsandlearn;
 
 import android.app.Application;
 
+import com.example.newsandlearn.Utils.TTSManager;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
 
@@ -17,5 +18,10 @@ public class NewsAndLearnApp extends Application {
                 .setPersistenceEnabled(true)
                 .build();
         firestore.setFirestoreSettings(settings);
+
+        // Warm up Text-to-Speech so "speaker" actions in Vocabulary work immediately.
+        // This is safe: TTSManager uses application context and handles engine
+        // fallback.
+        TTSManager.getInstance().initialize(this, null);
     }
 }

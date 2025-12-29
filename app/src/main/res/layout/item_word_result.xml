@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <!-- Status Icon -->
+        <TextView
+            android:id="@+id/status_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="✓"
+            android:textSize="24sp"
+            android:textColor="@android:color/white"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="@color/green"
+            android:gravity="center" />
+
+        <!-- Word Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/word_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="happy"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/phonetic_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="/ˈhæpi/"
+                android:textSize="14sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/spoken_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="You said: happy"
+                android:textSize="12sp"
+                android:textColor="@color/text_secondary"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+        <!-- Rating Badge -->
+        <TextView
+            android:id="@+id/rating_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PERFECT"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="@color/primary"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp" />
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>
