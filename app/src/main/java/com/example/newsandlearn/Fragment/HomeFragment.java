@@ -526,12 +526,25 @@ public class HomeFragment extends Fragment {
     private void loadUserInfo() {
         if (mAuth.getCurrentUser() != null) {
             String userId = mAuth.getCurrentUser().getUid();
+
+            // Get display name from Firebase Auth first (updated in EditProfile)
+            String displayName = mAuth.getCurrentUser().getDisplayName();
+            if (displayName != null && !displayName.isEmpty()) {
+                usernameText.setText(displayName);
+            }
+
             db.collection("users").document(userId).get()
                     .addOnSuccessListener(document -> {
                         if (document.exists()) {
-                            String username = document.getString("username");
-                            if (username != null) {
-                                usernameText.setText(username);
+                            // Use displayName from Firestore if Auth doesn't have it
+                            if (displayName == null || displayName.isEmpty()) {
+                                String username = document.getString("displayName");
+                                if (username == null || username.isEmpty()) {
+                                    username = document.getString("username");
+                                }
+                                if (username != null) {
+                                    usernameText.setText(username);
+                                }
                             }
 
                             // Load streak with animation
@@ -569,7 +582,10 @@ public class HomeFragment extends Fragment {
                         }
                     })
                     .addOnFailureListener(e -> {
-                        usernameText.setText("User");
+                        // Keep the displayName from Auth if Firestore fails
+                        if (displayName == null || displayName.isEmpty()) {
+                            usernameText.setText("User");
+                        }
                     });
         }
     }

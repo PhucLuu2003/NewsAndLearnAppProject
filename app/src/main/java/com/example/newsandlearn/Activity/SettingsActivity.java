@@ -3,11 +3,16 @@ package com.example.newsandlearn.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
@@ -15,6 +20,8 @@ import androidx.appcompat.widget.SwitchCompat;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.FirebaseDataSeeder;
 import com.example.newsandlearn.Utils.RoleManager;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -72,7 +79,7 @@ public class SettingsActivity extends AppCompatActivity {
         editProfile = findViewById(R.id.edit_profile);
         changePassword = findViewById(R.id.change_password);
         logoutButton = findViewById(R.id.logout_button);
-        
+
         // Developer Tools (Admin only)
         devToolsHeader = findViewById(R.id.tv_developer_tools_header);
         seedDataButton = findViewById(R.id.seed_data_button);
@@ -98,11 +105,13 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
         editProfile.setOnClickListener(v -> {
-            Toast.makeText(this, "Edit profile feature coming soon", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(SettingsActivity.this, EditProfileActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
 
         changePassword.setOnClickListener(v -> {
-            Toast.makeText(this, "Change password feature coming soon", Toast.LENGTH_SHORT).show();
+            showChangePasswordDialog();
         });
 
         logoutButton.setOnClickListener(v -> logout());
@@ -147,15 +156,28 @@ public class SettingsActivity extends AppCompatActivity {
     private void applyAdminVisibility(boolean isAdmin) {
         runOnUiThread(() -> {
             int visibility = isAdmin ? android.view.View.VISIBLE : android.view.View.GONE;
-            
+
             // Hide/show all developer tools
-            if (devToolsHeader != null) devToolsHeader.setVisibility(visibility);
-            if (seedDataButton != null) seedDataButton.setVisibility(visibility);
-            if (reseedVideosButton != null) reseedVideosButton.setVisibility(visibility);
-            if (adminPanelButton != null) adminPanelButton.setVisibility(visibility);
-            if (seedLearnModulesButton != null) seedLearnModulesButton.setVisibility(visibility);
-            if (addAudioButton != null) addAudioButton.setVisibility(visibility);
+            if (devToolsHeader != null)
+                devToolsHeader.setVisibility(visibility);
+            if (seedDataButton != null)
+                seedDataButton.setVisibility(visibility);
+            if (reseedVideosButton != null)
+                reseedVideosButton.setVisibility(visibility);
+            if (adminPanelButton != null)
+                adminPanelButton.setVisibility(visibility);
+            if (seedLearnModulesButton != null)
+                seedLearnModulesButton.setVisibility(visibility);
+            if (addAudioButton != null)
+                addAudioButton.setVisibility(visibility);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload user data when returning to this activity
+        loadUserData();
     }
 
     private void loadUserData() {
@@ -172,6 +194,95 @@ public class SettingsActivity extends AppCompatActivity {
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
         // TODO: Navigate to login screen
         finish();
+    }
+
+    private void showChangePasswordDialog() {
+        // Inflate custom layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null);
+
+        EditText currentPasswordInput = dialogView.findViewById(R.id.current_password_input);
+        EditText newPasswordInput = dialogView.findViewById(R.id.new_password_input);
+        EditText confirmPasswordInput = dialogView.findViewById(R.id.confirm_password_input);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Đổi mật khẩu")
+                .setView(dialogView)
+                .setPositiveButton("Đổi mật khẩu", null)
+                .setNegativeButton("Hủy", (d, which) -> d.dismiss())
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(v -> {
+                String currentPassword = currentPasswordInput.getText().toString().trim();
+                String newPassword = newPasswordInput.getText().toString().trim();
+                String confirmPassword = confirmPasswordInput.getText().toString().trim();
+
+                // Validation
+                if (TextUtils.isEmpty(currentPassword)) {
+                    currentPasswordInput.setError("Vui lòng nhập mật khẩu hiện tại");
+                    return;
+                }
+
+                if (TextUtils.isEmpty(newPassword)) {
+                    newPasswordInput.setError("Vui lòng nhập mật khẩu mới");
+                    return;
+                }
+
+                if (newPassword.length() < 6) {
+                    newPasswordInput.setError("Mật khẩu phải ít nhất 6 ký tự");
+                    return;
+                }
+
+                if (!newPassword.equals(confirmPassword)) {
+                    confirmPasswordInput.setError("Mật khẩu xác nhận không khớp");
+                    return;
+                }
+
+                // Change password
+                changePassword(currentPassword, newPassword, dialog);
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void changePassword(String currentPassword, String newPassword, AlertDialog dialog) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Show progress dialog
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang đổi mật khẩu...");
+        progressDialog.setCancelable(false);
+        progressDialog.show();
+
+        // Re-authenticate user first
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+
+        user.reauthenticate(credential)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Update password
+                        user.updatePassword(newPassword)
+                                .addOnCompleteListener(updateTask -> {
+                                    progressDialog.dismiss();
+                                    if (updateTask.isSuccessful()) {
+                                        Toast.makeText(this, "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    } else {
+                                        Toast.makeText(this, "Lỗi: " + updateTask.getException().getMessage(),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        progressDialog.dismiss();
+                        Toast.makeText(this, "Mật khẩu hiện tại không đúng", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     /**

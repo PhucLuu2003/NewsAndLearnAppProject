@@ -47,6 +47,12 @@
             android:name=".Activity.RegisterActivity"
             android:exported="false" />
         
+        <!-- Edit Profile Activity -->
+        <activity
+            android:name=".Activity.EditProfileActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+        
         <!-- Level Selection Activity -->
         <activity
             android:name=".Activity.LevelSelectionActivity"
