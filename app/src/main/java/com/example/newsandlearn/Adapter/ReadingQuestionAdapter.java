@@ -1,5 +1,6 @@
 package com.example.newsandlearn.Adapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.newsandlearn.Model.ReadingQuestion;
@@ -17,9 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Adapter for displaying reading comprehension questions
- */
 public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestionAdapter.QuestionViewHolder> {
 
     private List<ReadingQuestion> questions;
@@ -54,6 +53,8 @@ public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestion
     }
 
     public int calculateScore() {
+        if (questions == null || questions.isEmpty()) return 0;
+
         int correctCount = 0;
         for (int i = 0; i < questions.size(); i++) {
             String userAnswer = userAnswers.get(i);
@@ -61,16 +62,18 @@ public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestion
                 correctCount++;
             }
         }
-        return questions.size() > 0 ? (correctCount * 100) / questions.size() : 0;
+        return (correctCount * 100) / questions.size();
     }
 
     class QuestionViewHolder extends RecyclerView.ViewHolder {
+        CardView cardView;
         TextView questionNumber;
         TextView questionText;
         RadioGroup optionsGroup;
 
         QuestionViewHolder(@NonNull View itemView) {
             super(itemView);
+            cardView = (CardView) itemView;
             questionNumber = itemView.findViewById(R.id.question_number);
             questionText = itemView.findViewById(R.id.question_text);
             optionsGroup = itemView.findViewById(R.id.options_group);
@@ -88,24 +91,7 @@ public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestion
             if (question.getOptions() != null) {
                 for (int i = 0; i < question.getOptions().size(); i++) {
                     String option = question.getOptions().get(i);
-                    RadioButton radioButton = new RadioButton(itemView.getContext());
-                    radioButton.setId(View.generateViewId());
-                    radioButton.setText(option);
-                    radioButton.setTextSize(15);
-                    radioButton.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
-                    
-                    // Better padding and margins
-                    int paddingDp = (int) (12 * itemView.getContext().getResources().getDisplayMetrics().density);
-                    int marginDp = (int) (8 * itemView.getContext().getResources().getDisplayMetrics().density);
-                    radioButton.setPadding(paddingDp, paddingDp, paddingDp, paddingDp);
-                    
-                    RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(
-                        RadioGroup.LayoutParams.MATCH_PARENT,
-                        RadioGroup.LayoutParams.WRAP_CONTENT
-                    );
-                    params.setMargins(0, marginDp / 2, 0, marginDp / 2);
-                    radioButton.setLayoutParams(params);
-                    
+                    RadioButton radioButton = createRadioButton(option);
                     optionsGroup.addView(radioButton);
                 }
             }
@@ -116,6 +102,10 @@ public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestion
                 if (selectedButton != null) {
                     String selectedAnswer = selectedButton.getText().toString();
                     userAnswers.put(position, selectedAnswer);
+
+                    // Visual feedback
+                    cardView.setCardElevation(8f);
+                    cardView.postDelayed(() -> cardView.setCardElevation(4f), 200);
                 }
             });
 
@@ -130,6 +120,31 @@ public class ReadingQuestionAdapter extends RecyclerView.Adapter<ReadingQuestion
                     }
                 }
             }
+        }
+
+        private RadioButton createRadioButton(String text) {
+            RadioButton radioButton = new RadioButton(itemView.getContext());
+            radioButton.setId(View.generateViewId());
+            radioButton.setText(text);
+            radioButton.setTextSize(15);
+            radioButton.setTextColor(itemView.getContext().getResources().getColor(R.color.text_primary));
+
+            // Padding and margins
+            int paddingDp = (int) (12 * itemView.getContext().getResources().getDisplayMetrics().density);
+            int marginDp = (int) (8 * itemView.getContext().getResources().getDisplayMetrics().density);
+            radioButton.setPadding(paddingDp, paddingDp, paddingDp, paddingDp);
+
+            RadioGroup.LayoutParams params = new RadioGroup.LayoutParams(
+                    RadioGroup.LayoutParams.MATCH_PARENT,
+                    RadioGroup.LayoutParams.WRAP_CONTENT
+            );
+            params.setMargins(0, marginDp / 2, 0, marginDp / 2);
+            radioButton.setLayoutParams(params);
+
+            // Style
+            radioButton.setButtonTintList(itemView.getContext().getResources().getColorStateList(R.color.primary));
+
+            return radioButton;
         }
     }
 }
