@@ -3,19 +3,25 @@ package com.example.newsandlearn.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.SwitchCompat;
 
-import com.example.newsandlearn.Fragment.ChangePasswordDialog;
-import com.example.newsandlearn.Fragment.EditProfileDialog;
 import com.example.newsandlearn.R;
 import com.example.newsandlearn.Utils.FirebaseDataSeeder;
+import com.example.newsandlearn.Utils.RoleManager;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -24,13 +30,15 @@ import com.google.firebase.auth.FirebaseUser;
  */
 public class SettingsActivity extends AppCompatActivity {
 
-    private TextView userName, userLevel;
+    private TextView userName, userLevel, devToolsHeader;
     private SwitchCompat notificationsSwitch, darkModeSwitch;
     private LinearLayout editProfile, changePassword, logoutButton;
-    private Button seedDataButton, reseedVideosButton, adminPanelButton, seedLearnModulesButton, addAudioButton;
+    private Button adminPanelButton, seedDataButton, reseedVideosButton, seedLearnModulesButton, addAudioButton;
 
     private FirebaseAuth auth;
     private ProgressDialog progressDialog;
+
+    private boolean isAdminUser = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +49,22 @@ public class SettingsActivity extends AppCompatActivity {
         initializeViews();
         setupListeners();
         loadUserData();
+
+        // Hide Admin-only tools by default; enable only after role check.
+        applyAdminVisibility(false);
+        RoleManager.isCurrentUserAdmin(new RoleManager.RoleCheckCallback() {
+            @Override
+            public void onResult(boolean isAdmin) {
+                isAdminUser = isAdmin;
+                applyAdminVisibility(isAdmin);
+            }
+
+            @Override
+            public void onError(String error) {
+                isAdminUser = false;
+                applyAdminVisibility(false);
+            }
+        });
     }
 
     private void initializeServices() {
@@ -55,87 +79,112 @@ public class SettingsActivity extends AppCompatActivity {
         editProfile = findViewById(R.id.edit_profile);
         changePassword = findViewById(R.id.change_password);
         logoutButton = findViewById(R.id.logout_button);
+
+        // Developer Tools (Admin only)
+        devToolsHeader = findViewById(R.id.tv_developer_tools_header);
         seedDataButton = findViewById(R.id.seed_data_button);
         reseedVideosButton = findViewById(R.id.reseed_videos_button);
         adminPanelButton = findViewById(R.id.admin_panel_button);
         seedLearnModulesButton = findViewById(R.id.seed_learn_modules_button);
         addAudioButton = findViewById(R.id.add_audio_button);
-
-        // Initialize progress dialog
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setTitle("Seeding Data");
-        progressDialog.setMessage("Please wait...");
-        progressDialog.setCancelable(false);
     }
 
-
     private void setupListeners() {
-        if (notificationsSwitch != null) {
-            notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"),
-                        Toast.LENGTH_SHORT).show();
-            });
+        notificationsSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // TODO: Enable/disable notifications
+            Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"),
+                    Toast.LENGTH_SHORT).show();
+        });
+
+        darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+            }
+        });
+
+        editProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(SettingsActivity.this, EditProfileActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+
+        changePassword.setOnClickListener(v -> {
+            showChangePasswordDialog();
+        });
+
+        logoutButton.setOnClickListener(v -> logout());
+
+        // Admin Panel button - Only admin feature
+        adminPanelButton.setOnClickListener(v -> requireAdminThen(this::openAdminPanel));
+    }
+
+    private void requireAdminThen(Runnable action) {
+        if (auth.getCurrentUser() == null) {
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        if (darkModeSwitch != null) {
-            darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (isChecked) {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        if (isAdminUser) {
+            action.run();
+            return;
+        }
+
+        // Fallback: re-check role (covers cases where local flag is stale)
+        RoleManager.isCurrentUserAdmin(new RoleManager.RoleCheckCallback() {
+            @Override
+            public void onResult(boolean isAdmin) {
+                isAdminUser = isAdmin;
+                applyAdminVisibility(isAdmin);
+                if (isAdmin) {
+                    action.run();
                 } else {
-                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+                    Toast.makeText(SettingsActivity.this, "Bạn không có quyền Admin", Toast.LENGTH_SHORT).show();
                 }
-            });
-        }
+            }
 
-        if (editProfile != null) {
-            editProfile.setOnClickListener(v -> {
-                FirebaseUser user = auth.getCurrentUser();
-                if (user != null) {
-                    EditProfileDialog dialog = EditProfileDialog.newInstance(
-                            user.getDisplayName() != null ? user.getDisplayName() : "",
-                            user.getEmail() != null ? user.getEmail() : ""
-                    );
-                    dialog.show(getSupportFragmentManager(), "EditProfileDialog");
-                }
-            });
-        }
+            @Override
+            public void onError(String error) {
+                isAdminUser = false;
+                applyAdminVisibility(false);
+                Toast.makeText(SettingsActivity.this, "Không kiểm tra được quyền: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
-        if (changePassword != null) {
-            changePassword.setOnClickListener(v -> {
-                ChangePasswordDialog dialog = new ChangePasswordDialog();
-                dialog.show(getSupportFragmentManager(), "ChangePasswordDialog");
-            });
-        }
+    private void applyAdminVisibility(boolean isAdmin) {
+        runOnUiThread(() -> {
+            int visibility = isAdmin ? android.view.View.VISIBLE : android.view.View.GONE;
 
-        if (logoutButton != null) {
-            logoutButton.setOnClickListener(v -> logout());
-        }
+            // Hide/show all developer tools
+            if (devToolsHeader != null)
+                devToolsHeader.setVisibility(visibility);
+            if (seedDataButton != null)
+                seedDataButton.setVisibility(visibility);
+            if (reseedVideosButton != null)
+                reseedVideosButton.setVisibility(visibility);
+            if (adminPanelButton != null)
+                adminPanelButton.setVisibility(visibility);
+            if (seedLearnModulesButton != null)
+                seedLearnModulesButton.setVisibility(visibility);
+            if (addAudioButton != null)
+                addAudioButton.setVisibility(visibility);
+        });
+    }
 
-        if (seedDataButton != null) {
-            seedDataButton.setOnClickListener(v -> seedData());
-        }
-
-        if (reseedVideosButton != null) {
-            reseedVideosButton.setOnClickListener(v -> reseedVideoLessons());
-        }
-
-        if (adminPanelButton != null) {
-            adminPanelButton.setOnClickListener(v -> openAdminPanel());
-        }
-
-        if (seedLearnModulesButton != null) {
-            seedLearnModulesButton.setOnClickListener(v -> seedLearnModules());
-        }
-
-        if (addAudioButton != null) {
-            addAudioButton.setOnClickListener(v -> addAudioToSpeakingLessons());
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload user data when returning to this activity
+        loadUserData();
     }
 
     private void loadUserData() {
         FirebaseUser user = auth.getCurrentUser();
         if (user != null) {
             userName.setText(user.getDisplayName() != null ? user.getDisplayName() : "User");
+            // TODO: Load level and XP from Firebase
             userLevel.setText("Level 5 • 1,250 XP");
         }
     }
@@ -143,185 +192,105 @@ public class SettingsActivity extends AppCompatActivity {
     private void logout() {
         auth.signOut();
         Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(SettingsActivity.this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        // TODO: Navigate to login screen
         finish();
     }
 
-    /**
-     * Seed sample data to Firebase
-     */
-    private void seedData() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    private void showChangePasswordDialog() {
+        // Inflate custom layout
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_change_password, null);
 
-        progressDialog.show();
+        EditText currentPasswordInput = dialogView.findViewById(R.id.current_password_input);
+        EditText newPasswordInput = dialogView.findViewById(R.id.new_password_input);
+        EditText confirmPasswordInput = dialogView.findViewById(R.id.confirm_password_input);
 
-        FirebaseDataSeeder seeder = new FirebaseDataSeeder();
-        seeder.seedAllData(new FirebaseDataSeeder.SeedCallback() {
-            @Override
-            public void onSuccess(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "✅ " + message,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Đổi mật khẩu")
+                .setView(dialogView)
+                .setPositiveButton("Đổi mật khẩu", null)
+                .setNegativeButton("Hủy", (d, which) -> d.dismiss())
+                .create();
 
-            @Override
-            public void onProgress(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.setMessage(message);
-                });
-            }
+        dialog.setOnShowListener(dialogInterface -> {
+            Button button = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(v -> {
+                String currentPassword = currentPasswordInput.getText().toString().trim();
+                String newPassword = newPasswordInput.getText().toString().trim();
+                String confirmPassword = confirmPasswordInput.getText().toString().trim();
 
-            @Override
-            public void onFailure(String error) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "❌ Error: " + error,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
+                // Validation
+                if (TextUtils.isEmpty(currentPassword)) {
+                    currentPasswordInput.setError("Vui lòng nhập mật khẩu hiện tại");
+                    return;
+                }
+
+                if (TextUtils.isEmpty(newPassword)) {
+                    newPasswordInput.setError("Vui lòng nhập mật khẩu mới");
+                    return;
+                }
+
+                if (newPassword.length() < 6) {
+                    newPasswordInput.setError("Mật khẩu phải ít nhất 6 ký tự");
+                    return;
+                }
+
+                if (!newPassword.equals(confirmPassword)) {
+                    confirmPasswordInput.setError("Mật khẩu xác nhận không khớp");
+                    return;
+                }
+
+                // Change password
+                changePassword(currentPassword, newPassword, dialog);
+            });
         });
+
+        dialog.show();
     }
 
-    /**
-     * Clear and reseed video lessons with direct MP4 URLs
-     * This fixes the YouTube black screen issue
-     */
-    private void reseedVideoLessons() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
+    private void changePassword(String currentPassword, String newPassword, AlertDialog dialog) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin người dùng", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        progressDialog.setTitle("Fixing Video Lessons");
-        progressDialog.setMessage("Clearing old videos...");
+        // Show progress dialog
+        ProgressDialog progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Đang đổi mật khẩu...");
+        progressDialog.setCancelable(false);
         progressDialog.show();
 
-        FirebaseDataSeeder seeder = new FirebaseDataSeeder();
-        seeder.seedVideoLessons(new FirebaseDataSeeder.SeedCallback() {
-            @Override
-            public void onSuccess(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "✅ Video lessons fixed! " + message,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
+        // Re-authenticate user first
+        AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
 
-            @Override
-            public void onProgress(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.setMessage(message);
+        user.reauthenticate(credential)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        // Update password
+                        user.updatePassword(newPassword)
+                                .addOnCompleteListener(updateTask -> {
+                                    progressDialog.dismiss();
+                                    if (updateTask.isSuccessful()) {
+                                        Toast.makeText(this, "Đổi mật khẩu thành công!", Toast.LENGTH_SHORT).show();
+                                        dialog.dismiss();
+                                    } else {
+                                        Toast.makeText(this, "Lỗi: " + updateTask.getException().getMessage(),
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    } else {
+                        progressDialog.dismiss();
+                        Toast.makeText(this, "Mật khẩu hiện tại không đúng", Toast.LENGTH_SHORT).show();
+                    }
                 });
-            }
-
-            @Override
-            public void onFailure(String error) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "❌ Error: " + error,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
-        }, true); // true = clear first
     }
 
     /**
-     * Open Admin Panel Activity
+     * Open Admin Panel Activity (New tabbed interface)
+     * All data management and seeding functions are now in the Admin Panel
      */
     private void openAdminPanel() {
-        Intent intent = new Intent(this, AdminActivity.class);
+        Intent intent = new Intent(this, AdminPanelActivity.class);
         startActivity(intent);
-    }
-
-    /**
-     * Seed Learn Modules data (Grammar, Listening, Speaking, Reading, Writing)
-     */
-    private void seedLearnModules() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        progressDialog.setTitle("Seeding Learn Modules");
-        progressDialog.setMessage("Creating lessons...");
-        progressDialog.show();
-
-        FirebaseDataSeeder seeder = new FirebaseDataSeeder();
-        seeder.seedAllLearnModules(new FirebaseDataSeeder.SeedCallback() {
-            @Override
-            public void onSuccess(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "✅ " + message,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
-
-            @Override
-            public void onProgress(String message) {
-                runOnUiThread(() -> {
-                    progressDialog.setMessage(message);
-                });
-            }
-
-            @Override
-            public void onFailure(String error) {
-                runOnUiThread(() -> {
-                    progressDialog.dismiss();
-                    Toast.makeText(SettingsActivity.this,
-                            "❌ Error: " + error,
-                            Toast.LENGTH_LONG).show();
-                });
-            }
-        });
-    }
-
-    /**
-     * Add sample audio URLs to all speaking lessons
-     */
-    private void addAudioToSpeakingLessons() {
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        progressDialog.setTitle("Adding Audio");
-        progressDialog.setMessage("Adding sample audio to speaking lessons...");
-        progressDialog.show();
-
-        com.example.newsandlearn.Utils.SpeakingAudioUpdater.addAudioToSpeakingLessons(
-                new com.example.newsandlearn.Utils.SpeakingAudioUpdater.UpdateCallback() {
-                    @Override
-                    public void onSuccess(int updatedCount) {
-                        runOnUiThread(() -> {
-                            progressDialog.dismiss();
-                            Toast.makeText(SettingsActivity.this,
-                                    "✅ Added audio to " + updatedCount + " speaking lessons!",
-                                    Toast.LENGTH_LONG).show();
-                        });
-                    }
-
-                    @Override
-                    public void onFailure(Exception e) {
-                        runOnUiThread(() -> {
-                            progressDialog.dismiss();
-                            Toast.makeText(SettingsActivity.this,
-                                    "❌ Error: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        });
-                    }
-                });
     }
 }

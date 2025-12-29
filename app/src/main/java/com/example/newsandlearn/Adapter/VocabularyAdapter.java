@@ -69,6 +69,7 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
         TextView nextReviewText, masteryPercentageText, streakText; // Added streakText
         ProgressBar masteryProgress;
         ImageView speakerButton, favoriteButton;
+        View speakerButtonContainer, favoriteButtonContainer;
 
         public VocabularyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -83,6 +84,10 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
             streakText = itemView.findViewById(R.id.streak_text); // Bind streak text
             speakerButton = itemView.findViewById(R.id.speaker_button);
             favoriteButton = itemView.findViewById(R.id.favorite_button);
+            
+            // Bind the container views for click handling
+            speakerButtonContainer = itemView.findViewById(R.id.speaker_button_container);
+            favoriteButtonContainer = itemView.findViewById(R.id.favorite_button_container);
         }
 
         public void bind(VocabularyWithProgress vocabulary) {
@@ -137,19 +142,43 @@ public class VocabularyAdapter extends RecyclerView.Adapter<VocabularyAdapter.Vo
                 }
             });
 
-            speakerButton.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
-                if (listener != null) {
-                    listener.onSpeakerClick(vocabulary);
-                }
-            });
+            // Use container for speaker button click
+            if (speakerButtonContainer != null) {
+                speakerButtonContainer.setOnClickListener(v -> {
+                    android.util.Log.d("VocabularyAdapter", "Speaker button clicked for word: " + vocabulary.getWord());
+                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
+                    if (listener != null) {
+                        listener.onSpeakerClick(vocabulary);
+                    }
+                });
+            } else {
+                // Fallback to direct button click if container not found
+                speakerButton.setOnClickListener(v -> {
+                    android.util.Log.d("VocabularyAdapter", "Speaker button (fallback) clicked for word: " + vocabulary.getWord());
+                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
+                    if (listener != null) {
+                        listener.onSpeakerClick(vocabulary);
+                    }
+                });
+            }
 
-            favoriteButton.setOnClickListener(v -> {
-                com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
-                if (listener != null) {
-                    listener.onFavoriteClick(vocabulary);
-                }
-            });
+            // Use container for favorite button click
+            if (favoriteButtonContainer != null) {
+                favoriteButtonContainer.setOnClickListener(v -> {
+                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
+                    if (listener != null) {
+                        listener.onFavoriteClick(vocabulary);
+                    }
+                });
+            } else {
+                // Fallback to direct button click if container not found
+                favoriteButton.setOnClickListener(v -> {
+                    com.example.newsandlearn.Utils.AnimationHelper.buttonPress(context, v);
+                    if (listener != null) {
+                        listener.onFavoriteClick(vocabulary);
+                    }
+                });
+            }
         }
 
         private void updateMasteryBadgeBackground(int mastery) {

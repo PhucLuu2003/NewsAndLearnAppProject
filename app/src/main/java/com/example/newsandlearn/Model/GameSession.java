@@ -1,5 +1,6 @@
 package com.example.newsandlearn.Model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,9 @@ public class GameSession {
         this.maxCombo = 0;
     }
 
-    public static class HitResult {
+    public static class HitResult implements Serializable {
+        private static final long serialVersionUID = 1L;
+        
         private String word;
         private String spokenWord;
         private float pronunciationAccuracy;
@@ -50,6 +53,7 @@ public class GameSession {
 
         // Getters
         public String getWord() { return word; }
+        public String getTargetWord() { return word; } // Alias for adapter
         public String getSpokenWord() { return spokenWord; }
         public float getPronunciationAccuracy() { return pronunciationAccuracy; }
         public float getTimingAccuracy() { return timingAccuracy; }

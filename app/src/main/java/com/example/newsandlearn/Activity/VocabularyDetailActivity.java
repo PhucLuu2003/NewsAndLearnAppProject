@@ -41,7 +41,6 @@ public class VocabularyDetailActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
-    private TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,10 @@ public class VocabularyDetailActivity extends AppCompatActivity {
         initializeViews();
         setupToolbar();
         setupListeners();
-        setupTextToSpeech();
+
+        // Initialize TTSManager
+        com.example.newsandlearn.Utils.TTSManager.getInstance().initialize(this, null);
+
         loadVocabularyDetail();
     }
 
@@ -73,21 +75,21 @@ public class VocabularyDetailActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         favoriteButton = findViewById(R.id.favorite_button);
         speakerButton = findViewById(R.id.speaker_button);
-        
+
         wordText = findViewById(R.id.word_text);
         phoneticText = findViewById(R.id.phonetic_text);
         partOfSpeechText = findViewById(R.id.part_of_speech_text);
         levelBadge = findViewById(R.id.level_badge);
-        
+
         vietnameseMeaningText = findViewById(R.id.vietnamese_meaning_text);
         exampleText = findViewById(R.id.example_text);
         synonymsText = findViewById(R.id.synonyms_text);
         antonymsText = findViewById(R.id.antonyms_text);
-        
+
         exampleCard = findViewById(R.id.example_card);
         synonymsCard = findViewById(R.id.synonyms_card);
         antonymsCard = findViewById(R.id.antonyms_card);
-        
+
         markAsLearnedButton = findViewById(R.id.mark_as_learned_button);
     }
 
@@ -112,14 +114,6 @@ public class VocabularyDetailActivity extends AppCompatActivity {
         markAsLearnedButton.setOnClickListener(v -> markAsLearned());
     }
 
-    private void setupTextToSpeech() {
-        tts = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                tts.setLanguage(Locale.US);
-            }
-        });
-    }
-
     private void loadVocabularyDetail() {
         // Load vocabulary from public collection
         db.collection("vocabularies").document(vocabularyId)
@@ -141,7 +135,8 @@ public class VocabularyDetailActivity extends AppCompatActivity {
     }
 
     private void loadUserProgress() {
-        if (auth.getCurrentUser() == null) return;
+        if (auth.getCurrentUser() == null)
+            return;
 
         String userId = auth.getCurrentUser().getUid();
         db.collection("users").document(userId)
@@ -151,12 +146,12 @@ public class VocabularyDetailActivity extends AppCompatActivity {
                     if (documentSnapshot.exists()) {
                         Boolean favorite = documentSnapshot.getBoolean("isFavorite");
                         Boolean learned = documentSnapshot.getBoolean("isLearned");
-                        
+
                         if (favorite != null) {
                             isFavorite = favorite;
                             updateFavoriteButton();
                         }
-                        
+
                         if (learned != null) {
                             isLearned = learned;
                             updateLearnedButton();
@@ -168,7 +163,7 @@ public class VocabularyDetailActivity extends AppCompatActivity {
     private void displayVocabulary() {
         // Word and phonetic
         wordText.setText(vocabulary.getWord());
-        
+
         if (vocabulary.getPronunciation() != null && !vocabulary.getPronunciation().isEmpty()) {
             phoneticText.setText("/" + vocabulary.getPronunciation() + "/");
             phoneticText.setVisibility(View.VISIBLE);
@@ -223,9 +218,13 @@ public class VocabularyDetailActivity extends AppCompatActivity {
     }
 
     private void speakWord(String word) {
-        if (tts != null) {
-            tts.speak(word, TextToSpeech.QUEUE_FLUSH, null, null);
+        com.example.newsandlearn.Utils.TTSManager ttsManager = com.example.newsandlearn.Utils.TTSManager.getInstance();
+        if (!ttsManager.isInitialized()) {
+            ttsManager.initialize(this, () -> ttsManager.speakWord(word));
+            Toast.makeText(this, "Preparing voice...", Toast.LENGTH_SHORT).show();
+            return;
         }
+        ttsManager.speakWord(word);
     }
 
     private void toggleFavorite() {
@@ -306,9 +305,6 @@ public class VocabularyDetailActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
+        // Note: We don't shutdown TTSManager here as it's a singleton
     }
 }
